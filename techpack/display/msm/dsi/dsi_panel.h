@@ -173,6 +173,13 @@ struct drm_panel_esd_config {
 	u32 groups;
 };
 
+enum dsi_panel_display_mode {
+	DISPLAY_MODE_DEFAULT,
+	DISPLAY_MODE_SRGB,
+	DISPLAY_MODE_DCI_P3,
+	DISPLAY_MODE_WIDE_COLOR,
+};
+
 struct dsi_panel {
 	const char *name;
 	const char *type;
@@ -206,6 +213,7 @@ struct dsi_panel {
 	struct drm_panel_esd_config esd_config;
 
 	int hbm_mode;
+	enum dsi_panel_display_mode display_mode;
 
 	struct dsi_parser_utils utils;
 
@@ -313,6 +321,8 @@ int dsi_panel_unprepare(struct dsi_panel *panel);
 int dsi_panel_post_unprepare(struct dsi_panel *panel);
 
 int dsi_panel_apply_hbm_mode(struct dsi_panel *panel);
+
+int dsi_panel_apply_display_mode(struct dsi_panel *panel);
 
 int dsi_panel_set_backlight(struct dsi_panel *panel, u32 bl_lvl);
 
