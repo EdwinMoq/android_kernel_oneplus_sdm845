@@ -545,7 +545,7 @@ static int dsi_panel_tx_cmd_set(struct dsi_panel *panel,
 	SDE_EVT32(type, state, count);
 
 	if (count == 0) {
-		DSI_DEBUG("[%s] No commands to be sent for state(%d)\n",
+		DSI_ERR("[%s] No commands to be sent for state(%d)\n",
 			 panel->name, type);
 		goto error;
 	}
@@ -1841,6 +1841,10 @@ const char *cmd_set_prop_map[DSI_CMD_SET_MAX] = {
 	"qcom,mdss-dsi-panel-hbm-on-command-3",
 	"qcom,mdss-dsi-panel-hbm-on-command-4",
 	"qcom,mdss-dsi-panel-hbm-on-command-5",
+	"qcom,mdss-dsi-panel-display-srgb-color-mode-on-command",
+	"qcom,mdss-dsi-panel-display-p3-mode-on-command",
+	"qcom,mdss-dsi-panel-display-wide-color-mode-on-command",
+	"qcom,mdss-dsi-panel-dci-p3-off-command", // also disables SRGB and wide color modes
 };
 
 const char *cmd_set_state_map[DSI_CMD_SET_MAX] = {
@@ -1873,6 +1877,10 @@ const char *cmd_set_state_map[DSI_CMD_SET_MAX] = {
 	"qcom,mdss-dsi-hbm-on-command-state",
 	"qcom,mdss-dsi-hbm-on-command-state",
 	"qcom,mdss-dsi-hbm-on-command-state",
+	"qcom,mdss-dsi-panel-display-srgb-color-mode-on-command-state",
+	"qcom,mdss-dsi-panel-display-p3-mode-on-command-state",
+	"qcom,mdss-dsi-panel-display-wide-color-mode-on-command-state",
+	"qcom,mdss-dsi-panel-dci-p3-off-command-state",
 };
 
 static int dsi_panel_get_cmd_pkt_count(const char *data, u32 length, u32 *cnt)
@@ -4511,6 +4519,8 @@ int dsi_panel_enable(struct dsi_panel *panel)
 
 	if (panel->hbm_mode)
 		dsi_panel_apply_hbm_mode(panel);
+	if (panel->display_mode != DISPLAY_MODE_DEFAULT)
+		dsi_panel_apply_display_mode(panel);
 
 	return rc;
 }
@@ -4665,6 +4675,25 @@ int dsi_panel_apply_hbm_mode(struct dsi_panel *panel)
 		type = type_map[panel->hbm_mode];
 	else
 		type = DSI_CMD_SET_HBM_OFF;
+
+	mutex_lock(&panel->panel_lock);
+	rc = dsi_panel_tx_cmd_set(panel, type);
+	mutex_unlock(&panel->panel_lock);
+
+	return rc;
+}
+
+int dsi_panel_apply_display_mode(struct dsi_panel *panel)
+{
+	enum dsi_cmd_set_type type;
+	int rc;
+
+	switch (panel->display_mode) {
+		case DISPLAY_MODE_SRGB: type = DSI_CMD_SET_MODE_SRGB; break;
+		case DISPLAY_MODE_DCI_P3: type = DSI_CMD_SET_MODE_DCI_P3; break;
+		case DISPLAY_MODE_WIDE_COLOR: type = DSI_CMD_SET_MODE_WIDE_COLOR; break;
+		default: type = DSI_CMD_SET_MODE_DEFAULT; break;
+	}
 
 	mutex_lock(&panel->panel_lock);
 	rc = dsi_panel_tx_cmd_set(panel, type);
