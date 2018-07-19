@@ -5152,12 +5152,18 @@ static struct attribute_group display_attrs_group = {
 	.attrs = display_attrs,
 };
 
-static int dsi_display_sysfs_init(struct dsi_display *display)
+static int dsi_display_sysfs_init(struct dsi_display *display,
+		struct device *master)
 {
 	int rc = 0;
 	struct device *dev = &display->pdev->dev;
+	struct dsi_panel *panel;
+	panel = display->panel;
 
 	rc = sysfs_create_group(&dev->kobj, &display_attrs_group);
+	if (rc == 0 && !strcmp(display->display_type, "primary"))
+		rc = sysfs_create_link(&master->kobj,
+				&dev->kobj, "main_display");
 	if (rc)
 		DSI_ERR("failed to create display sysfs attributes\n");
 
@@ -5239,7 +5245,7 @@ static int dsi_display_bind(struct device *dev,
 		goto error;
 	}
 
-	rc = dsi_display_sysfs_init(display);
+	rc = dsi_display_sysfs_init(display, master);
 	if (rc)
 		goto error;
 
