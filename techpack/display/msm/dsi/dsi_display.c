@@ -7580,6 +7580,7 @@ int dsi_display_enable(struct dsi_display *display)
 {
 	int rc = 0;
 	struct dsi_display_mode *mode;
+	struct drm_connector *connector = NULL;
 
 	if (!display || !display->panel) {
 		DSI_ERR("Invalid params\n");
@@ -7674,6 +7675,12 @@ int dsi_display_enable(struct dsi_display *display)
 		rc = -EINVAL;
 		goto error_disable_panel;
 	}
+
+	rc = dsi_display_set_backlight(connector, display,
+				       display->panel->bl_config.bl_level);
+	if (rc)
+		pr_warn("[%s]failed to restore previous brightness, rc=%d\n",
+			display->name, rc);
 
 	goto error;
 
