@@ -7,6 +7,7 @@
 #include <linux/of.h>
 #include <linux/of_gpio.h>
 #include <linux/err.h>
+#include <linux/msm_drm_notify.h>
 
 #include "msm_drv.h"
 #include "sde_connector.h"
@@ -1045,7 +1046,9 @@ int dsi_display_set_power(struct drm_connector *connector,
 		int power_mode, void *disp)
 {
 	struct dsi_display *display = disp;
+	struct msm_drm_notifier notifier_data;
 	int rc = 0;
+	int blank;
 
 	if (!display || !display->panel) {
 		DSI_ERR("invalid display/panel\n");
@@ -1059,23 +1062,30 @@ int dsi_display_set_power(struct drm_connector *connector,
 	case SDE_MODE_DPMS_LP2:
 		rc = dsi_panel_set_lp2(display->panel);
 		break;
-	case SDE_MODE_DPMS_ON:
-		if ((display->panel->power_mode == SDE_MODE_DPMS_LP1) ||
-			(display->panel->power_mode == SDE_MODE_DPMS_LP2))
-			rc = dsi_panel_set_nolp(display->panel);
-		break;
-	case SDE_MODE_DPMS_OFF:
 	default:
-		return rc;
+		rc = dsi_panel_set_nolp(display->panel);
+		break;
 	}
 
-	SDE_EVT32(display->panel->power_mode, power_mode, rc);
-	DSI_DEBUG("Power mode transition from %d to %d %s",
-			display->panel->power_mode, power_mode,
-			rc ? "failed" : "successful");
-	if (!rc)
-		display->panel->power_mode = power_mode;
-
+	if (power_mode == SDE_MODE_DPMS_ON) {
+		blank = MSM_DRM_BLANK_UNBLANK_CUST;
+		notifier_data.data = &blank;
+		notifier_data.id = connector_state_crtc_index;
+		msm_drm_notifier_call_chain(MSM_DRM_EARLY_EVENT_BLANK,
+					    &notifier_data);
+	} else if (power_mode == SDE_MODE_DPMS_LP1) {
+		blank = MSM_DRM_BLANK_NORMAL;
+		notifier_data.data = &blank;
+		notifier_data.id = connector_state_crtc_index;
+		msm_drm_notifier_call_chain(MSM_DRM_EARLY_EVENT_BLANK,
+					    &notifier_data);
+	} else if (power_mode == SDE_MODE_DPMS_OFF) {
+		blank = MSM_DRM_BLANK_POWERDOWN_CUST;
+		notifier_data.data = &blank;
+		notifier_data.id = connector_state_crtc_index;
+		msm_drm_notifier_call_chain(MSM_DRM_EARLY_EVENT_BLANK,
+					    &notifier_data);
+	}
 	return rc;
 }
 
