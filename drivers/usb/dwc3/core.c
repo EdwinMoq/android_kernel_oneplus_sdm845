@@ -1329,6 +1329,8 @@ static void dwc3_get_properties(struct dwc3 *dwc)
 				    &dwc->hsphy_interface);
 	device_property_read_u32(dev, "snps,quirk-frame-length-adjustment",
 				 &dwc->fladj);
+	dwc->enable_super_speed = device_property_read_bool(dev,
+					"op,enable_super_speed");
 	dwc->enable_bus_suspend = device_property_read_bool(dev,
 					"snps,bus-suspend-enable");
 	dwc->usb3_u1u2_disable = device_property_read_bool(dev,
@@ -1354,6 +1356,12 @@ static void dwc3_get_properties(struct dwc3 *dwc)
 	dwc->gen2_tx_de_emph3 = -1;
 	device_property_read_u32(dev, "snps,gen2-tx-de-emph3",
 			&dwc->gen2_tx_de_emph3);
+
+	if (!dwc->enable_super_speed) {
+		pr_info("Force USB running as High speed");
+		dwc->max_hw_supp_speed = USB_SPEED_HIGH;
+		dwc->maximum_speed = USB_SPEED_HIGH;
+	}
 
 	dwc->lpm_nyet_threshold = lpm_nyet_threshold;
 	dwc->tx_de_emphasis = tx_de_emphasis;
