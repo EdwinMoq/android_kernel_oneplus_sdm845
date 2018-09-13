@@ -477,6 +477,8 @@ struct fg_dev {
 	bool			profile_available;
 	enum prof_load_status	profile_load_status;
 	bool			battery_missing;
+/* david.liu@bsp, 20171023 Battery & Charging porting */
+	bool			use_external_fg;
 	bool			fg_restarting;
 	bool			charge_full;
 	bool			recharge_soc_adjusted;
@@ -528,6 +530,7 @@ struct fg_dbgfs {
 	u32				addr;
 };
 
+static struct external_battery_gauge *external_fg;
 extern int fg_decode_voltage_24b(struct fg_sram_param *sp,
 	enum fg_sram_param_id id, int val);
 extern int fg_decode_voltage_15b(struct fg_sram_param *sp,
