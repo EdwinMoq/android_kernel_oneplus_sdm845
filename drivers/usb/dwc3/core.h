@@ -1327,6 +1327,7 @@ struct dwc3 {
 	unsigned		disable_clk_gating:1;
 	unsigned		enable_bus_suspend:1;
 	unsigned		usb3_u1u2_disable:1;
+    unsigned        enable_super_speed:1;
 
 	atomic_t		in_lpm;
 	bool			b_suspend;
