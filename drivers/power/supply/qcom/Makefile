@@ -15,3 +15,6 @@ obj-$(CONFIG_SMB1398_CHARGER)		+= smb1398-charger.o pmic-voter.o
 obj-$(CONFIG_QPNP_SMBLITE)		+= step-chg-jeita.o battery.o qpnp-smblite.o smblite-lib.o pmic-voter.o storm-watch.o schgm-flashlite.o
 obj-$(CONFIG_QPNP_VM_BMS)		+= qpnp-vm-bms.o batterydata-lib.o batterydata-interface.o
 obj-$(CONFIG_QPNP_LINEAR_CHARGER)	+= qpnp-linear-charger.o
+obj-$(CONFIG_FG_BQ27541)	+= bq27541_fuelgauger.o
+obj-$(CONFIG_ONEPLUS_FASTCHG)	+= oneplus_fastchg.o op_dash_adapter.o
+obj-$(CONFIG_QPNP_QG)		+= qpnp-qg.o pmic-voter.o qg-util.o qg-soc.o qg-sdam.o qg-battery-profile.o qg-profile-lib.o fg-alg.o
