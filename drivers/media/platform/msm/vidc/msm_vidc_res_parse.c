@@ -1146,12 +1146,12 @@ int msm_vidc_smmu_fault_handler(struct iommu_domain *domain,
 	core->smmu_fault_handled = true;
 	mutex_unlock(&core->lock);
 	/*
-	 * Return -ENOSYS to elicit the default behaviour of smmu driver.
-	 * If we return -ENOSYS, then smmu driver assumes page fault handler
+	 * Return -EINVAL to elicit the default behaviour of smmu driver.
+	 * If we return -EINVAL, then smmu driver assumes page fault handler
 	 * is not installed and prints a list of useful debug information like
 	 * FAR, SID etc. This information is not printed if we return 0.
 	 */
-	return -ENOSYS;
+	return -EINVAL;
 }
 
 static int msm_vidc_populate_context_bank(struct device *dev,
