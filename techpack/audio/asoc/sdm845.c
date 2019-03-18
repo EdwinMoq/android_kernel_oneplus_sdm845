@@ -161,6 +161,10 @@ struct msm_pinctrl_info {
 
 static atomic_t pinctrl_ref_count;
 
+enum {
+	AFE_LOOPBACK_TX_IDX = 0,
+	AFE_LOOPBACK_TX_IDX_MAX,
+};
 struct msm_asoc_mach_data {
 	u32 mclk_freq;
 	int us_euro_gpio; /* used by gpio driver API */
@@ -458,6 +462,10 @@ static struct dev_config aux_pcm_tx_cfg[] = {
 	[QUAT_AUX_PCM] = {SAMPLING_RATE_8KHZ, SNDRV_PCM_FORMAT_S16_LE, 1},
 };
 
+static struct dev_config afe_loopback_tx_cfg[] = {
+	[AFE_LOOPBACK_TX_IDX] = {SAMPLING_RATE_48KHZ, SNDRV_PCM_FORMAT_S16_LE, 1},
+};
+
 static int msm_vi_feed_tx_ch = 2;
 static const char *const slim_rx_ch_text[] = {"One", "Two"};
 static const char *const slim_tx_ch_text[] = {"One", "Two", "Three", "Four",
@@ -509,6 +517,7 @@ static const char *const mi2s_ch_text[] = {"One", "Two", "Three", "Four",
 					   "Eight"};
 static const char *const hifi_text[] = {"Off", "On"};
 static const char *const qos_text[] = {"Disable", "Enable"};
+static const char *const afe_loopback_tx_ch_text[] = {"One", "Two"};
 
 static SOC_ENUM_SINGLE_EXT_DECL(slim_0_rx_chs, slim_rx_ch_text);
 static SOC_ENUM_SINGLE_EXT_DECL(slim_2_rx_chs, slim_rx_ch_text);
@@ -576,6 +585,7 @@ static SOC_ENUM_SINGLE_EXT_DECL(aux_pcm_rx_format, bit_format_text);
 static SOC_ENUM_SINGLE_EXT_DECL(aux_pcm_tx_format, bit_format_text);
 static SOC_ENUM_SINGLE_EXT_DECL(hifi_function, hifi_text);
 static SOC_ENUM_SINGLE_EXT_DECL(qos_vote, qos_text);
+static SOC_ENUM_SINGLE_EXT_DECL(afe_loopback_tx_chs, afe_loopback_tx_ch_text);
 
 static struct platform_device *spdev;
 static int msm_hifi_control;
@@ -971,6 +981,28 @@ static int slim_tx_bit_format_put(struct snd_kcontrol *kcontrol,
 			ucontrol->value.enumerated.item[0]);
 
 	return 0;
+}
+
+static int afe_loopback_tx_ch_get(struct snd_kcontrol *kcontrol,
+				struct snd_ctl_elem_value *ucontrol)
+{
+	pr_debug("%s: afe_loopback_tx_ch  = %d\n", __func__,
+		afe_loopback_tx_cfg[0].channels);
+	ucontrol->value.enumerated.item[0] =
+		afe_loopback_tx_cfg[0].channels - 1;
+
+	return 0;
+}
+
+static int afe_loopback_tx_ch_put(struct snd_kcontrol *kcontrol,
+				struct snd_ctl_elem_value *ucontrol)
+{
+	afe_loopback_tx_cfg[0].channels =
+			ucontrol->value.enumerated.item[0] + 1;
+	pr_debug("%s: afe_loopback_tx_ch  = %d\n", __func__,
+			afe_loopback_tx_cfg[0].channels);
+
+	return 1;
 }
 
 static int msm_slim_rx_ch_get(struct snd_kcontrol *kcontrol,
@@ -3188,6 +3220,9 @@ static const struct snd_kcontrol_new msm_snd_controls[] = {
 			msm_qos_ctl_put),
 	SOC_SINGLE_MULTI_EXT("TDM Slot Map", SND_SOC_NOPM, 0, 255, 0, 4,
 	NULL, tdm_slot_map_put),
+	SOC_ENUM_EXT("AFE_LOOPBACK_TX Channels", afe_loopback_tx_chs,
+			afe_loopback_tx_ch_get, afe_loopback_tx_ch_put),
+
 };
 
 static int msm_snd_enable_codec_ext_clk(struct snd_soc_component *component,
@@ -3404,7 +3439,7 @@ static int msm_be_hw_params_fixup(struct snd_soc_pcm_runtime *rtd,
 	struct snd_interval *channels = hw_param_interval(params,
 					SNDRV_PCM_HW_PARAM_CHANNELS);
 	int rc = 0;
-	int idx;
+	int idx = 0;
 	void *config = NULL;
 	struct snd_soc_component *component = NULL;
 	struct snd_soc_dai *codec_dai = rtd->codec_dai;
@@ -3727,6 +3762,14 @@ static int msm_be_hw_params_fixup(struct snd_soc_pcm_runtime *rtd,
 		rate->min = rate->max = mi2s_tx_cfg[QUAT_MI2S].sample_rate;
 		channels->min = channels->max =
 			mi2s_tx_cfg[QUAT_MI2S].channels;
+		break;
+
+	case MSM_BACKEND_DAI_AFE_LOOPBACK_TX:
+		param_set_mask(params, SNDRV_PCM_HW_PARAM_FORMAT,
+				afe_loopback_tx_cfg[idx].bit_format);
+		rate->min = rate->max = afe_loopback_tx_cfg[idx].sample_rate;
+		channels->min = channels->max =
+				afe_loopback_tx_cfg[idx].channels;
 		break;
 
 	default:
@@ -6483,6 +6526,23 @@ static struct snd_soc_dai_link msm_auxpcm_be_dai_links[] = {
 	},
 };
 
+static struct snd_soc_dai_link msm_afe_rxtx_lb_be_dai_link[] = {
+	{
+		.name = LPASS_BE_AFE_LOOPBACK_TX,
+		.stream_name = "AFE Loopback Capture",
+		.cpu_dai_name = "msm-dai-q6-dev.24577",
+		.platform_name = "msm-pcm-routing",
+		.codec_name = "msm-stub-codec.1",
+		.codec_dai_name = "msm-stub-tx",
+		.no_pcm = 1,
+		.dpcm_capture = 1,
+		.id = MSM_BACKEND_DAI_AFE_LOOPBACK_TX,
+		.be_hw_params_fixup = msm_be_hw_params_fixup,
+		.ignore_pmdown_time = 1,
+		.ignore_suspend = 1,
+	},
+};
+
 static struct snd_soc_dai_link msm_tavil_snd_card_dai_links[
 			 ARRAY_SIZE(msm_common_dai_links) +
 			 ARRAY_SIZE(msm_tavil_fe_dai_links) +
@@ -6492,7 +6552,8 @@ static struct snd_soc_dai_link msm_tavil_snd_card_dai_links[
 			 ARRAY_SIZE(msm_wcn_be_dai_links) +
 			 ARRAY_SIZE(ext_disp_be_dai_link) +
 			 ARRAY_SIZE(msm_mi2s_be_dai_links) +
-			 ARRAY_SIZE(msm_auxpcm_be_dai_links)];
+			 ARRAY_SIZE(msm_auxpcm_be_dai_links) +
+			 ARRAY_SIZE(msm_afe_rxtx_lb_be_dai_link)];
 
 static int msm_snd_card_tavil_late_probe(struct snd_soc_card *card)
 {
@@ -6794,6 +6855,8 @@ static struct snd_soc_card *populate_snd_card_dailinks(struct device *dev)
 	struct snd_soc_dai_link *dailink;
 	int len_1, len_2, len_3, len_4;
 	int total_links;
+	int rc = 0;
+	u32 val = 0;
 	const struct of_device_id *match;
 
 	match = of_match_node(sdm845_asoc_machine_of_match, dev->of_node);
@@ -6857,6 +6920,16 @@ static struct snd_soc_card *populate_snd_card_dailinks(struct device *dev)
 			msm_auxpcm_be_dai_links,
 			sizeof(msm_auxpcm_be_dai_links));
 			total_links += ARRAY_SIZE(msm_auxpcm_be_dai_links);
+		}
+
+		rc = of_property_read_u32(dev->of_node, "qcom,afe-rxtx-lb",
+				&val);
+		if (!rc && val) {
+			memcpy(msm_tavil_snd_card_dai_links + total_links,
+				msm_afe_rxtx_lb_be_dai_link,
+				sizeof(msm_afe_rxtx_lb_be_dai_link));
+			total_links +=
+				ARRAY_SIZE(msm_afe_rxtx_lb_be_dai_link);
 		}
 		dailink = msm_tavil_snd_card_dai_links;
 	} else if (!strcmp(match->data, "stub_codec")) {
