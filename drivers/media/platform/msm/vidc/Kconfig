@@ -6,5 +6,3 @@ menuconfig MSM_VIDC_LEGACY_V4L2
 	tristate "Qualcomm Technologies, Inc. MSM V4L2 based video driver"
 		depends on ARCH_QCOM && VIDEO_V4L2
 		select VIDEOBUF2_CORE
-
-source "drivers/media/platform/msm/vidc/governors/Kconfig"
