@@ -1060,7 +1060,7 @@ no_data_count:
 	device->bus_vote.data_count = num_data;
 
 	venus_hfi_for_each_bus(device, bus) {
-		if (bus) {
+		if (bus && bus->client) {
 			if (!bus->is_prfm_gov_used) {
 				freq = __calc_bw(bus, &device->bus_vote);
 			} else {
