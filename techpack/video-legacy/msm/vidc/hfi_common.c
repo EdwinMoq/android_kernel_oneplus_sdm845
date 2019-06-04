@@ -122,7 +122,7 @@ static void __setup_ucregion_memory_map_common(
 struct venus_hfi_vpu_ops vpu4_ops = {
 	.interrupt_init = __interrupt_init_ar50,
 	.setup_ucregion_memmap = __setup_ucregion_memory_map_common,
-	.clock_config_on_enable = NULL,
+	.clock_config_on_enable = __clock_config_on_enable_ar50,
 	.reset_ahb2axi_bridge = NULL,
 	.power_off = __power_off_common,
 	.prepare_pc = __prepare_pc_common,

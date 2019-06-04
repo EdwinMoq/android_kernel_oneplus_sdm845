@@ -307,6 +307,8 @@ void __interrupt_init_iris1(struct venus_hfi_device *device, u32 sid);
 void __setup_dsp_uc_memmap_iris1(struct venus_hfi_device *device);
 void __clock_config_on_enable_iris1(struct venus_hfi_device *device,
 		u32 sid);
+void __clock_config_on_enable_ar50(struct venus_hfi_device *device,
+		u32 sid);
 void __setup_ucregion_memory_map_iris1(struct venus_hfi_device *device,
 		u32 sid);
 /* IRIS2 specific */
