@@ -529,6 +529,11 @@ int msm_vidc_qbuf(void *instance, struct v4l2_buffer *b)
 	}
 	mutex_lock(&q->lock);
 
+	if (inst->in_flush && is_decode_session(inst) &&
+		b->type == V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE) {
+		dprintk(VIDC_ERR, "%s: in flush, discarding qbuf\n", __func__);
+		return -EINVAL;
+	}
 
 	for (i = 0; i < b->length; i++) {
 		b->m.planes[i].m.fd = b->m.planes[i].reserved[0];
