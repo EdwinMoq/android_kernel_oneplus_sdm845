@@ -118,6 +118,13 @@ void drm_gem_release(struct drm_device *dev, struct drm_file *file_private);
 void drm_gem_print_info(struct drm_printer *p, unsigned int indent,
 			const struct drm_gem_object *obj);
 
+int dsi_display_set_hbm_mode(struct drm_connector *connector, int level);
+int dsi_display_get_hbm_mode(struct drm_connector *connector);
+int dsi_display_set_aod_mode(struct drm_connector *connector, int level);
+int dsi_display_get_aod_mode(struct drm_connector *connector);
+int dsi_display_set_fp_hbm_mode(struct drm_connector *connector, int level);
+int dsi_display_get_fp_hbm_mode(struct drm_connector *connector);
+
 /* drm_debugfs.c drm_debugfs_crc.c */
 #if defined(CONFIG_DEBUG_FS)
 int drm_debugfs_init(struct drm_minor *minor, int minor_id,
