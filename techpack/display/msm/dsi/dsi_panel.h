@@ -215,6 +215,15 @@ struct dsi_panel {
 	int hbm_mode;
 	enum dsi_panel_display_mode display_mode;
 
+	int aod_mode;
+	int aod_status;
+	int aod_curr_mode;
+	int aod_disable;
+	int hbm_backlight;
+	bool is_hbm_enabled;
+	int  op_force_screenfp;
+	bool dim_status;
+
 	struct dsi_parser_utils utils;
 
 	bool lp11_init;
@@ -359,5 +368,9 @@ void dsi_panel_ext_bridge_put(struct dsi_panel *panel);
 
 void dsi_panel_calc_dsi_transfer_time(struct dsi_host_common_cfg *config,
 		struct dsi_display_mode *mode, u32 frame_threshold_us);
+
+int dsi_panel_set_hbm_mode(struct dsi_panel *panel, int level);
+int dsi_panel_op_set_hbm_mode(struct dsi_panel *panel, int level);
+int dsi_panel_set_aod_mode(struct dsi_panel *panel, int level);
 
 #endif /* _DSI_PANEL_H_ */
