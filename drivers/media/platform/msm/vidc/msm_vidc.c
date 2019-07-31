@@ -521,6 +521,12 @@ int msm_vidc_qbuf(void *instance, struct v4l2_buffer *b)
 		return -EINVAL;
 	}
 
+	if (!IS_ALIGNED(b->m.planes[0].length, SZ_4K)) {
+		dprintk(VIDC_ERR, "qbuf: %x: buffer size not 4K aligned - %u\n",
+			hash32_ptr(inst->session), b->m.planes[0].length);
+		return -EINVAL;
+	}
+
 	q = msm_comm_get_vb2q(inst, b->type);
 	if (!q) {
 		dprintk(VIDC_ERR,
