@@ -78,7 +78,7 @@
 			compatible = "snps,dwc3";
 			reg = <0x0a600000 0xcd00>;
 			interrupts = <GIC_SPI 133 IRQ_TYPE_LEVEL_HIGH>;
-			usb-phy = <&qusb_phy0>, <&usb_qmp_dp_phy>;
+			usb-phy = <&qusb_phy0>, <&usb_nop_phy>;
 			tx-fifo-resize;
 			linux,sysdev_is_parent;
 			snps,disable-clk-gating;
@@ -87,7 +87,7 @@
 			snps,usb3_lpm_capable;
 			usb-core-id = <0>;
 			dr_mode = "drd";
-			maximum-speed = "super-speed";
+			maximum-speed = "high-speed";
 		};
 
 		qcom,usbbam@a704000 {
