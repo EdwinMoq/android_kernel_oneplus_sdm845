@@ -981,4 +981,12 @@ config ICNSS_QMI
 	  and configurations. It also send WLAN on/off control message to FW
 	  over QMI channel.
 
+config RF_CABLE_DETECT
+	bool "detect RF cable connection"
+	help
+	  detect RF cable connection for different RF configuration
+	  To compile this driver as a module, choose M here: the module
+	  will be called RF cable.
+	  If unsure, say N.
+
 source "drivers/soc/qcom/wcnss/Kconfig"
