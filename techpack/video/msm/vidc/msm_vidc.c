@@ -1383,6 +1383,7 @@ static int try_get_ctrl_for_instance(struct msm_vidc_inst *inst,
 	case V4L2_CID_MPEG_VIDC_VIDEO_EXTRADATA:
 		ctrl->val = inst->prop.extradata_ctrls;
 		break;
+#ifndef CONFIG_ARCH_SDM845
 	case V4L2_CID_MPEG_VIDC_VIDEO_ROI_TYPE:
 	{
 		uint32_t vpu_ver;
@@ -1397,6 +1398,7 @@ static int try_get_ctrl_for_instance(struct msm_vidc_inst *inst,
 				V4L2_CID_MPEG_VIDC_VIDEO_ROI_TYPE_2BIT;
 		break;
 	}
+#endif
 	default:
 		break;
 	}

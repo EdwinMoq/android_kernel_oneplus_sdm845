@@ -935,6 +935,7 @@ static struct msm_vidc_ctrl msm_venc_ctrls[] = {
 		.default_value = V4L2_MPEG_MSM_VIDC_DISABLE,
 		.step = 1,
 	},
+#ifndef CONFIG_ARCH_SDM845
 	{
 		.id = V4L2_CID_MPEG_VIDC_VENC_BITRATE_SAVINGS,
 		.name = "Enable/Disable bitrate savings",
@@ -944,6 +945,7 @@ static struct msm_vidc_ctrl msm_venc_ctrls[] = {
 		.default_value = 3,
 		.step = 1,
 	},
+#endif
 	{
 		.id = V4L2_CID_MPEG_VIDEO_H264_CHROMA_QP_INDEX_OFFSET,
 		.name = "Chroma QP Index Offset",
@@ -989,6 +991,7 @@ static struct msm_vidc_ctrl msm_venc_ctrls[] = {
 		.default_value = (DEFAULT_FPS << 16),
 		.step = 1,
 	},
+#ifndef CONFIG_ARCH_SDM845
 	{
 		.id = V4L2_CID_MPEG_VIDC_VIDEO_ROI_TYPE,
 		.name = "ROI Type",
@@ -1003,6 +1006,7 @@ static struct msm_vidc_ctrl msm_venc_ctrls[] = {
 		),
 		.qmenu = roi_map_type,
 	},
+#endif
 	{
 		.id = V4L2_CID_MPEG_VIDC_ENABLE_ONLY_BASE_LAYER_IR,
 		.name = "Enable Only Base Layer IR",
@@ -2088,7 +2092,9 @@ int msm_venc_set_frame_rate(struct msm_vidc_inst *inst)
 int msm_venc_set_color_format(struct msm_vidc_inst *inst)
 {
 	int rc = 0;
+#ifndef CONFIG_ARCH_SDM845
 	struct msm_vidc_format_constraint *fmt_constraints;
+#endif
 	struct v4l2_format *f;
 
 	f = &inst->fmts[INPUT_PORT].v4l2_fmt;
@@ -2097,6 +2103,7 @@ int msm_venc_set_color_format(struct msm_vidc_inst *inst)
 	if (rc)
 		return rc;
 
+#ifndef CONFIG_ARCH_SDM845
 	fmt_constraints = msm_comm_get_pixel_fmt_constraints(
 			enc_pix_format_constraints,
 			ARRAY_SIZE(enc_pix_format_constraints),
@@ -2111,6 +2118,7 @@ int msm_venc_set_color_format(struct msm_vidc_inst *inst)
 			return rc;
 		}
 	}
+#endif
 
 	return rc;
 }
@@ -3346,6 +3354,7 @@ int msm_venc_set_intra_refresh_mode(struct msm_vidc_inst *inst)
 	return rc;
 }
 
+#ifndef CONFIG_ARCH_SDM845
 int msm_venc_set_bitrate_savings_mode(struct msm_vidc_inst *inst)
 {
 	int rc = 0;
@@ -3396,6 +3405,7 @@ int msm_venc_set_bitrate_savings_mode(struct msm_vidc_inst *inst)
 
 	return rc;
 }
+#endif
 
 int msm_venc_set_chroma_qp_offset(struct msm_vidc_inst *inst)
 {
@@ -4736,9 +4746,11 @@ int msm_venc_set_properties(struct msm_vidc_inst *inst)
 	rc = msm_venc_set_vbv_delay(inst);
 	if (rc)
 		goto exit;
+#ifndef CONFIG_ARCH_SDM845
 	rc = msm_venc_set_bitrate_savings_mode(inst);
 	if (rc)
 		goto exit;
+#endif
 	rc = msm_venc_set_input_timestamp_rc(inst);
 	if (rc)
 		goto exit;
