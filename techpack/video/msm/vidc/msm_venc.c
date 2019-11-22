@@ -935,6 +935,7 @@ static struct msm_vidc_ctrl msm_venc_ctrls[] = {
 		.default_value = V4L2_MPEG_MSM_VIDC_DISABLE,
 		.step = 1,
 	},
+#ifdef VIDC_BITRATE_SAVINGS_AVAILABLE
 	{
 		.id = V4L2_CID_MPEG_VIDC_VENC_BITRATE_SAVINGS,
 		.name = "Enable/Disable bitrate savings",
@@ -944,6 +945,7 @@ static struct msm_vidc_ctrl msm_venc_ctrls[] = {
 		.default_value = 3,
 		.step = 1,
 	},
+#endif
 	{
 		.id = V4L2_CID_MPEG_VIDEO_H264_CHROMA_QP_INDEX_OFFSET,
 		.name = "Chroma QP Index Offset",
@@ -2110,7 +2112,9 @@ int msm_venc_set_frame_rate(struct msm_vidc_inst *inst)
 int msm_venc_set_color_format(struct msm_vidc_inst *inst)
 {
 	int rc = 0;
+#ifdef VIDC_FORMAT_CONSTRAINTS_SUPPORTED
 	struct msm_vidc_format_constraint *fmt_constraints;
+#endif
 	struct v4l2_format *f;
 
 	f = &inst->fmts[INPUT_PORT].v4l2_fmt;
@@ -2119,6 +2123,7 @@ int msm_venc_set_color_format(struct msm_vidc_inst *inst)
 	if (rc)
 		return rc;
 
+#ifdef VIDC_FORMAT_CONSTRAINTS_SUPPORTED
 	fmt_constraints = msm_comm_get_pixel_fmt_constraints(
 			enc_pix_format_constraints,
 			ARRAY_SIZE(enc_pix_format_constraints),
@@ -2133,6 +2138,7 @@ int msm_venc_set_color_format(struct msm_vidc_inst *inst)
 			return rc;
 		}
 	}
+#endif
 
 	return rc;
 }
@@ -3374,6 +3380,7 @@ int msm_venc_set_intra_refresh_mode(struct msm_vidc_inst *inst)
 	return rc;
 }
 
+#ifdef VIDC_BITRATE_SAVINGS_AVAILABLE
 int msm_venc_set_bitrate_savings_mode(struct msm_vidc_inst *inst)
 {
 	int rc = 0;
@@ -3424,6 +3431,7 @@ int msm_venc_set_bitrate_savings_mode(struct msm_vidc_inst *inst)
 
 	return rc;
 }
+#endif
 
 int msm_venc_set_chroma_qp_offset(struct msm_vidc_inst *inst)
 {
@@ -4764,9 +4772,11 @@ int msm_venc_set_properties(struct msm_vidc_inst *inst)
 	rc = msm_venc_set_vbv_delay(inst);
 	if (rc)
 		goto exit;
+#ifdef VIDC_BITRATE_SAVINGS_AVAILABLE
 	rc = msm_venc_set_bitrate_savings_mode(inst);
 	if (rc)
 		goto exit;
+#endif
 	rc = msm_venc_set_input_timestamp_rc(inst);
 	if (rc)
 		goto exit;

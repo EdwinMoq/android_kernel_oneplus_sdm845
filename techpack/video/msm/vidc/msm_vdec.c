@@ -1009,7 +1009,9 @@ int msm_vdec_set_color_format(struct msm_vidc_inst *inst)
 {
 	int rc = 0;
 	struct hfi_device *hdev;
+#ifdef VIDC_FORMAT_CONSTRAINTS_SUPPORTED
 	struct msm_vidc_format_constraint *fmt_constraint;
+#endif
 
 	if (!inst || !inst->core) {
 		d_vpr_e("%s: invalid params %pK\n", __func__, inst);
@@ -1025,6 +1027,7 @@ int msm_vdec_set_color_format(struct msm_vidc_inst *inst)
 			__func__, inst->clk_data.opb_fourcc);
 		return rc;
 	}
+#ifdef VIDC_FORMAT_CONSTRAINTS_SUPPORTED
 	fmt_constraint = msm_comm_get_pixel_fmt_constraints(
 			dec_pix_format_constraints,
 			ARRAY_SIZE(dec_pix_format_constraints),
@@ -1040,6 +1043,7 @@ int msm_vdec_set_color_format(struct msm_vidc_inst *inst)
 			return rc;
 		}
 	}
+#endif
 
 	return rc;
 }

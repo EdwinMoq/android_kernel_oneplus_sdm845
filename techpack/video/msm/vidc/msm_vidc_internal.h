@@ -33,6 +33,11 @@
 /* kernel/msm-4.19 */
 #define MSM_VIDC_VERSION     ((0 << 16) + (4 << 8) + 19)
 
+#if !defined(CONFIG_ARCH_SDM845)
+#define VIDC_BITRATE_SAVINGS_AVAILABLE
+#define VIDC_FORMAT_CONSTRAINTS_SUPPORTED
+#endif
+
 #define MAX_DEBUGFS_NAME 50
 #define DEFAULT_TIMEOUT 3
 #define DEFAULT_HEIGHT 240
