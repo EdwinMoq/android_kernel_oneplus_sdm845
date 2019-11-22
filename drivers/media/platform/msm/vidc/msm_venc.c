@@ -1162,6 +1162,7 @@ static struct msm_vidc_ctrl msm_venc_ctrls[] = {
 		),
 		.qmenu = mpeg_video_stream_format,
 	},
+#ifdef VENC_BITRATE_SAVINGS_AVAILABLE
 	{
 		.id = V4L2_CID_MPEG_VIDC_VENC_BITRATE_SAVINGS,
 		.name = "Enable/Disable bitrate savings",
@@ -1171,6 +1172,8 @@ static struct msm_vidc_ctrl msm_venc_ctrls[] = {
 		.default_value = V4L2_MPEG_MSM_VIDC_ENABLE,
 		.step = 1,
 	},
+#endif
+#ifdef VENC_ROI_TYPE_AVAILABLE
 	{
 		.id = V4L2_CID_MPEG_VIDC_VIDEO_ROI_TYPE,
 		.name = "ROI Type",
@@ -1185,6 +1188,7 @@ static struct msm_vidc_ctrl msm_venc_ctrls[] = {
 		),
 		.qmenu = roi_map_type,
 	},
+#endif
 	{
 		.id = V4L2_CID_MPEG_VIDC_VENC_COMPLEXITY,
 		.name = "Encoder complexity",
