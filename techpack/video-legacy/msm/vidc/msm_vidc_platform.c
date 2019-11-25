@@ -1706,7 +1706,7 @@ static struct msm_vidc_common_data sdm845_common_data[] = {
 	},
 	{
 		.key = "qcom,max-secure-instances",
-		.value = 5,
+		.value = 2,
 	},
 	{
 		.key = "qcom,max-hw-load",
@@ -1730,11 +1730,11 @@ static struct msm_vidc_common_data sdm845_common_data[] = {
 	},
 	{
 		.key = "qcom,power-collapse-delay",
-		.value = 500,
+		.value = 1500,
 	},
 	{
 		.key = "qcom,hw-resp-timeout",
-		.value = 250,
+		.value = 1000,
 	},
 	{
 		.key = "qcom,debug-timeout",
@@ -1743,6 +1743,14 @@ static struct msm_vidc_common_data sdm845_common_data[] = {
 	{
 		.key = "qcom,dcvs",
 		.value = 1,
+	},
+	{
+		.key = "qcom,fw-cycles",
+		.value = 733003,
+	},
+	{
+		.key = "qcom,fw-vpp-cycles",
+		.value = 225975,
 	},
 };
 
