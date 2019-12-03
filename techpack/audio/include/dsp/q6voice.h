@@ -1991,6 +1991,7 @@ struct common_data {
 	bool is_destroy_cvd;
 	char cvd_version[CVD_VERSION_STRING_MAX_SIZE];
 	int cvp_version;
+	bool is_legacy_dsp_v2_firmware;
 	bool is_avcs_version_queried;
 	bool is_per_vocoder_cal_enabled;
 	bool is_sound_focus_resp_success;
