@@ -4665,7 +4665,8 @@ static int voice_send_cvp_media_fmt_info_cmd(struct voice_data *v)
 {
 	int ret = 0;
 
-	if (common.cvp_version < CVP_VERSION_2)
+	if (common.cvp_version < CVP_VERSION_2 ||
+	    common.is_legacy_dsp_v2_firmware)
 		ret = voice_send_cvp_device_channels_cmd(v);
 	else
 		ret = voice_send_cvp_channel_info_cmd(v);
@@ -10110,6 +10111,10 @@ int __init voice_init(void)
 	 * to mono
 	 */
 	common.rec_channel_count = NUM_CHANNELS_MONO;
+
+	/* Support legacy DSP firmware with CVPv2.0+CVD2.3 */
+	common.is_legacy_dsp_v2_firmware =
+		of_machine_is_compatible("qcom,sdm845");
 
 	mutex_init(&common.common_lock);
 
