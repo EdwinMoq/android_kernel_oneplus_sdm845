@@ -21,15 +21,13 @@
 			reg = <0 0xAC200000 0 0x00100000>;
 			label = "param_mem";
 		};
-		ramoops: ramoops@0xAC300000 {
-			compatible = "ramoops";
-			reg = <0 0xAC300000 0 0x00400000>;
-			record-size =  <0x40000>; /*256x1024*/
-			console-size = <0x40000>;
-			ftrace-size =  <0x40000>;
-			pmsg-size=	   <0x200000>;
-			devinfo-size=  <0x01000>;
-			ecc-size=	   <0x0>;
+		ramoops {
+			compatible = "removed-dma-pool", "ramoops";
+			no-map;
+			reg = <0x0 0xAC300000 0x0 0x00400000>;
+			status = "ok";
+			console-size = <0x200000>;
+			pmsg-size = <0x200000>;
 		};
 		mtp_mem: mtp_mem@ac700000 {
 			reg = <0 0xAC700000 0 0x00B00000>;
