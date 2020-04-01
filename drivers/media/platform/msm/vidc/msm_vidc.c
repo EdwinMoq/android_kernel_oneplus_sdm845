@@ -1563,7 +1563,9 @@ static void msm_vidc_buf_queue(struct vb2_buffer *vb2)
 		rc = msm_vidc_queue_buf(inst, vb2);
 	if (rc) {
 		print_vb2_buffer(VIDC_ERR, "failed vb2-qbuf", inst, vb2);
-		msm_comm_generate_session_error(inst);
+		vb2_buffer_done(vb2, VB2_BUF_STATE_DONE);
+		msm_vidc_queue_v4l2_event(inst,
+			V4L2_EVENT_MSM_VIDC_SYS_ERROR);
 	}
 }
 
