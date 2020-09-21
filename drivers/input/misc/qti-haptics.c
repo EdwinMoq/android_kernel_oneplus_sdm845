@@ -34,9 +34,26 @@ enum lra_res_sig_shape {
 	RES_SIG_SQUARE,
 };
 
+enum hap_auto_res_mode {
+	HAP_AUTO_RES_NONE,
+	HAP_AUTO_RES_ZXD,
+	HAP_AUTO_RES_QWD,
+	HAP_AUTO_RES_MAX_QWD,
+	HAP_AUTO_RES_ZXD_EOP,
+};
+
 enum lra_auto_res_mode {
 	AUTO_RES_MODE_ZXD,
 	AUTO_RES_MODE_QWD,
+};
+
+
+/* high Z option lines */
+enum hap_high_z {
+	HAP_LRA_HIGH_Z_NONE, /* opt0 for PM660 */
+	HAP_LRA_HIGH_Z_OPT1,
+	HAP_LRA_HIGH_Z_OPT2,
+	HAP_LRA_HIGH_Z_OPT3,
 };
 
 enum wf_src {
@@ -112,6 +129,16 @@ enum haptics_custom_effect_param {
 #define HAP_WF_SOURCE_AUDIO		(2 << HAP_WF_SOURCE_SHIFT)
 #define HAP_WF_SOURCE_PWM		(3 << HAP_WF_SOURCE_SHIFT)
 
+/* For pmi8998 */
+#define LRA_AUTO_RES_MODE_MASK		GENMASK(6, 4)
+#define LRA_AUTO_RES_MODE_SHIFT		4
+#define LRA_HIGH_Z_MASK			GENMASK(3, 2)
+#define LRA_HIGH_Z_SHIFT		2
+#define LRA_RES_CAL_MASK		GENMASK(1, 0)
+#define HAP_RES_CAL_PERIOD_MIN		4
+#define HAP_RES_CAL_PERIOD_MAX		32
+
+/* For pm660 */
 #define REG_HAP_AUTO_RES_CFG		0x4F
 #define HAP_AUTO_RES_MODE_BIT		BIT(7)
 #define HAP_AUTO_RES_MODE_SHIFT		7
@@ -194,7 +221,7 @@ struct qti_hap_play_info {
 struct qti_hap_config {
 	enum actutor_type	act_type;
 	enum lra_res_sig_shape	lra_shape;
-	enum lra_auto_res_mode	lra_auto_res_mode;
+	u8			lra_auto_res_mode;
 	u16			vmax_mv;
 	u16			play_rate_us;
 	bool			lra_allow_variable_play_rate;
@@ -1126,10 +1153,17 @@ static int qti_haptics_hw_init(struct qti_hap_chip *chip)
 		return rc;
 	}
 
-	addr = REG_HAP_AUTO_RES_CFG;
-	mask = HAP_AUTO_RES_MODE_BIT | HAP_CAL_EOP_EN_BIT | HAP_CAL_PERIOD_MASK;
-	val = config->lra_auto_res_mode << HAP_AUTO_RES_MODE_SHIFT;
-	val |= HAP_CAL_EOP_EN_BIT | HAP_CAL_OPT3_EVERY_8_PERIOD;
+	if (chip->revid->pmic_subtype == PM660_SUBTYPE) {
+		addr = REG_HAP_AUTO_RES_CFG;
+		mask = HAP_AUTO_RES_MODE_BIT | HAP_CAL_EOP_EN_BIT | HAP_CAL_PERIOD_MASK;
+		val = config->lra_auto_res_mode << HAP_AUTO_RES_MODE_SHIFT;
+		val |= HAP_CAL_EOP_EN_BIT | HAP_CAL_OPT3_EVERY_8_PERIOD;
+	} else {
+		addr = REG_HAP_AUTO_RES_CFG;
+		mask = LRA_AUTO_RES_MODE_MASK | LRA_HIGH_Z_MASK | LRA_RES_CAL_MASK;
+		val |= (config->lra_auto_res_mode << LRA_AUTO_RES_MODE_SHIFT);
+		val |= (HAP_LRA_HIGH_Z_OPT3 << LRA_HIGH_Z_SHIFT);
+	}
 	rc = qti_haptics_masked_write(chip, addr, mask, val);
 	if (rc < 0) {
 		dev_err(chip->dev, "set AUTO_RES_CFG failed, rc=%d\n", rc);
@@ -1394,14 +1428,33 @@ static int qti_haptics_lra_parse_dt(struct qti_hap_chip *chip)
 	rc = of_property_read_string(node, "qcom,lra-auto-resonance-mode",
 					&str);
 	if (!rc) {
-		if (strcmp(str, "zxd") == 0) {
-			config->lra_auto_res_mode = AUTO_RES_MODE_ZXD;
-		} else if (strcmp(str, "qwd") == 0) {
-			config->lra_auto_res_mode = AUTO_RES_MODE_QWD;
+		if (chip->revid->pmic_subtype == PM660_SUBTYPE) {
+			config->lra_auto_res_mode =
+					AUTO_RES_MODE_QWD;
+			if (strcmp(str, "zxd") == 0)
+				config->lra_auto_res_mode =
+						AUTO_RES_MODE_ZXD;
+			else if (strcmp(str, "qwd") == 0)
+				config->lra_auto_res_mode =
+						AUTO_RES_MODE_QWD;
 		} else {
-			dev_err(chip->dev, "Invalid auto resonance mode: %s\n",
-					str);
-			return -EINVAL;
+			config->lra_auto_res_mode =
+					HAP_AUTO_RES_ZXD_EOP;
+			if (strcmp(str, "none") == 0)
+				config->lra_auto_res_mode =
+					HAP_AUTO_RES_NONE;
+			else if (strcmp(str, "zxd") == 0)
+				config->lra_auto_res_mode =
+					HAP_AUTO_RES_ZXD;
+			else if (strcmp(str, "qwd") == 0)
+				config->lra_auto_res_mode =
+					HAP_AUTO_RES_QWD;
+			else if (strcmp(str, "max-qwd") == 0)
+				config->lra_auto_res_mode =
+					HAP_AUTO_RES_MAX_QWD;
+			else
+				config->lra_auto_res_mode =
+					HAP_AUTO_RES_ZXD_EOP;
 		}
 	}
 
