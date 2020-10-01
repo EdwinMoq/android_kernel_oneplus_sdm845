@@ -64,6 +64,8 @@ static u32 spss_emul_type_reg_addr; /* TCSR_SOC_EMULATION_TYPE */
 static void *iar_notif_handle;
 static struct notifier_block *iar_nb;
 static bool is_iar_active;
+/* To differentiate legacy and new generation of hardware supported features*/
+static bool is_cmac_and_iar_feature_supported = true;
 
 #define CMAC_SIZE_IN_BYTES (128/8) /* 128 bit = 16 bytes */
 #define CMAC_SIZE_IN_DWORDS (CMAC_SIZE_IN_BYTES/sizeof(u32)) /* 4 dwords */
@@ -330,6 +332,9 @@ static int spss_create_sysfs(struct device *dev)
 		goto remove_test_fuse_state;
 	}
 
+	if (!is_cmac_and_iar_feature_supported)
+		goto out;
+
 	ret = device_create_file(dev, &dev_attr_cmac_buf);
 	if (ret < 0) {
 		pr_err("failed to create sysfs file for cmac_buf.\n");
@@ -360,7 +365,7 @@ static int spss_create_sysfs(struct device *dev)
 		goto remove_pbl_cmac;
 	}
 
-
+out:
 	return 0;
 
 remove_pbl_cmac:
@@ -522,6 +527,11 @@ static long spss_utils_ioctl(struct file *file,
 	case SPSS_IOC_SET_FW_CMAC:
 		if (size != sizeof(fw_and_apps_cmacs)) {
 			pr_err("cmd [0x%x] invalid size [0x%x]\n", cmd, size);
+			return -EINVAL;
+		}
+
+		if (!is_cmac_and_iar_feature_supported) {
+			pr_err("legacy SPSS not support cmac,iar feature.\n");
 			return -EINVAL;
 		}
 
@@ -827,6 +837,11 @@ static int spss_parse_dt(struct device_node *node)
 	iounmap(spss_emul_type_reg);
 end:
 
+	if (!is_cmac_and_iar_feature_supported) {
+		pr_info("legacy SPSS not support cmac & iar feature.\n");
+		goto out;
+	}
+
 	/* PIL-SPSS area */
 	np = of_parse_phandle(node, "pil-mem", 0);
 	if (!np) {
@@ -922,7 +937,7 @@ end:
 	iar_state = val1;
 
 	pr_debug("iar_state [%d]\n", iar_state);
-
+out:
 	return 0;
 }
 
@@ -1114,6 +1129,10 @@ static int spss_utils_pil_callback(struct notifier_block *nb,
 		pr_debug("[SUBSYS_PROXY_UNVOTE] event.\n");
 		break;
 	case SUBSYS_BEFORE_AUTH_AND_RESET:
+		if (!is_cmac_and_iar_feature_supported) {
+			pr_info("legacy SPSS not support cmac,iar feature.\n");
+			break;
+		}
 		/* do nothing if IAR is not active */
 		if (!is_iar_active)
 			return NOTIFY_OK;
@@ -1165,6 +1184,14 @@ static int spss_probe(struct platform_device *pdev)
 	}
 
 	platform_set_drvdata(pdev, dev);
+	/* Based on flag will differentiate legacy spss
+	 * supported features
+	 */
+	if (of_property_read_bool(pdev->dev.of_node,
+				"qcom,no-cmac-and-iar-feature-support")) {
+		pr_info("legacy SPSS not support cmac & iar feature.\n");
+		is_cmac_and_iar_feature_supported = false;
+	}
 
 	ret = spss_parse_dt(np);
 	if (ret < 0)
