@@ -59,7 +59,7 @@
 			qcom,lmh-dcvs = <&lmh_dcvs0>;
 			#cooling-cells = <2>;
 			next-level-cache = <&L2_0>;
-			sched-energy-costs = <&CPU_COST_0 &CLUSTER_COST_0>;
+			sched-energy-costs = <&CPU_COST_0>;
 			L2_0: l2-cache {
 			      compatible = "arm,arch-cache";
 			      cache-size = <0x20000>;
@@ -96,7 +96,7 @@
 			qcom,lmh-dcvs = <&lmh_dcvs0>;
 			#cooling-cells = <2>;
 			next-level-cache = <&L2_100>;
-			sched-energy-costs = <&CPU_COST_0 &CLUSTER_COST_0>;
+			sched-energy-costs = <&CPU_COST_0>;
 			L2_100: l2-cache {
 			      compatible = "arm,arch-cache";
 			      cache-size = <0x20000>;
@@ -127,7 +127,7 @@
 			qcom,lmh-dcvs = <&lmh_dcvs0>;
 			#cooling-cells = <2>;
 			next-level-cache = <&L2_200>;
-			sched-energy-costs = <&CPU_COST_0 &CLUSTER_COST_0>;
+			sched-energy-costs = <&CPU_COST_0>;
 			L2_200: l2-cache {
 			      compatible = "arm,arch-cache";
 			      cache-size = <0x20000>;
@@ -158,7 +158,7 @@
 			qcom,lmh-dcvs = <&lmh_dcvs0>;
 			#cooling-cells = <2>;
 			next-level-cache = <&L2_300>;
-			sched-energy-costs = <&CPU_COST_0 &CLUSTER_COST_0>;
+			sched-energy-costs = <&CPU_COST_0>;
 			L2_300: l2-cache {
 			      compatible = "arm,arch-cache";
 			      cache-size = <0x20000>;
@@ -189,7 +189,7 @@
 			qcom,lmh-dcvs = <&lmh_dcvs1>;
 			#cooling-cells = <2>;
 			next-level-cache = <&L2_400>;
-			sched-energy-costs = <&CPU_COST_1 &CLUSTER_COST_1>;
+			sched-energy-costs = <&CPU_COST_1>;
 			L2_400: l2-cache {
 			      compatible = "arm,arch-cache";
 			      cache-size = <0x40000>;
@@ -220,7 +220,7 @@
 			qcom,lmh-dcvs = <&lmh_dcvs1>;
 			#cooling-cells = <2>;
 			next-level-cache = <&L2_500>;
-			sched-energy-costs = <&CPU_COST_1 &CLUSTER_COST_1>;
+			sched-energy-costs = <&CPU_COST_1>;
 			L2_500: l2-cache {
 			      compatible = "arm,arch-cache";
 			      cache-size = <0x40000>;
@@ -251,7 +251,7 @@
 			qcom,lmh-dcvs = <&lmh_dcvs1>;
 			#cooling-cells = <2>;
 			next-level-cache = <&L2_600>;
-			sched-energy-costs = <&CPU_COST_1 &CLUSTER_COST_1>;
+			sched-energy-costs = <&CPU_COST_1>;
 			L2_600: l2-cache {
 			      compatible = "arm,arch-cache";
 			      cache-size = <0x40000>;
@@ -282,7 +282,7 @@
 			qcom,lmh-dcvs = <&lmh_dcvs1>;
 			#cooling-cells = <2>;
 			next-level-cache = <&L2_700>;
-			sched-energy-costs = <&CPU_COST_1 &CLUSTER_COST_1>;
+			sched-energy-costs = <&CPU_COST_1>;
 			L2_700: l2-cache {
 			      compatible = "arm,arch-cache";
 			      cache-size = <0x40000>;
@@ -368,9 +368,6 @@
 				1708800  186 /* speedbin 0,1 */
 				1747200  201 /* speedbin 2 */
 			>;
-			idle-cost-data = <
-				22 18 14 12
-			>;
 		};
 		CPU_COST_1: core-cost1 {
 			busy-cost-data = <
@@ -400,70 +397,6 @@
 			       2092000  1290 /* speedbin 1 */
 			       2112000  1308 /* speedbin 2 */
 			       2208000  1363 /* speedbin 2 */
-			>;
-			idle-cost-data = <
-				100 80 60 40
-			>;
-		};
-		CLUSTER_COST_0: cluster-cost0 {
-			busy-cost-data = <
-				 300000   3
-				 422400   4
-				 499200   4
-				 576000   4
-				 652800   5
-				 748800   5
-				 825600   6
-				 902400   7
-				 979200   7
-				1056000   8
-				1132800   9
-				1209600   9
-				1286400  10
-				1363200  11
-				1440000  12
-				1516800  13
-				1593600  15
-				1651200  17 /* speedbin 0,1 */
-				1670400  19 /* speedbin 2 */
-				1708800  21 /* speedbin 0,1 */
-				1747200  23 /* speedbin 2 */
-			>;
-			idle-cost-data = <
-				4 3 2 1
-			>;
-		};
-		CLUSTER_COST_1: cluster-cost1 {
-			busy-cost-data = <
-				300000  24
-				422400  24
-				499200  25
-				576000  25
-				652800  26
-				729600  27
-				806400  28
-				883200  29
-				960000  30
-			       1036800  32
-			       1113600  34
-			       1190400  37
-			       1267200  40
-			       1344000  45
-			       1420800  50
-			       1497600  57
-			       1574400  64
-			       1651200  74
-			       1728000  84
-			       1804800  96
-			       1881600 106
-			       1958400 113
-			       2035000 120 /* speedbin 1,2 */
-			       2092000 125 /* speedbin 1 */
-			       2112000 127 /* speedbin 2 */
-			       2208000 130 /* speedbin 2 */
-			>;
-			idle-cost-data = <
-				4 3 2 1
 			>;
 		};
 	}; /* energy-costs */
