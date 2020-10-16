@@ -1087,18 +1087,18 @@ struct msm_vidc_format_constraint enc_pix_format_constraints[] = {
 	{
 		.fourcc = V4L2_PIX_FMT_NV12,
 		.num_planes = 2,
-		.y_max_stride = 16384,
-		.y_buffer_alignment = 512,
-		.uv_max_stride = 16384,
-		.uv_buffer_alignment = 256,
+		.y_max_stride = 8192,
+		.y_buffer_alignment = 128,
+		.uv_max_stride = 8192,
+		.uv_buffer_alignment = 32,
 	},
 	{
 		.fourcc = V4L2_PIX_FMT_NV21,
 		.num_planes = 2,
 		.y_max_stride = 8192,
-		.y_buffer_alignment = 512,
+		.y_buffer_alignment = 128,
 		.uv_max_stride = 8192,
-		.uv_buffer_alignment = 256,
+		.uv_buffer_alignment = 32,
 	},
 };
 
