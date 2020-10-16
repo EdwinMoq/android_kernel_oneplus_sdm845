@@ -1084,6 +1084,16 @@ struct msm_vidc_format_constraint enc_pix_format_constraints[] = {
 		.uv_max_stride = 16384,
 		.uv_buffer_alignment = 256,
 	},
+#ifdef CONFIG_ARCH_SDM845
+	{
+		.fourcc = V4L2_PIX_FMT_NV12,
+		.num_planes = 2,
+		.y_max_stride = 8192,
+		.y_buffer_alignment = 128,
+		.uv_max_stride = 8192,
+		.uv_buffer_alignment = 32,
+	},
+#else
 	{
 		.fourcc = V4L2_PIX_FMT_NV12,
 		.num_planes = 2,
@@ -1092,6 +1102,17 @@ struct msm_vidc_format_constraint enc_pix_format_constraints[] = {
 		.uv_max_stride = 16384,
 		.uv_buffer_alignment = 256,
 	},
+#endif
+#ifdef CONFIG_ARCH_SDM845
+	{
+		.fourcc = V4L2_PIX_FMT_NV21,
+		.num_planes = 2,
+		.y_max_stride = 8192,
+		.y_buffer_alignment = 128,
+		.uv_max_stride = 8192,
+		.uv_buffer_alignment = 32,
+	},
+#else
 	{
 		.fourcc = V4L2_PIX_FMT_NV21,
 		.num_planes = 2,
@@ -1100,6 +1121,7 @@ struct msm_vidc_format_constraint enc_pix_format_constraints[] = {
 		.uv_max_stride = 8192,
 		.uv_buffer_alignment = 256,
 	},
+#endif
 };
 
 u32 v4l2_to_hfi_flip(struct msm_vidc_inst *inst)
