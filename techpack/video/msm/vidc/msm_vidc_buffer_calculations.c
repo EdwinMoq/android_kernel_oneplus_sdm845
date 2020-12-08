@@ -1019,6 +1019,9 @@ u32 msm_vidc_calculate_enc_output_frame_size(struct msm_vidc_inst *inst)
 	u32 mbs_per_frame;
 	u32 width, height;
 	struct v4l2_format *f;
+	uint32_t vpu;
+
+	vpu = inst->core->platform_data->vpu_ver;
 
 	f = &inst->fmts[OUTPUT_PORT].v4l2_fmt;
 	/*
@@ -1048,6 +1051,16 @@ u32 msm_vidc_calculate_enc_output_frame_size(struct msm_vidc_inst *inst)
 		frame_size = frame_size >> 2;
 	else
 		frame_size = frame_size >> 3;
+
+	/*
+	 * Check added to avoid Encode failure of resolutions
+	 * above 720P on SA6155P. Need to be removed if fix is
+	 * added in firmware.
+	*/
+	if (vpu == VPU_VERSION_AR50) {
+		if (mbs_per_frame > NUM_MBS_720P)
+			frame_size = width * height;
+	}
 
 	if (inst->rc_type == RATE_CONTROL_OFF)
 		frame_size = frame_size << 1;
