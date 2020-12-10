@@ -1063,6 +1063,8 @@ u32 msm_vidc_calculate_enc_output_frame_size(struct msm_vidc_inst *inst)
 	if (inst->core->platform_data->vpu_ver == VPU_VERSION_AR50) {
 		if (mbs_per_frame > NUM_MBS_720P)
 			frame_size = width * height;
+		else
+			frame_size =  frame_size << 1;
 	}
 
 	if (inst->rc_type == RATE_CONTROL_OFF)
