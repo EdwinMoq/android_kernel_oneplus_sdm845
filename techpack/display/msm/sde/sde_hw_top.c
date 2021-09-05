@@ -457,6 +457,11 @@ struct sde_hw_sid *sde_hw_sid_init(void __iomem *addr,
 {
 	struct sde_hw_sid *c;
 
+	if (!addr) {
+		SDE_DEBUG("Invalid addr\n");
+		return NULL;
+	}
+
 	c = kzalloc(sizeof(*c), GFP_KERNEL);
 	if (!c)
 		return ERR_PTR(-ENOMEM);
