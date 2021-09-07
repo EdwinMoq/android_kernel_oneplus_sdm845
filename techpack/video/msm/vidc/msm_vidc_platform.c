@@ -1003,13 +1003,16 @@ static struct msm_vidc_codec_capability sdm845_capabilities[] = {
 	                            V4L2_MPEG_VIDEO_HEVC_LEVEL_6, 1,
 	                            V4L2_MPEG_VIDEO_HEVC_LEVEL_6},
 
-	/* Level for AVC and HEVC decoder specific */
+	/* Level for AVC, HEVC and VP9 decoder specific */
 	{CAP_H264_LEVEL, DEC, H264, V4L2_MPEG_VIDEO_H264_LEVEL_1_0,
 	                            V4L2_MPEG_VIDEO_H264_LEVEL_6_0, 1,
 	                            V4L2_MPEG_VIDEO_H264_LEVEL_5_0},
 	{CAP_HEVC_LEVEL, DEC, HEVC, V4L2_MPEG_VIDEO_HEVC_LEVEL_1,
 	                            V4L2_MPEG_VIDEO_HEVC_LEVEL_6, 1,
 	                            V4L2_MPEG_VIDEO_HEVC_LEVEL_5},
+	{CAP_VP9_LEVEL, DEC, VP9, V4L2_MPEG_VIDC_VIDEO_VP9_LEVEL_UNUSED,
+	                            V4L2_MPEG_VIDC_VIDEO_VP9_LEVEL_51, 1,
+	                            V4L2_MPEG_VIDC_VIDEO_VP9_LEVEL_51},
 };
 
 /*
