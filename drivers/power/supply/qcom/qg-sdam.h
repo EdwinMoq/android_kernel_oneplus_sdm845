@@ -7,6 +7,8 @@
 #define __QG_SDAM_H__
 
 #define SDAM_TYPE			0x2E
+#define SDAM_MIN_OFFSET			0x45
+#define SDAM_MAX_OFFSET			0xB3
 
 enum qg_sdam_param {
 	SDAM_VALID,
@@ -21,6 +23,7 @@ enum qg_sdam_param {
 	SDAM_ESR_DISCHARGE_DELTA,
 	SDAM_ESR_CHARGE_SF,
 	SDAM_ESR_DISCHARGE_SF,
+	SDAM_MAGIC,
 	SDAM_BATT_AGE_LEVEL,
 	SDAM_FLASH_OCV,
 	SDAM_MAX,
@@ -38,5 +41,6 @@ int qg_sdam_write_all(u32 *sdam_data);
 int qg_sdam_read_all(u32 *sdam_data);
 int qg_sdam_multibyte_write(u32 offset, u8 *sdam_data, u32 length);
 int qg_sdam_multibyte_read(u32 offset, u8 *sdam_data, u32 length);
+int qg_sdam_clear(void);
 
 #endif
