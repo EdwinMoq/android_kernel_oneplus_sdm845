@@ -144,6 +144,7 @@
 		};
 
 		tavil_hph_en0: msm_cdc_pinctrl_hph_en0 {
+		      #gpio-cells = <0>;
 		      compatible = "qcom,msm-cdc-pinctrl";
 		      pinctrl-names = "aud_active", "aud_sleep";
 		      pinctrl-0 = <&hph_en0_wcd_active>;
@@ -151,6 +152,7 @@
 		};
 
 		tavil_hph_en1: msm_cdc_pinctrl_hph_en1 {
+		      #gpio-cells = <0>;
 		      compatible = "qcom,msm-cdc-pinctrl";
 		      pinctrl-names = "aud_active", "aud_sleep";
 		      pinctrl-0 = <&hph_en1_wcd_active>;
