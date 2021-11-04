@@ -175,108 +175,6 @@ reserved-memory {
 		};
 	};
 
-	dsi_samsung_s6e3fc1_cmd_display: qcom,dsi-display@17 {
-		compatible = "qcom,dsi-display";
-		label = "dsi_samsung_s6e3fc1_cmd_display";
-		qcom,display-type = "primary";
-		qcom,dsi-ctrl = <&mdss_dsi0>;
-		qcom,dsi-phy = <&mdss_dsi_phy0>;
-		clocks = <&mdss_dsi0_pll BYTECLK_MUX_0_CLK>,
-			<&mdss_dsi0_pll PCLK_MUX_0_CLK>;
-		clock-names = "mux_byte_clk", "mux_pixel_clk";
-		pinctrl-names = "panel_active", "panel_suspend";
-		pinctrl-0 = <&sde_dsi_active &sde_te_active &esd_check_active>;
-		pinctrl-1 = <&sde_dsi_suspend &sde_te_suspend &esd_check_suspend>;
-		qcom,dsi-panel = <&dsi_samsung_s6e3fc1_cmd>;
-		vddio-supply = <&pm8998_l14>;
-		qcom,platform-te-gpio = <&tlmm 30 0>;
-	};
-
-	dsi_samsung_sofef00_m_cmd_display: qcom,dsi-display@18 {
-		compatible = "qcom,dsi-display";
-		label = "dsi_samsung_sofef00_m_cmd_display";
-		qcom,display-type = "primary";
-		qcom,dsi-ctrl = <&mdss_dsi0>;
-		qcom,dsi-phy = <&mdss_dsi_phy0>;
-		clocks = <&mdss_dsi0_pll BYTECLK_MUX_0_CLK>,
-			<&mdss_dsi0_pll PCLK_MUX_0_CLK>;
-		clock-names = "mux_byte_clk", "mux_pixel_clk";
-		pinctrl-names = "panel_active", "panel_suspend";
-		pinctrl-0 = <&sde_dsi_active &sde_te_active &esd_check_active>;
-		pinctrl-1 = <&sde_dsi_suspend &sde_te_suspend &esd_check_suspend>;
-		qcom,dsi-panel = <&dsi_samsung_sofef00_m_cmd>;
-		vddio-supply = <&pm8998_l14>;
-		qcom,platform-te-gpio = <&tlmm 30 0>;
-	};
-
-	dsi_samsung_sofef00_m_video_display: qcom,dsi-display@19 {
-		compatible = "qcom,dsi-display";
-		label = "dsi_samsung_sofef00_m_video_display";
-		qcom,display-type = "primary";
-		qcom,dsi-ctrl = <&mdss_dsi0>;
-		qcom,dsi-phy = <&mdss_dsi_phy0>;
-		clocks = <&mdss_dsi0_pll BYTECLK_MUX_0_CLK>,
-			<&mdss_dsi0_pll PCLK_MUX_0_CLK>;
-		clock-names = "mux_byte_clk", "mux_pixel_clk";
-		pinctrl-names = "panel_active", "panel_suspend";
-		pinctrl-0 = <&sde_dsi_active &sde_te_active &esd_check_active>;
-		pinctrl-1 = <&sde_dsi_suspend &sde_te_suspend &esd_check_suspend>;
-		qcom,dsi-panel = <&dsi_samsung_sofef00_m_video>;
-		vddio-supply = <&pm8998_l14>;
-		qcom,platform-te-gpio = <&tlmm 30 0>;
-	};
-
-dsi_samsung_sofeg01_s_cmd_display: qcom,dsi-display@20 {
-		compatible = "qcom,dsi-display";
-		label = "dsi_samsung_sofeg01_s_cmd_display";
-		qcom,display-type = "primary";
-		qcom,dsi-ctrl = <&mdss_dsi0>;
-		qcom,dsi-phy = <&mdss_dsi_phy0>;
-		clocks = <&mdss_dsi0_pll BYTECLK_MUX_0_CLK>,
-			<&mdss_dsi0_pll PCLK_MUX_0_CLK>;
-		clock-names = "mux_byte_clk", "mux_pixel_clk";
-		pinctrl-names = "panel_active", "panel_suspend";
-		pinctrl-0 = <&sde_dsi_active &sde_te_active &esd_check_active>;
-		pinctrl-1 = <&sde_dsi_suspend &sde_te_suspend &esd_check_suspend>;
-		qcom,dsi-panel = <&dsi_samsung_sofeg01_s_cmd>;
-		vddio-supply = <&pm8998_l14>;
-		qcom,platform-te-gpio = <&tlmm 30 0>;
-	};
-
-dsi_samsung_s6e3fc2x01_cmd_display: qcom,dsi-display@21 {
-		compatible = "qcom,dsi-display";
-		label = "dsi_samsung_s6e3fc2x01_cmd_display";
-		qcom,display-type = "primary";
-		qcom,dsi-ctrl = <&mdss_dsi0>;
-		qcom,dsi-phy = <&mdss_dsi_phy0>;
-		clocks = <&mdss_dsi0_pll BYTECLK_MUX_0_CLK>,
-			<&mdss_dsi0_pll PCLK_MUX_0_CLK>;
-		clock-names = "mux_byte_clk", "mux_pixel_clk";
-		pinctrl-names = "panel_active", "panel_suspend";
-		pinctrl-0 = <&sde_dsi_active &sde_te_active &esd_check_active>;
-		pinctrl-1 = <&sde_dsi_suspend &sde_te_suspend &esd_check_suspend>;
-		qcom,dsi-panel = <&dsi_samsung_s6e3fc2x01_cmd>;
-		vddio-supply = <&pm8998_l14>;
-		qcom,platform-te-gpio = <&tlmm 10 0>;
-	};
-
-dsi_samsung_dsc_cmd_display: qcom,dsi-display@22 {
-		compatible = "qcom,dsi-display";
-		label = "dsi_samsung_dsc_cmd_display";
-		qcom,display-type = "primary";
-		qcom,dsi-ctrl = <&mdss_dsi0>;
-		qcom,dsi-phy = <&mdss_dsi_phy0>;
-		clocks = <&mdss_dsi0_pll BYTECLK_MUX_0_CLK>,
-			<&mdss_dsi0_pll PCLK_MUX_0_CLK>;
-		clock-names = "mux_byte_clk", "mux_pixel_clk";
-		pinctrl-names = "panel_active", "panel_suspend";
-		pinctrl-0 = <&sde_dsi_active &sde_te_active &esd_check_active>;
-		pinctrl-1 = <&sde_dsi_suspend &sde_te_suspend &esd_check_suspend>;
-		qcom,dsi-panel = <&dsi_samsung_dsc_cmd>;
-		vddio-supply = <&pm8998_l14>;
-		qcom,platform-te-gpio = <&tlmm 10 0>;
-	};
-
 	oem_serial_pinctrl {
 		compatible = "oem,oem_serial_pinctrl";
 		pinctrl-names = "uart_pinctrl_active","uart_pinctrl_deactive";
@@ -512,6 +410,7 @@ status = "disabled";
 &dsi_samsung_s6e3fc1_cmd {
 	qcom,dsi-display-active;
 	qcom,panel-supply-entries = <&dsi_panel_pwr_supply_no_labibb_2>;
+	qcom,dsi-select-clocks = "mux_byte_clk0", "mux_pixel_clk0";
 	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_dcs";
 	qcom,mdss-brightness-max-level = <1023>;
 	qcom,mdss-dsi-bl-min-level = <1>;
@@ -536,6 +435,7 @@ status = "disabled";
 
 &dsi_samsung_sofef00_m_cmd {
 	qcom,panel-supply-entries = <&dsi_panel_pwr_supply_no_labibb_2>;
+	qcom,dsi-select-clocks = "mux_byte_clk0", "mux_pixel_clk0";
 	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_dcs";
 	qcom,mdss-brightness-max-level = <1023>;
 	qcom,mdss-dsi-bl-min-level = <1>;
@@ -560,6 +460,7 @@ status = "disabled";
 
 &dsi_samsung_sofef00_m_video {
 	qcom,panel-supply-entries = <&dsi_panel_pwr_supply_no_labibb_2>;
+	qcom,dsi-select-clocks = "mux_byte_clk0", "mux_pixel_clk0";
 	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_dcs";
 	qcom,mdss-brightness-max-level = <1023>;
 	qcom,mdss-dsi-bl-min-level = <1>;
@@ -584,6 +485,7 @@ status = "disabled";
 
 &dsi_samsung_sofeg01_s_cmd {
 	qcom,panel-supply-entries = <&dsi_panel_pwr_supply_no_labibb_2>;
+	qcom,dsi-select-clocks = "mux_byte_clk0", "mux_pixel_clk0";
 	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_dcs";
 	qcom,mdss-brightness-max-level = <1023>;
 	qcom,mdss-dsi-bl-min-level = <1>;
@@ -608,6 +510,7 @@ status = "disabled";
 
 &dsi_samsung_s6e3fc2x01_cmd {
 	qcom,panel-supply-entries = <&dsi_panel_pwr_supply_no_labibb_2>;
+	qcom,dsi-select-clocks = "mux_byte_clk0", "mux_pixel_clk0";
 	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_dcs";
 	qcom,mdss-brightness-max-level = <1023>;
 	qcom,mdss-brightness-default-val = <200>;
@@ -635,6 +538,7 @@ status = "disabled";
 
 &dsi_samsung_dsc_cmd {
 	qcom,panel-supply-entries = <&dsi_panel_pwr_supply_no_labibb_2>;
+	qcom,dsi-select-clocks = "mux_byte_clk0", "mux_pixel_clk0";
 	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_dcs";
 	qcom,mdss-brightness-max-level = <1023>;
 	qcom,mdss-dsi-bl-min-level = <1>;
@@ -658,6 +562,18 @@ status = "disabled";
 			qcom,default-topology-index = <1>;
 		};
 	};
+};
+
+&sde_dsi {
+	qcom,dsi-default-panel = <&dsi_samsung_s6e3fc2x01_cmd>;
+	qcom,dsi-ctrl = <&mdss_dsi0>;
+	qcom,dsi-phy = <&mdss_dsi_phy0>;
+	clocks = <&mdss_dsi0_pll BYTECLK_MUX_0_CLK>,
+			 <&mdss_dsi0_pll PCLK_MUX_0_CLK>;
+	clock-names = "mux_byte_clk0", "mux_pixel_clk0";
+	pinctrl-0 = <&sde_dsi_active &sde_te_active &esd_check_active>;
+	pinctrl-1 = <&sde_dsi_suspend &sde_te_suspend &esd_check_suspend>;
+	qcom,platform-te-gpio = <&tlmm 30 0>;
 };
 
 &qupv3_se4_i2c {
@@ -1084,7 +1000,7 @@ status = "disabled";
 	status = "disabled";
 };
 &mdss_mdp {
-	connectors = <&sde_rscc &sde_wb>;
+	connectors = <&sde_rscc &sde_wb &sde_dsi>;
 };
 &sde_dp{
 	status = "disabled";
