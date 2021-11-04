@@ -122,9 +122,6 @@
 		qcom,panel-te-source = <0>;
 
 		vddio-supply = <&pm8998_l14>;
-		lab-supply = <&lab_regulator>;
-		ibb-supply = <&ibb_regulator>;
-		oled-vdda-supply = <&pm8998_l22>;
 
 		qcom,mdp = <&mdss_mdp>;
 		qcom,dsi-default-panel = <&dsi_nt35597_truly_dsc_cmd>;
