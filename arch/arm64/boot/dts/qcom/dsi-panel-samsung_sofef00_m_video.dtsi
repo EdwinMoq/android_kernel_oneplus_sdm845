@@ -11,7 +11,7 @@
  */
 
 &mdss_mdp {
-	dsi_samsung_sofef00_m_video: qcom,mdss_dsi_samsung_sofef00_m_video {
+	dsi_samsung_sofef00_m_video: dsi_samsung_sofef00_m_video_display {
 		qcom,mdss-dsi-panel-name =
 		"samsung sofef00_m video mode dsi panel";
 		qcom,mdss-dsi-panel-manufacture = "SAMSUNG";
@@ -19,6 +19,8 @@
 		qcom,mdss-dsi-backlight-version = "SAMSUNG";
 		qcom,mdss-dsi-backlight-manufacture = "SAMSUNG";
 		qcom,mdss-dsi-panel-type = "dsi_video_mode";
+		qcom,dsi-ctrl-num = <0>;
+		qcom,dsi-phy-num = <0>;
 		qcom,mdss-dsi-virtual-channel-id = <0>;
 		qcom,mdss-dsi-stream = <0>;
 		qcom,mdss-dsi-bpp = <24>;
