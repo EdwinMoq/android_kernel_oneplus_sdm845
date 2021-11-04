@@ -11,13 +11,15 @@
  */
 
 &mdss_mdp {
-	dsi_samsung_s6e3fc1_cmd: qcom,mdss_dsi_samsung_s6e3fc1_cmd {
+	dsi_samsung_s6e3fc1_cmd: dsi_samsung_s6e3fc1_cmd_display {
 		qcom,mdss-dsi-panel-name = "samsung s6e3fc1 cmd mode dsi panel";
 		qcom,mdss-dsi-panel-manufacture = "SAMSUNG";
 		qcom,mdss-dsi-panel-version = "S6E3FC1";
 		qcom,mdss-dsi-backlight-version = "SAMSUNG";
 		qcom,mdss-dsi-backlight-manufacture = "SAMSUNG";
 		qcom,mdss-dsi-panel-type = "dsi_cmd_mode";
+		qcom,dsi-ctrl-num = <0>;
+		qcom,dsi-phy-num = <0>;
 		qcom,mdss-dsi-virtual-channel-id = <0>;
 		qcom,mdss-dsi-stream = <0>;
 		qcom,mdss-dsi-bpp = <24>;
