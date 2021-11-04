@@ -25,6 +25,14 @@ ifeq ($(CONFIG_ARCH_BENGAL), y)
 LINUXINCLUDE    += -include $(srctree)/techpack/display/config/bengaldispconf.h
 endif
 
+ifeq ($(CONFIG_ARCH_SDM845), y)
+include $(srctree)/techpack/display/config/konadisp.conf
+endif
+
+ifeq ($(CONFIG_ARCH_SDM845), y)
+LINUXINCLUDE    += -include $(srctree)/techpack/display/config/konadispconf.h
+endif
+
 obj-$(CONFIG_DRM_MSM) += msm/
 obj-$(CONFIG_MSM_SDE_ROTATOR) += rotator/
 obj-$(CONFIG_QCOM_MDSS_PLL) += pll/
