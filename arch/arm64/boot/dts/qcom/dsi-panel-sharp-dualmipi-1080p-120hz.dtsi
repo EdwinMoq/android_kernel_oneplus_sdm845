@@ -1,8 +1,3 @@
-// SPDX-License-Identifier: GPL-2.0-only
-/*
- * Copyright (c) 2014-2017, The Linux Foundation. All rights reserved.
- */
-
 &mdss_mdp {
 	dsi_dual_sharp_1080_120hz_cmd: qcom,mdss_dual_sharp_1080p_120hz_cmd {
 		qcom,mdss-dsi-panel-name =
@@ -11,6 +6,7 @@
 
 		qcom,dsi-ctrl-num = <0 1>;
 		qcom,dsi-phy-num = <0 1>;
+		qcom,dsi-select-clocks = "src_byte_clk0", "src_pixel_clk0";
 
 		qcom,mdss-dsi-virtual-channel-id = <0>;
 		qcom,mdss-dsi-stream = <0>;
@@ -38,7 +34,7 @@
 		qcom,mdss-dsi-te-using-te-pin;
 
 		qcom,mdss-dsi-display-timings {
-			timing@0{
+			timing@0 {
 				qcom,mdss-dsi-panel-width = <540>;
 				qcom,mdss-dsi-panel-height = <1920>;
 				qcom,mdss-dsi-h-front-porch = <28>;

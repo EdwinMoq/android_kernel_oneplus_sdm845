@@ -1,10 +1,5 @@
-// SPDX-License-Identifier: GPL-2.0-only
-/*
- * Copyright (c) 2016-2017, The Linux Foundation. All rights reserved.
- */
-
 &mdss_mdp {
-	dsi_dual_s6e3ha3_amoled_cmd: qcom,mdss_dsi_s6e3ha3_amoled_wqhd_cmd{
+	dsi_dual_s6e3ha3_amoled_cmd: qcom,mdss_dsi_s6e3ha3_amoled_wqhd_cmd {
 		qcom,mdss-dsi-panel-name =
 			"Dual s6e3ha3 amoled cmd mode dsi panel";
 		qcom,mdss-dsi-panel-type = "dsi_cmd_mode";
