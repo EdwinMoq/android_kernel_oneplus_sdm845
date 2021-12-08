@@ -1778,7 +1778,7 @@ int sde_rm_cont_splash_res_init(struct msm_drm_private *priv,
 			return -EINVAL;
 		}
 
-		intf_sel = ctl->ops.get_ctl_intf(ctl);
+		intf_sel = ctl->ops.get_ctl_intf(ctl, cat->hwversion);
 		if (intf_sel) {
 			splash_display =  &splash_data->splash_display[index];
 			SDE_DEBUG("finding resources for display=%d ctl=%d\n",
