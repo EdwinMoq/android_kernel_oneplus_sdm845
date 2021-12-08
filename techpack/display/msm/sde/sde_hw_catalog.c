@@ -4246,6 +4246,8 @@ static int _sde_hardware_pre_caps(struct sde_mdss_cfg *sde_cfg, uint32_t hw_rev)
 		sde_cfg->ts_prefill_rev = 2;
 		sde_cfg->sui_misr_supported = true;
 		sde_cfg->sui_block_xin_mask = 0x3F71;
+		clear_bit(MDSS_INTF_TEAR_1_INTR, sde_cfg->mdss_irqs);
+		clear_bit(MDSS_INTF_TEAR_2_INTR, sde_cfg->mdss_irqs);
 		clear_bit(MDSS_INTR_LTM_0_INTR, sde_cfg->mdss_irqs);
 		clear_bit(MDSS_INTR_LTM_1_INTR, sde_cfg->mdss_irqs);
 		sde_cfg->has_decimation = true;
