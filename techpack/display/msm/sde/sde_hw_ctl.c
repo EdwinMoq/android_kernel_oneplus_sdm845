@@ -619,7 +619,7 @@ static inline int sde_hw_ctl_trigger_flush_v1(struct sde_hw_ctl *ctx)
 	return 0;
 }
 
-static inline u32 sde_hw_ctl_get_intf_v1(struct sde_hw_ctl *ctx)
+static inline u32 sde_hw_ctl_get_intf_v1(struct sde_hw_ctl *ctx, u32 hwversion)
 {
 	struct sde_hw_blk_reg_map *c;
 	u32 intf_active;
@@ -635,7 +635,7 @@ static inline u32 sde_hw_ctl_get_intf_v1(struct sde_hw_ctl *ctx)
 	return intf_active;
 }
 
-static inline u32 sde_hw_ctl_get_intf(struct sde_hw_ctl *ctx)
+static inline u32 sde_hw_ctl_get_intf(struct sde_hw_ctl *ctx, u32 hwversion)
 {
 	struct sde_hw_blk_reg_map *c;
 	u32 ctl_top;
@@ -648,10 +648,15 @@ static inline u32 sde_hw_ctl_get_intf(struct sde_hw_ctl *ctx)
 
 	c = &ctx->hw;
 	ctl_top = SDE_REG_READ(c, CTL_TOP);
+	if (!ctl_top)
+		goto end;
 
-	intf_active = (ctl_top > 0) ?
-		BIT(ctl_top - 1) : 0;
+	if (IS_SDM845_TARGET(hwversion))
+		intf_active = (ctl_top >> 4) & 0xf;
+	else
+		intf_active = BIT(ctl_top - 1);
 
+end:
 	return intf_active;
 }
 
