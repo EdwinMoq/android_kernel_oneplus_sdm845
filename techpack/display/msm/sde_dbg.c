@@ -301,6 +301,1015 @@ static void _sde_debug_bus_ppb1_dump(void __iomem *mem_base,
 			entry->wr_addr, entry->block_id, entry->test_id, val);
 }
 
+static void _sde_debug_bus_axi_dump_sdm845(void __iomem *mem_base,
+		struct sde_debug_bus_entry *entry, u32 val)
+{
+	u32 status, i;
+
+	if (!mem_base || !entry)
+		return;
+
+	for (i = 0; i <= RSC_DEBUG_MUX_SEL_SDM845; i++) {
+		sde_rsc_debug_dump(i);
+
+		/* make sure that mux_sel updated */
+		wmb();
+
+		/* read status again after rsc routes the debug bus */
+		status = readl_relaxed(mem_base + DBGBUS_DSPP_STATUS);
+
+		dev_err(sde_dbg_base.dev, "rsc mux_sel:%d 0x%x %d %d 0x%x\n",
+			i, entry->wr_addr, entry->block_id,
+			entry->test_id, status);
+	}
+}
+
+static struct sde_debug_bus_entry dbg_bus_sde_sdm845[] = {
+
+	/* Unpack 0 sspp 0*/
+	{ DBGBUS_SSPP0, 50, 2 },
+	{ DBGBUS_SSPP0, 60, 2 },
+	{ DBGBUS_SSPP0, 70, 2 },
+
+	/* Upack 0 sspp 1*/
+	{ DBGBUS_SSPP1, 50, 2 },
+	{ DBGBUS_SSPP1, 60, 2 },
+	{ DBGBUS_SSPP1, 70, 2 },
+
+	/* scheduler */
+	{ DBGBUS_DSPP, 130, 0 },
+	{ DBGBUS_DSPP, 130, 1 },
+	{ DBGBUS_DSPP, 130, 2 },
+	{ DBGBUS_DSPP, 130, 3 },
+	{ DBGBUS_DSPP, 130, 4 },
+	{ DBGBUS_DSPP, 130, 5 },
+
+	/* qseed */
+	{ DBGBUS_SSPP0, 6, 0},
+	{ DBGBUS_SSPP0, 6, 1},
+	{ DBGBUS_SSPP0, 26, 0},
+	{ DBGBUS_SSPP0, 26, 1},
+	{ DBGBUS_SSPP1, 6, 0},
+	{ DBGBUS_SSPP1, 6, 1},
+	{ DBGBUS_SSPP1, 26, 0},
+	{ DBGBUS_SSPP1, 26, 1},
+
+	/* scale */
+	{ DBGBUS_SSPP0, 16, 0},
+	{ DBGBUS_SSPP0, 16, 1},
+	{ DBGBUS_SSPP0, 36, 0},
+	{ DBGBUS_SSPP0, 36, 1},
+	{ DBGBUS_SSPP1, 16, 0},
+	{ DBGBUS_SSPP1, 16, 1},
+	{ DBGBUS_SSPP1, 36, 0},
+	{ DBGBUS_SSPP1, 36, 1},
+
+	/* fetch sspp0 */
+
+	/* vig 0 */
+	{ DBGBUS_SSPP0, 0, 0 },
+	{ DBGBUS_SSPP0, 0, 1 },
+	{ DBGBUS_SSPP0, 0, 2 },
+	{ DBGBUS_SSPP0, 0, 3 },
+	{ DBGBUS_SSPP0, 0, 4 },
+	{ DBGBUS_SSPP0, 0, 5 },
+	{ DBGBUS_SSPP0, 0, 6 },
+	{ DBGBUS_SSPP0, 0, 7 },
+
+	{ DBGBUS_SSPP0, 1, 0 },
+	{ DBGBUS_SSPP0, 1, 1 },
+	{ DBGBUS_SSPP0, 1, 2 },
+	{ DBGBUS_SSPP0, 1, 3 },
+	{ DBGBUS_SSPP0, 1, 4 },
+	{ DBGBUS_SSPP0, 1, 5 },
+	{ DBGBUS_SSPP0, 1, 6 },
+	{ DBGBUS_SSPP0, 1, 7 },
+
+	{ DBGBUS_SSPP0, 2, 0 },
+	{ DBGBUS_SSPP0, 2, 1 },
+	{ DBGBUS_SSPP0, 2, 2 },
+	{ DBGBUS_SSPP0, 2, 3 },
+	{ DBGBUS_SSPP0, 2, 4 },
+	{ DBGBUS_SSPP0, 2, 5 },
+	{ DBGBUS_SSPP0, 2, 6 },
+	{ DBGBUS_SSPP0, 2, 7 },
+
+	{ DBGBUS_SSPP0, 4, 0 },
+	{ DBGBUS_SSPP0, 4, 1 },
+	{ DBGBUS_SSPP0, 4, 2 },
+	{ DBGBUS_SSPP0, 4, 3 },
+	{ DBGBUS_SSPP0, 4, 4 },
+	{ DBGBUS_SSPP0, 4, 5 },
+	{ DBGBUS_SSPP0, 4, 6 },
+	{ DBGBUS_SSPP0, 4, 7 },
+
+	{ DBGBUS_SSPP0, 5, 0 },
+	{ DBGBUS_SSPP0, 5, 1 },
+	{ DBGBUS_SSPP0, 5, 2 },
+	{ DBGBUS_SSPP0, 5, 3 },
+	{ DBGBUS_SSPP0, 5, 4 },
+	{ DBGBUS_SSPP0, 5, 5 },
+	{ DBGBUS_SSPP0, 5, 6 },
+	{ DBGBUS_SSPP0, 5, 7 },
+
+	/* vig 2 */
+	{ DBGBUS_SSPP0, 20, 0 },
+	{ DBGBUS_SSPP0, 20, 1 },
+	{ DBGBUS_SSPP0, 20, 2 },
+	{ DBGBUS_SSPP0, 20, 3 },
+	{ DBGBUS_SSPP0, 20, 4 },
+	{ DBGBUS_SSPP0, 20, 5 },
+	{ DBGBUS_SSPP0, 20, 6 },
+	{ DBGBUS_SSPP0, 20, 7 },
+
+	{ DBGBUS_SSPP0, 21, 0 },
+	{ DBGBUS_SSPP0, 21, 1 },
+	{ DBGBUS_SSPP0, 21, 2 },
+	{ DBGBUS_SSPP0, 21, 3 },
+	{ DBGBUS_SSPP0, 21, 4 },
+	{ DBGBUS_SSPP0, 21, 5 },
+	{ DBGBUS_SSPP0, 21, 6 },
+	{ DBGBUS_SSPP0, 21, 7 },
+
+	{ DBGBUS_SSPP0, 22, 0 },
+	{ DBGBUS_SSPP0, 22, 1 },
+	{ DBGBUS_SSPP0, 22, 2 },
+	{ DBGBUS_SSPP0, 22, 3 },
+	{ DBGBUS_SSPP0, 22, 4 },
+	{ DBGBUS_SSPP0, 22, 5 },
+	{ DBGBUS_SSPP0, 22, 6 },
+	{ DBGBUS_SSPP0, 22, 7 },
+
+	{ DBGBUS_SSPP0, 24, 0 },
+	{ DBGBUS_SSPP0, 24, 1 },
+	{ DBGBUS_SSPP0, 24, 2 },
+	{ DBGBUS_SSPP0, 24, 3 },
+	{ DBGBUS_SSPP0, 24, 4 },
+	{ DBGBUS_SSPP0, 24, 5 },
+	{ DBGBUS_SSPP0, 24, 6 },
+	{ DBGBUS_SSPP0, 24, 7 },
+
+	{ DBGBUS_SSPP0, 25, 0 },
+	{ DBGBUS_SSPP0, 25, 1 },
+	{ DBGBUS_SSPP0, 25, 2 },
+	{ DBGBUS_SSPP0, 25, 3 },
+	{ DBGBUS_SSPP0, 25, 4 },
+	{ DBGBUS_SSPP0, 25, 5 },
+	{ DBGBUS_SSPP0, 25, 6 },
+	{ DBGBUS_SSPP0, 25, 7 },
+
+	/* dma 2 */
+	{ DBGBUS_SSPP0, 30, 0 },
+	{ DBGBUS_SSPP0, 30, 1 },
+	{ DBGBUS_SSPP0, 30, 2 },
+	{ DBGBUS_SSPP0, 30, 3 },
+	{ DBGBUS_SSPP0, 30, 4 },
+	{ DBGBUS_SSPP0, 30, 5 },
+	{ DBGBUS_SSPP0, 30, 6 },
+	{ DBGBUS_SSPP0, 30, 7 },
+
+	{ DBGBUS_SSPP0, 31, 0 },
+	{ DBGBUS_SSPP0, 31, 1 },
+	{ DBGBUS_SSPP0, 31, 2 },
+	{ DBGBUS_SSPP0, 31, 3 },
+	{ DBGBUS_SSPP0, 31, 4 },
+	{ DBGBUS_SSPP0, 31, 5 },
+	{ DBGBUS_SSPP0, 31, 6 },
+	{ DBGBUS_SSPP0, 31, 7 },
+
+	{ DBGBUS_SSPP0, 32, 0 },
+	{ DBGBUS_SSPP0, 32, 1 },
+	{ DBGBUS_SSPP0, 32, 2 },
+	{ DBGBUS_SSPP0, 32, 3 },
+	{ DBGBUS_SSPP0, 32, 4 },
+	{ DBGBUS_SSPP0, 32, 5 },
+	{ DBGBUS_SSPP0, 32, 6 },
+	{ DBGBUS_SSPP0, 32, 7 },
+
+	{ DBGBUS_SSPP0, 33, 0 },
+	{ DBGBUS_SSPP0, 33, 1 },
+	{ DBGBUS_SSPP0, 33, 2 },
+	{ DBGBUS_SSPP0, 33, 3 },
+	{ DBGBUS_SSPP0, 33, 4 },
+	{ DBGBUS_SSPP0, 33, 5 },
+	{ DBGBUS_SSPP0, 33, 6 },
+	{ DBGBUS_SSPP0, 33, 7 },
+
+	{ DBGBUS_SSPP0, 34, 0 },
+	{ DBGBUS_SSPP0, 34, 1 },
+	{ DBGBUS_SSPP0, 34, 2 },
+	{ DBGBUS_SSPP0, 34, 3 },
+	{ DBGBUS_SSPP0, 34, 4 },
+	{ DBGBUS_SSPP0, 34, 5 },
+	{ DBGBUS_SSPP0, 34, 6 },
+	{ DBGBUS_SSPP0, 34, 7 },
+
+	{ DBGBUS_SSPP0, 35, 0 },
+	{ DBGBUS_SSPP0, 35, 1 },
+	{ DBGBUS_SSPP0, 35, 2 },
+	{ DBGBUS_SSPP0, 35, 3 },
+
+	/* dma 0 */
+	{ DBGBUS_SSPP0, 40, 0 },
+	{ DBGBUS_SSPP0, 40, 1 },
+	{ DBGBUS_SSPP0, 40, 2 },
+	{ DBGBUS_SSPP0, 40, 3 },
+	{ DBGBUS_SSPP0, 40, 4 },
+	{ DBGBUS_SSPP0, 40, 5 },
+	{ DBGBUS_SSPP0, 40, 6 },
+	{ DBGBUS_SSPP0, 40, 7 },
+
+	{ DBGBUS_SSPP0, 41, 0 },
+	{ DBGBUS_SSPP0, 41, 1 },
+	{ DBGBUS_SSPP0, 41, 2 },
+	{ DBGBUS_SSPP0, 41, 3 },
+	{ DBGBUS_SSPP0, 41, 4 },
+	{ DBGBUS_SSPP0, 41, 5 },
+	{ DBGBUS_SSPP0, 41, 6 },
+	{ DBGBUS_SSPP0, 41, 7 },
+
+	{ DBGBUS_SSPP0, 42, 0 },
+	{ DBGBUS_SSPP0, 42, 1 },
+	{ DBGBUS_SSPP0, 42, 2 },
+	{ DBGBUS_SSPP0, 42, 3 },
+	{ DBGBUS_SSPP0, 42, 4 },
+	{ DBGBUS_SSPP0, 42, 5 },
+	{ DBGBUS_SSPP0, 42, 6 },
+	{ DBGBUS_SSPP0, 42, 7 },
+
+	{ DBGBUS_SSPP0, 44, 0 },
+	{ DBGBUS_SSPP0, 44, 1 },
+	{ DBGBUS_SSPP0, 44, 2 },
+	{ DBGBUS_SSPP0, 44, 3 },
+	{ DBGBUS_SSPP0, 44, 4 },
+	{ DBGBUS_SSPP0, 44, 5 },
+	{ DBGBUS_SSPP0, 44, 6 },
+	{ DBGBUS_SSPP0, 44, 7 },
+
+	{ DBGBUS_SSPP0, 45, 0 },
+	{ DBGBUS_SSPP0, 45, 1 },
+	{ DBGBUS_SSPP0, 45, 2 },
+	{ DBGBUS_SSPP0, 45, 3 },
+	{ DBGBUS_SSPP0, 45, 4 },
+	{ DBGBUS_SSPP0, 45, 5 },
+	{ DBGBUS_SSPP0, 45, 6 },
+	{ DBGBUS_SSPP0, 45, 7 },
+
+	/* fetch sspp1 */
+	/* vig 1 */
+	{ DBGBUS_SSPP1, 0, 0 },
+	{ DBGBUS_SSPP1, 0, 1 },
+	{ DBGBUS_SSPP1, 0, 2 },
+	{ DBGBUS_SSPP1, 0, 3 },
+	{ DBGBUS_SSPP1, 0, 4 },
+	{ DBGBUS_SSPP1, 0, 5 },
+	{ DBGBUS_SSPP1, 0, 6 },
+	{ DBGBUS_SSPP1, 0, 7 },
+
+	{ DBGBUS_SSPP1, 1, 0 },
+	{ DBGBUS_SSPP1, 1, 1 },
+	{ DBGBUS_SSPP1, 1, 2 },
+	{ DBGBUS_SSPP1, 1, 3 },
+	{ DBGBUS_SSPP1, 1, 4 },
+	{ DBGBUS_SSPP1, 1, 5 },
+	{ DBGBUS_SSPP1, 1, 6 },
+	{ DBGBUS_SSPP1, 1, 7 },
+
+	{ DBGBUS_SSPP1, 2, 0 },
+	{ DBGBUS_SSPP1, 2, 1 },
+	{ DBGBUS_SSPP1, 2, 2 },
+	{ DBGBUS_SSPP1, 2, 3 },
+	{ DBGBUS_SSPP1, 2, 4 },
+	{ DBGBUS_SSPP1, 2, 5 },
+	{ DBGBUS_SSPP1, 2, 6 },
+	{ DBGBUS_SSPP1, 2, 7 },
+
+	{ DBGBUS_SSPP1, 4, 0 },
+	{ DBGBUS_SSPP1, 4, 1 },
+	{ DBGBUS_SSPP1, 4, 2 },
+	{ DBGBUS_SSPP1, 4, 3 },
+	{ DBGBUS_SSPP1, 4, 4 },
+	{ DBGBUS_SSPP1, 4, 5 },
+	{ DBGBUS_SSPP1, 4, 6 },
+	{ DBGBUS_SSPP1, 4, 7 },
+
+	{ DBGBUS_SSPP1, 5, 0 },
+	{ DBGBUS_SSPP1, 5, 1 },
+	{ DBGBUS_SSPP1, 5, 2 },
+	{ DBGBUS_SSPP1, 5, 3 },
+	{ DBGBUS_SSPP1, 5, 4 },
+	{ DBGBUS_SSPP1, 5, 5 },
+	{ DBGBUS_SSPP1, 5, 6 },
+	{ DBGBUS_SSPP1, 5, 7 },
+
+	/* vig 3 */
+	{ DBGBUS_SSPP1, 20, 0 },
+	{ DBGBUS_SSPP1, 20, 1 },
+	{ DBGBUS_SSPP1, 20, 2 },
+	{ DBGBUS_SSPP1, 20, 3 },
+	{ DBGBUS_SSPP1, 20, 4 },
+	{ DBGBUS_SSPP1, 20, 5 },
+	{ DBGBUS_SSPP1, 20, 6 },
+	{ DBGBUS_SSPP1, 20, 7 },
+
+	{ DBGBUS_SSPP1, 21, 0 },
+	{ DBGBUS_SSPP1, 21, 1 },
+	{ DBGBUS_SSPP1, 21, 2 },
+	{ DBGBUS_SSPP1, 21, 3 },
+	{ DBGBUS_SSPP1, 21, 4 },
+	{ DBGBUS_SSPP1, 21, 5 },
+	{ DBGBUS_SSPP1, 21, 6 },
+	{ DBGBUS_SSPP1, 21, 7 },
+
+	{ DBGBUS_SSPP1, 22, 0 },
+	{ DBGBUS_SSPP1, 22, 1 },
+	{ DBGBUS_SSPP1, 22, 2 },
+	{ DBGBUS_SSPP1, 22, 3 },
+	{ DBGBUS_SSPP1, 22, 4 },
+	{ DBGBUS_SSPP1, 22, 5 },
+	{ DBGBUS_SSPP1, 22, 6 },
+	{ DBGBUS_SSPP1, 22, 7 },
+
+	{ DBGBUS_SSPP1, 24, 0 },
+	{ DBGBUS_SSPP1, 24, 1 },
+	{ DBGBUS_SSPP1, 24, 2 },
+	{ DBGBUS_SSPP1, 24, 3 },
+	{ DBGBUS_SSPP1, 24, 4 },
+	{ DBGBUS_SSPP1, 24, 5 },
+	{ DBGBUS_SSPP1, 24, 6 },
+	{ DBGBUS_SSPP1, 24, 7 },
+
+	{ DBGBUS_SSPP1, 25, 0 },
+	{ DBGBUS_SSPP1, 25, 1 },
+	{ DBGBUS_SSPP1, 25, 2 },
+	{ DBGBUS_SSPP1, 25, 3 },
+	{ DBGBUS_SSPP1, 25, 4 },
+	{ DBGBUS_SSPP1, 25, 5 },
+	{ DBGBUS_SSPP1, 25, 6 },
+	{ DBGBUS_SSPP1, 25, 7 },
+
+	/* dma 3 */
+	{ DBGBUS_SSPP1, 30, 0 },
+	{ DBGBUS_SSPP1, 30, 1 },
+	{ DBGBUS_SSPP1, 30, 2 },
+	{ DBGBUS_SSPP1, 30, 3 },
+	{ DBGBUS_SSPP1, 30, 4 },
+	{ DBGBUS_SSPP1, 30, 5 },
+	{ DBGBUS_SSPP1, 30, 6 },
+	{ DBGBUS_SSPP1, 30, 7 },
+
+	{ DBGBUS_SSPP1, 31, 0 },
+	{ DBGBUS_SSPP1, 31, 1 },
+	{ DBGBUS_SSPP1, 31, 2 },
+	{ DBGBUS_SSPP1, 31, 3 },
+	{ DBGBUS_SSPP1, 31, 4 },
+	{ DBGBUS_SSPP1, 31, 5 },
+	{ DBGBUS_SSPP1, 31, 6 },
+	{ DBGBUS_SSPP1, 31, 7 },
+
+	{ DBGBUS_SSPP1, 32, 0 },
+	{ DBGBUS_SSPP1, 32, 1 },
+	{ DBGBUS_SSPP1, 32, 2 },
+	{ DBGBUS_SSPP1, 32, 3 },
+	{ DBGBUS_SSPP1, 32, 4 },
+	{ DBGBUS_SSPP1, 32, 5 },
+	{ DBGBUS_SSPP1, 32, 6 },
+	{ DBGBUS_SSPP1, 32, 7 },
+
+	{ DBGBUS_SSPP1, 33, 0 },
+	{ DBGBUS_SSPP1, 33, 1 },
+	{ DBGBUS_SSPP1, 33, 2 },
+	{ DBGBUS_SSPP1, 33, 3 },
+	{ DBGBUS_SSPP1, 33, 4 },
+	{ DBGBUS_SSPP1, 33, 5 },
+	{ DBGBUS_SSPP1, 33, 6 },
+	{ DBGBUS_SSPP1, 33, 7 },
+
+	{ DBGBUS_SSPP1, 34, 0 },
+	{ DBGBUS_SSPP1, 34, 1 },
+	{ DBGBUS_SSPP1, 34, 2 },
+	{ DBGBUS_SSPP1, 34, 3 },
+	{ DBGBUS_SSPP1, 34, 4 },
+	{ DBGBUS_SSPP1, 34, 5 },
+	{ DBGBUS_SSPP1, 34, 6 },
+	{ DBGBUS_SSPP1, 34, 7 },
+
+	{ DBGBUS_SSPP1, 35, 0 },
+	{ DBGBUS_SSPP1, 35, 1 },
+	{ DBGBUS_SSPP1, 35, 2 },
+
+	/* dma 1 */
+	{ DBGBUS_SSPP1, 40, 0 },
+	{ DBGBUS_SSPP1, 40, 1 },
+	{ DBGBUS_SSPP1, 40, 2 },
+	{ DBGBUS_SSPP1, 40, 3 },
+	{ DBGBUS_SSPP1, 40, 4 },
+	{ DBGBUS_SSPP1, 40, 5 },
+	{ DBGBUS_SSPP1, 40, 6 },
+	{ DBGBUS_SSPP1, 40, 7 },
+
+	{ DBGBUS_SSPP1, 41, 0 },
+	{ DBGBUS_SSPP1, 41, 1 },
+	{ DBGBUS_SSPP1, 41, 2 },
+	{ DBGBUS_SSPP1, 41, 3 },
+	{ DBGBUS_SSPP1, 41, 4 },
+	{ DBGBUS_SSPP1, 41, 5 },
+	{ DBGBUS_SSPP1, 41, 6 },
+	{ DBGBUS_SSPP1, 41, 7 },
+
+	{ DBGBUS_SSPP1, 42, 0 },
+	{ DBGBUS_SSPP1, 42, 1 },
+	{ DBGBUS_SSPP1, 42, 2 },
+	{ DBGBUS_SSPP1, 42, 3 },
+	{ DBGBUS_SSPP1, 42, 4 },
+	{ DBGBUS_SSPP1, 42, 5 },
+	{ DBGBUS_SSPP1, 42, 6 },
+	{ DBGBUS_SSPP1, 42, 7 },
+
+	{ DBGBUS_SSPP1, 44, 0 },
+	{ DBGBUS_SSPP1, 44, 1 },
+	{ DBGBUS_SSPP1, 44, 2 },
+	{ DBGBUS_SSPP1, 44, 3 },
+	{ DBGBUS_SSPP1, 44, 4 },
+	{ DBGBUS_SSPP1, 44, 5 },
+	{ DBGBUS_SSPP1, 44, 6 },
+	{ DBGBUS_SSPP1, 44, 7 },
+
+	{ DBGBUS_SSPP1, 45, 0 },
+	{ DBGBUS_SSPP1, 45, 1 },
+	{ DBGBUS_SSPP1, 45, 2 },
+	{ DBGBUS_SSPP1, 45, 3 },
+	{ DBGBUS_SSPP1, 45, 4 },
+	{ DBGBUS_SSPP1, 45, 5 },
+	{ DBGBUS_SSPP1, 45, 6 },
+	{ DBGBUS_SSPP1, 45, 7 },
+
+	/* dspp */
+	{ DBGBUS_DSPP, 13, 0 },
+	{ DBGBUS_DSPP, 19, 0 },
+	{ DBGBUS_DSPP, 14, 0 },
+	{ DBGBUS_DSPP, 14, 1 },
+	{ DBGBUS_DSPP, 14, 3 },
+	{ DBGBUS_DSPP, 20, 0 },
+	{ DBGBUS_DSPP, 20, 1 },
+	{ DBGBUS_DSPP, 20, 3 },
+
+	/* ppb_0 */
+	{ DBGBUS_DSPP, 31, 0, _sde_debug_bus_ppb0_dump },
+	{ DBGBUS_DSPP, 33, 0, _sde_debug_bus_ppb0_dump },
+	{ DBGBUS_DSPP, 35, 0, _sde_debug_bus_ppb0_dump },
+	{ DBGBUS_DSPP, 42, 0, _sde_debug_bus_ppb0_dump },
+
+	/* ppb_1 */
+	{ DBGBUS_DSPP, 32, 0, _sde_debug_bus_ppb1_dump },
+	{ DBGBUS_DSPP, 34, 0, _sde_debug_bus_ppb1_dump },
+	{ DBGBUS_DSPP, 36, 0, _sde_debug_bus_ppb1_dump },
+	{ DBGBUS_DSPP, 43, 0, _sde_debug_bus_ppb1_dump },
+
+	/* lm_lut */
+	{ DBGBUS_DSPP, 109, 0 },
+	{ DBGBUS_DSPP, 105, 0 },
+	{ DBGBUS_DSPP, 103, 0 },
+
+	/* crossbar */
+	{ DBGBUS_DSPP, 0, 0, _sde_debug_bus_xbar_dump },
+
+	/* rotator */
+	{ DBGBUS_DSPP, 9, 0},
+
+	/* blend */
+	/* LM0 */
+	{ DBGBUS_DSPP, 63, 1},
+	{ DBGBUS_DSPP, 63, 2},
+	{ DBGBUS_DSPP, 63, 3},
+	{ DBGBUS_DSPP, 63, 4},
+	{ DBGBUS_DSPP, 63, 5},
+	{ DBGBUS_DSPP, 63, 6},
+	{ DBGBUS_DSPP, 63, 7, _sde_debug_bus_lm_dump },
+
+	{ DBGBUS_DSPP, 64, 1},
+	{ DBGBUS_DSPP, 64, 2},
+	{ DBGBUS_DSPP, 64, 3},
+	{ DBGBUS_DSPP, 64, 4},
+	{ DBGBUS_DSPP, 64, 5},
+	{ DBGBUS_DSPP, 64, 6},
+	{ DBGBUS_DSPP, 64, 7, _sde_debug_bus_lm_dump },
+
+	{ DBGBUS_DSPP, 65, 1},
+	{ DBGBUS_DSPP, 65, 2},
+	{ DBGBUS_DSPP, 65, 3},
+	{ DBGBUS_DSPP, 65, 4},
+	{ DBGBUS_DSPP, 65, 5},
+	{ DBGBUS_DSPP, 65, 6},
+	{ DBGBUS_DSPP, 65, 7, _sde_debug_bus_lm_dump },
+
+	{ DBGBUS_DSPP, 66, 1},
+	{ DBGBUS_DSPP, 66, 2},
+	{ DBGBUS_DSPP, 66, 3},
+	{ DBGBUS_DSPP, 66, 4},
+	{ DBGBUS_DSPP, 66, 5},
+	{ DBGBUS_DSPP, 66, 6},
+	{ DBGBUS_DSPP, 66, 7, _sde_debug_bus_lm_dump },
+
+	{ DBGBUS_DSPP, 67, 1},
+	{ DBGBUS_DSPP, 67, 2},
+	{ DBGBUS_DSPP, 67, 3},
+	{ DBGBUS_DSPP, 67, 4},
+	{ DBGBUS_DSPP, 67, 5},
+	{ DBGBUS_DSPP, 67, 6},
+	{ DBGBUS_DSPP, 67, 7, _sde_debug_bus_lm_dump },
+
+	{ DBGBUS_DSPP, 68, 1},
+	{ DBGBUS_DSPP, 68, 2},
+	{ DBGBUS_DSPP, 68, 3},
+	{ DBGBUS_DSPP, 68, 4},
+	{ DBGBUS_DSPP, 68, 5},
+	{ DBGBUS_DSPP, 68, 6},
+	{ DBGBUS_DSPP, 68, 7, _sde_debug_bus_lm_dump },
+
+	{ DBGBUS_DSPP, 69, 1},
+	{ DBGBUS_DSPP, 69, 2},
+	{ DBGBUS_DSPP, 69, 3},
+	{ DBGBUS_DSPP, 69, 4},
+	{ DBGBUS_DSPP, 69, 5},
+	{ DBGBUS_DSPP, 69, 6},
+	{ DBGBUS_DSPP, 69, 7, _sde_debug_bus_lm_dump },
+
+	{ DBGBUS_DSPP, 84, 1},
+	{ DBGBUS_DSPP, 84, 2},
+	{ DBGBUS_DSPP, 84, 3},
+	{ DBGBUS_DSPP, 84, 4},
+	{ DBGBUS_DSPP, 84, 5},
+	{ DBGBUS_DSPP, 84, 6},
+	{ DBGBUS_DSPP, 84, 7, _sde_debug_bus_lm_dump },
+
+
+	{ DBGBUS_DSPP, 85, 1},
+	{ DBGBUS_DSPP, 85, 2},
+	{ DBGBUS_DSPP, 85, 3},
+	{ DBGBUS_DSPP, 85, 4},
+	{ DBGBUS_DSPP, 85, 5},
+	{ DBGBUS_DSPP, 85, 6},
+	{ DBGBUS_DSPP, 85, 7, _sde_debug_bus_lm_dump },
+
+
+	{ DBGBUS_DSPP, 86, 1},
+	{ DBGBUS_DSPP, 86, 2},
+	{ DBGBUS_DSPP, 86, 3},
+	{ DBGBUS_DSPP, 86, 4},
+	{ DBGBUS_DSPP, 86, 5},
+	{ DBGBUS_DSPP, 86, 6},
+	{ DBGBUS_DSPP, 86, 7, _sde_debug_bus_lm_dump },
+
+
+	{ DBGBUS_DSPP, 87, 1},
+	{ DBGBUS_DSPP, 87, 2},
+	{ DBGBUS_DSPP, 87, 3},
+	{ DBGBUS_DSPP, 87, 4},
+	{ DBGBUS_DSPP, 87, 5},
+	{ DBGBUS_DSPP, 87, 6},
+	{ DBGBUS_DSPP, 87, 7, _sde_debug_bus_lm_dump },
+
+	/* LM1 */
+	{ DBGBUS_DSPP, 70, 1},
+	{ DBGBUS_DSPP, 70, 2},
+	{ DBGBUS_DSPP, 70, 3},
+	{ DBGBUS_DSPP, 70, 4},
+	{ DBGBUS_DSPP, 70, 5},
+	{ DBGBUS_DSPP, 70, 6},
+	{ DBGBUS_DSPP, 70, 7, _sde_debug_bus_lm_dump },
+
+	{ DBGBUS_DSPP, 71, 1},
+	{ DBGBUS_DSPP, 71, 2},
+	{ DBGBUS_DSPP, 71, 3},
+	{ DBGBUS_DSPP, 71, 4},
+	{ DBGBUS_DSPP, 71, 5},
+	{ DBGBUS_DSPP, 71, 6},
+	{ DBGBUS_DSPP, 71, 7, _sde_debug_bus_lm_dump },
+
+	{ DBGBUS_DSPP, 72, 1},
+	{ DBGBUS_DSPP, 72, 2},
+	{ DBGBUS_DSPP, 72, 3},
+	{ DBGBUS_DSPP, 72, 4},
+	{ DBGBUS_DSPP, 72, 5},
+	{ DBGBUS_DSPP, 72, 6},
+	{ DBGBUS_DSPP, 72, 7, _sde_debug_bus_lm_dump },
+
+	{ DBGBUS_DSPP, 73, 1},
+	{ DBGBUS_DSPP, 73, 2},
+	{ DBGBUS_DSPP, 73, 3},
+	{ DBGBUS_DSPP, 73, 4},
+	{ DBGBUS_DSPP, 73, 5},
+	{ DBGBUS_DSPP, 73, 6},
+	{ DBGBUS_DSPP, 73, 7, _sde_debug_bus_lm_dump },
+
+	{ DBGBUS_DSPP, 74, 1},
+	{ DBGBUS_DSPP, 74, 2},
+	{ DBGBUS_DSPP, 74, 3},
+	{ DBGBUS_DSPP, 74, 4},
+	{ DBGBUS_DSPP, 74, 5},
+	{ DBGBUS_DSPP, 74, 6},
+	{ DBGBUS_DSPP, 74, 7, _sde_debug_bus_lm_dump },
+
+	{ DBGBUS_DSPP, 75, 1},
+	{ DBGBUS_DSPP, 75, 2},
+	{ DBGBUS_DSPP, 75, 3},
+	{ DBGBUS_DSPP, 75, 4},
+	{ DBGBUS_DSPP, 75, 5},
+	{ DBGBUS_DSPP, 75, 6},
+	{ DBGBUS_DSPP, 75, 7, _sde_debug_bus_lm_dump },
+
+	{ DBGBUS_DSPP, 76, 1},
+	{ DBGBUS_DSPP, 76, 2},
+	{ DBGBUS_DSPP, 76, 3},
+	{ DBGBUS_DSPP, 76, 4},
+	{ DBGBUS_DSPP, 76, 5},
+	{ DBGBUS_DSPP, 76, 6},
+	{ DBGBUS_DSPP, 76, 7, _sde_debug_bus_lm_dump },
+
+	{ DBGBUS_DSPP, 88, 1},
+	{ DBGBUS_DSPP, 88, 2},
+	{ DBGBUS_DSPP, 88, 3},
+	{ DBGBUS_DSPP, 88, 4},
+	{ DBGBUS_DSPP, 88, 5},
+	{ DBGBUS_DSPP, 88, 6},
+	{ DBGBUS_DSPP, 88, 7, _sde_debug_bus_lm_dump },
+
+	{ DBGBUS_DSPP, 89, 1},
+	{ DBGBUS_DSPP, 89, 2},
+	{ DBGBUS_DSPP, 89, 3},
+	{ DBGBUS_DSPP, 89, 4},
+	{ DBGBUS_DSPP, 89, 5},
+	{ DBGBUS_DSPP, 89, 6},
+	{ DBGBUS_DSPP, 89, 7, _sde_debug_bus_lm_dump },
+
+	{ DBGBUS_DSPP, 90, 1},
+	{ DBGBUS_DSPP, 90, 2},
+	{ DBGBUS_DSPP, 90, 3},
+	{ DBGBUS_DSPP, 90, 4},
+	{ DBGBUS_DSPP, 90, 5},
+	{ DBGBUS_DSPP, 90, 6},
+	{ DBGBUS_DSPP, 90, 7, _sde_debug_bus_lm_dump },
+
+	{ DBGBUS_DSPP, 91, 1},
+	{ DBGBUS_DSPP, 91, 2},
+	{ DBGBUS_DSPP, 91, 3},
+	{ DBGBUS_DSPP, 91, 4},
+	{ DBGBUS_DSPP, 91, 5},
+	{ DBGBUS_DSPP, 91, 6},
+	{ DBGBUS_DSPP, 91, 7, _sde_debug_bus_lm_dump },
+
+	/* LM2 */
+	{ DBGBUS_DSPP, 77, 0},
+	{ DBGBUS_DSPP, 77, 1},
+	{ DBGBUS_DSPP, 77, 2},
+	{ DBGBUS_DSPP, 77, 3},
+	{ DBGBUS_DSPP, 77, 4},
+	{ DBGBUS_DSPP, 77, 5},
+	{ DBGBUS_DSPP, 77, 6},
+	{ DBGBUS_DSPP, 77, 7, _sde_debug_bus_lm_dump },
+
+	{ DBGBUS_DSPP, 78, 0},
+	{ DBGBUS_DSPP, 78, 1},
+	{ DBGBUS_DSPP, 78, 2},
+	{ DBGBUS_DSPP, 78, 3},
+	{ DBGBUS_DSPP, 78, 4},
+	{ DBGBUS_DSPP, 78, 5},
+	{ DBGBUS_DSPP, 78, 6},
+	{ DBGBUS_DSPP, 78, 7, _sde_debug_bus_lm_dump },
+
+	{ DBGBUS_DSPP, 79, 0},
+	{ DBGBUS_DSPP, 79, 1},
+	{ DBGBUS_DSPP, 79, 2},
+	{ DBGBUS_DSPP, 79, 3},
+	{ DBGBUS_DSPP, 79, 4},
+	{ DBGBUS_DSPP, 79, 5},
+	{ DBGBUS_DSPP, 79, 6},
+	{ DBGBUS_DSPP, 79, 7, _sde_debug_bus_lm_dump },
+
+	{ DBGBUS_DSPP, 80, 0},
+	{ DBGBUS_DSPP, 80, 1},
+	{ DBGBUS_DSPP, 80, 2},
+	{ DBGBUS_DSPP, 80, 3},
+	{ DBGBUS_DSPP, 80, 4},
+	{ DBGBUS_DSPP, 80, 5},
+	{ DBGBUS_DSPP, 80, 6},
+	{ DBGBUS_DSPP, 80, 7, _sde_debug_bus_lm_dump },
+
+	{ DBGBUS_DSPP, 81, 0},
+	{ DBGBUS_DSPP, 81, 1},
+	{ DBGBUS_DSPP, 81, 2},
+	{ DBGBUS_DSPP, 81, 3},
+	{ DBGBUS_DSPP, 81, 4},
+	{ DBGBUS_DSPP, 81, 5},
+	{ DBGBUS_DSPP, 81, 6},
+	{ DBGBUS_DSPP, 81, 7, _sde_debug_bus_lm_dump },
+
+	{ DBGBUS_DSPP, 82, 0},
+	{ DBGBUS_DSPP, 82, 1},
+	{ DBGBUS_DSPP, 82, 2},
+	{ DBGBUS_DSPP, 82, 3},
+	{ DBGBUS_DSPP, 82, 4},
+	{ DBGBUS_DSPP, 82, 5},
+	{ DBGBUS_DSPP, 82, 6},
+	{ DBGBUS_DSPP, 82, 7, _sde_debug_bus_lm_dump },
+
+	{ DBGBUS_DSPP, 83, 0},
+	{ DBGBUS_DSPP, 83, 1},
+	{ DBGBUS_DSPP, 83, 2},
+	{ DBGBUS_DSPP, 83, 3},
+	{ DBGBUS_DSPP, 83, 4},
+	{ DBGBUS_DSPP, 83, 5},
+	{ DBGBUS_DSPP, 83, 6},
+	{ DBGBUS_DSPP, 83, 7, _sde_debug_bus_lm_dump },
+
+	{ DBGBUS_DSPP, 92, 1},
+	{ DBGBUS_DSPP, 92, 2},
+	{ DBGBUS_DSPP, 92, 3},
+	{ DBGBUS_DSPP, 92, 4},
+	{ DBGBUS_DSPP, 92, 5},
+	{ DBGBUS_DSPP, 92, 6},
+	{ DBGBUS_DSPP, 92, 7, _sde_debug_bus_lm_dump },
+
+	{ DBGBUS_DSPP, 93, 1},
+	{ DBGBUS_DSPP, 93, 2},
+	{ DBGBUS_DSPP, 93, 3},
+	{ DBGBUS_DSPP, 93, 4},
+	{ DBGBUS_DSPP, 93, 5},
+	{ DBGBUS_DSPP, 93, 6},
+	{ DBGBUS_DSPP, 93, 7, _sde_debug_bus_lm_dump },
+
+	{ DBGBUS_DSPP, 94, 1},
+	{ DBGBUS_DSPP, 94, 2},
+	{ DBGBUS_DSPP, 94, 3},
+	{ DBGBUS_DSPP, 94, 4},
+	{ DBGBUS_DSPP, 94, 5},
+	{ DBGBUS_DSPP, 94, 6},
+	{ DBGBUS_DSPP, 94, 7, _sde_debug_bus_lm_dump },
+
+	{ DBGBUS_DSPP, 95, 1},
+	{ DBGBUS_DSPP, 95, 2},
+	{ DBGBUS_DSPP, 95, 3},
+	{ DBGBUS_DSPP, 95, 4},
+	{ DBGBUS_DSPP, 95, 5},
+	{ DBGBUS_DSPP, 95, 6},
+	{ DBGBUS_DSPP, 95, 7, _sde_debug_bus_lm_dump },
+
+	/* LM5 */
+	{ DBGBUS_DSPP, 110, 1},
+	{ DBGBUS_DSPP, 110, 2},
+	{ DBGBUS_DSPP, 110, 3},
+	{ DBGBUS_DSPP, 110, 4},
+	{ DBGBUS_DSPP, 110, 5},
+	{ DBGBUS_DSPP, 110, 6},
+	{ DBGBUS_DSPP, 110, 7, _sde_debug_bus_lm_dump },
+
+	{ DBGBUS_DSPP, 111, 1},
+	{ DBGBUS_DSPP, 111, 2},
+	{ DBGBUS_DSPP, 111, 3},
+	{ DBGBUS_DSPP, 111, 4},
+	{ DBGBUS_DSPP, 111, 5},
+	{ DBGBUS_DSPP, 111, 6},
+	{ DBGBUS_DSPP, 111, 7, _sde_debug_bus_lm_dump },
+
+	{ DBGBUS_DSPP, 112, 1},
+	{ DBGBUS_DSPP, 112, 2},
+	{ DBGBUS_DSPP, 112, 3},
+	{ DBGBUS_DSPP, 112, 4},
+	{ DBGBUS_DSPP, 112, 5},
+	{ DBGBUS_DSPP, 112, 6},
+	{ DBGBUS_DSPP, 112, 7, _sde_debug_bus_lm_dump },
+
+	{ DBGBUS_DSPP, 113, 1},
+	{ DBGBUS_DSPP, 113, 2},
+	{ DBGBUS_DSPP, 113, 3},
+	{ DBGBUS_DSPP, 113, 4},
+	{ DBGBUS_DSPP, 113, 5},
+	{ DBGBUS_DSPP, 113, 6},
+	{ DBGBUS_DSPP, 113, 7, _sde_debug_bus_lm_dump },
+
+	{ DBGBUS_DSPP, 114, 1},
+	{ DBGBUS_DSPP, 114, 2},
+	{ DBGBUS_DSPP, 114, 3},
+	{ DBGBUS_DSPP, 114, 4},
+	{ DBGBUS_DSPP, 114, 5},
+	{ DBGBUS_DSPP, 114, 6},
+	{ DBGBUS_DSPP, 114, 7, _sde_debug_bus_lm_dump },
+
+	{ DBGBUS_DSPP, 115, 1},
+	{ DBGBUS_DSPP, 115, 2},
+	{ DBGBUS_DSPP, 115, 3},
+	{ DBGBUS_DSPP, 115, 4},
+	{ DBGBUS_DSPP, 115, 5},
+	{ DBGBUS_DSPP, 115, 6},
+	{ DBGBUS_DSPP, 115, 7, _sde_debug_bus_lm_dump },
+
+	{ DBGBUS_DSPP, 116, 1},
+	{ DBGBUS_DSPP, 116, 2},
+	{ DBGBUS_DSPP, 116, 3},
+	{ DBGBUS_DSPP, 116, 4},
+	{ DBGBUS_DSPP, 116, 5},
+	{ DBGBUS_DSPP, 116, 6},
+	{ DBGBUS_DSPP, 116, 7, _sde_debug_bus_lm_dump },
+
+	{ DBGBUS_DSPP, 117, 1},
+	{ DBGBUS_DSPP, 117, 2},
+	{ DBGBUS_DSPP, 117, 3},
+	{ DBGBUS_DSPP, 117, 4},
+	{ DBGBUS_DSPP, 117, 5},
+	{ DBGBUS_DSPP, 117, 6},
+	{ DBGBUS_DSPP, 117, 7, _sde_debug_bus_lm_dump },
+
+	{ DBGBUS_DSPP, 118, 1},
+	{ DBGBUS_DSPP, 118, 2},
+	{ DBGBUS_DSPP, 118, 3},
+	{ DBGBUS_DSPP, 118, 4},
+	{ DBGBUS_DSPP, 118, 5},
+	{ DBGBUS_DSPP, 118, 6},
+	{ DBGBUS_DSPP, 118, 7, _sde_debug_bus_lm_dump },
+
+	{ DBGBUS_DSPP, 119, 1},
+	{ DBGBUS_DSPP, 119, 2},
+	{ DBGBUS_DSPP, 119, 3},
+	{ DBGBUS_DSPP, 119, 4},
+	{ DBGBUS_DSPP, 119, 5},
+	{ DBGBUS_DSPP, 119, 6},
+	{ DBGBUS_DSPP, 119, 7, _sde_debug_bus_lm_dump },
+
+	{ DBGBUS_DSPP, 120, 1},
+	{ DBGBUS_DSPP, 120, 2},
+	{ DBGBUS_DSPP, 120, 3},
+	{ DBGBUS_DSPP, 120, 4},
+	{ DBGBUS_DSPP, 120, 5},
+	{ DBGBUS_DSPP, 120, 6},
+	{ DBGBUS_DSPP, 120, 7, _sde_debug_bus_lm_dump },
+
+	/* csc */
+	{ DBGBUS_SSPP0, 7, 0},
+	{ DBGBUS_SSPP0, 7, 1},
+	{ DBGBUS_SSPP0, 27, 0},
+	{ DBGBUS_SSPP0, 27, 1},
+	{ DBGBUS_SSPP1, 7, 0},
+	{ DBGBUS_SSPP1, 7, 1},
+	{ DBGBUS_SSPP1, 27, 0},
+	{ DBGBUS_SSPP1, 27, 1},
+
+	/* pcc */
+	{ DBGBUS_SSPP0, 3,  3},
+	{ DBGBUS_SSPP0, 23, 3},
+	{ DBGBUS_SSPP0, 33, 3},
+	{ DBGBUS_SSPP0, 43, 3},
+	{ DBGBUS_SSPP1, 3,  3},
+	{ DBGBUS_SSPP1, 23, 3},
+	{ DBGBUS_SSPP1, 33, 3},
+	{ DBGBUS_SSPP1, 43, 3},
+
+	/* spa */
+	{ DBGBUS_SSPP0, 8,  0},
+	{ DBGBUS_SSPP0, 28, 0},
+	{ DBGBUS_SSPP1, 8,  0},
+	{ DBGBUS_SSPP1, 28, 0},
+	{ DBGBUS_DSPP, 13, 0},
+	{ DBGBUS_DSPP, 19, 0},
+
+	/* igc */
+	{ DBGBUS_SSPP0, 17, 0},
+	{ DBGBUS_SSPP0, 17, 1},
+	{ DBGBUS_SSPP0, 17, 3},
+	{ DBGBUS_SSPP0, 37, 0},
+	{ DBGBUS_SSPP0, 37, 1},
+	{ DBGBUS_SSPP0, 37, 3},
+	{ DBGBUS_SSPP0, 46, 0},
+	{ DBGBUS_SSPP0, 46, 1},
+	{ DBGBUS_SSPP0, 46, 3},
+
+	{ DBGBUS_SSPP1, 17, 0},
+	{ DBGBUS_SSPP1, 17, 1},
+	{ DBGBUS_SSPP1, 17, 3},
+	{ DBGBUS_SSPP1, 37, 0},
+	{ DBGBUS_SSPP1, 37, 1},
+	{ DBGBUS_SSPP1, 37, 3},
+	{ DBGBUS_SSPP1, 46, 0},
+	{ DBGBUS_SSPP1, 46, 1},
+	{ DBGBUS_SSPP1, 46, 3},
+
+	{ DBGBUS_DSPP, 14, 0},
+	{ DBGBUS_DSPP, 14, 1},
+	{ DBGBUS_DSPP, 14, 3},
+	{ DBGBUS_DSPP, 20, 0},
+	{ DBGBUS_DSPP, 20, 1},
+	{ DBGBUS_DSPP, 20, 3},
+
+	/* intf0-3 */
+	{ DBGBUS_PERIPH, 0, 0},
+	{ DBGBUS_PERIPH, 1, 0},
+	{ DBGBUS_PERIPH, 2, 0},
+	{ DBGBUS_PERIPH, 3, 0},
+
+	/* te counter wrapper */
+	{ DBGBUS_PERIPH, 60, 0},
+
+	/* dsc0 */
+	{ DBGBUS_PERIPH, 47, 0},
+	{ DBGBUS_PERIPH, 47, 1},
+	{ DBGBUS_PERIPH, 47, 2},
+	{ DBGBUS_PERIPH, 47, 3},
+	{ DBGBUS_PERIPH, 47, 4},
+	{ DBGBUS_PERIPH, 47, 5},
+	{ DBGBUS_PERIPH, 47, 6},
+	{ DBGBUS_PERIPH, 47, 7},
+
+	/* dsc1 */
+	{ DBGBUS_PERIPH, 48, 0},
+	{ DBGBUS_PERIPH, 48, 1},
+	{ DBGBUS_PERIPH, 48, 2},
+	{ DBGBUS_PERIPH, 48, 3},
+	{ DBGBUS_PERIPH, 48, 4},
+	{ DBGBUS_PERIPH, 48, 5},
+	{ DBGBUS_PERIPH, 48, 6},
+	{ DBGBUS_PERIPH, 48, 7},
+
+	/* dsc2 */
+	{ DBGBUS_PERIPH, 51, 0},
+	{ DBGBUS_PERIPH, 51, 1},
+	{ DBGBUS_PERIPH, 51, 2},
+	{ DBGBUS_PERIPH, 51, 3},
+	{ DBGBUS_PERIPH, 51, 4},
+	{ DBGBUS_PERIPH, 51, 5},
+	{ DBGBUS_PERIPH, 51, 6},
+	{ DBGBUS_PERIPH, 51, 7},
+
+	/* dsc3 */
+	{ DBGBUS_PERIPH, 52, 0},
+	{ DBGBUS_PERIPH, 52, 1},
+	{ DBGBUS_PERIPH, 52, 2},
+	{ DBGBUS_PERIPH, 52, 3},
+	{ DBGBUS_PERIPH, 52, 4},
+	{ DBGBUS_PERIPH, 52, 5},
+	{ DBGBUS_PERIPH, 52, 6},
+	{ DBGBUS_PERIPH, 52, 7},
+
+	/* tear-check */
+	{ DBGBUS_PERIPH, 63, 0 },
+	{ DBGBUS_PERIPH, 64, 0 },
+	{ DBGBUS_PERIPH, 65, 0 },
+	{ DBGBUS_PERIPH, 73, 0 },
+	{ DBGBUS_PERIPH, 74, 0 },
+
+	/* cdwn */
+	{ DBGBUS_PERIPH, 80, 0},
+	{ DBGBUS_PERIPH, 80, 1},
+	{ DBGBUS_PERIPH, 80, 2},
+
+	{ DBGBUS_PERIPH, 81, 0},
+	{ DBGBUS_PERIPH, 81, 1},
+	{ DBGBUS_PERIPH, 81, 2},
+
+	{ DBGBUS_PERIPH, 82, 0},
+	{ DBGBUS_PERIPH, 82, 1},
+	{ DBGBUS_PERIPH, 82, 2},
+	{ DBGBUS_PERIPH, 82, 3},
+	{ DBGBUS_PERIPH, 82, 4},
+	{ DBGBUS_PERIPH, 82, 5},
+	{ DBGBUS_PERIPH, 82, 6},
+	{ DBGBUS_PERIPH, 82, 7},
+
+	/* hdmi */
+	{ DBGBUS_PERIPH, 68, 0},
+	{ DBGBUS_PERIPH, 68, 1},
+	{ DBGBUS_PERIPH, 68, 2},
+	{ DBGBUS_PERIPH, 68, 3},
+	{ DBGBUS_PERIPH, 68, 4},
+	{ DBGBUS_PERIPH, 68, 5},
+
+	/* edp */
+	{ DBGBUS_PERIPH, 69, 0},
+	{ DBGBUS_PERIPH, 69, 1},
+	{ DBGBUS_PERIPH, 69, 2},
+	{ DBGBUS_PERIPH, 69, 3},
+	{ DBGBUS_PERIPH, 69, 4},
+	{ DBGBUS_PERIPH, 69, 5},
+
+	/* dsi0 */
+	{ DBGBUS_PERIPH, 70, 0},
+	{ DBGBUS_PERIPH, 70, 1},
+	{ DBGBUS_PERIPH, 70, 2},
+	{ DBGBUS_PERIPH, 70, 3},
+	{ DBGBUS_PERIPH, 70, 4},
+	{ DBGBUS_PERIPH, 70, 5},
+
+	/* dsi1 */
+	{ DBGBUS_PERIPH, 71, 0},
+	{ DBGBUS_PERIPH, 71, 1},
+	{ DBGBUS_PERIPH, 71, 2},
+	{ DBGBUS_PERIPH, 71, 3},
+	{ DBGBUS_PERIPH, 71, 4},
+	{ DBGBUS_PERIPH, 71, 5},
+
+	/* axi - should be last entry */
+	{ DBGBUS_AXI_INTF, 62, 0, _sde_debug_bus_axi_dump_sdm845},
+};
+
 static struct sde_debug_bus_entry dbg_bus_sde_sm8150[] = {
 
 	/* Unpack 0 sspp 0*/
@@ -4693,7 +5702,22 @@ void sde_dbg_init_dbg_buses(u32 hwversion)
 	memset(&dbg->dbgbus_sde, 0, sizeof(dbg->dbgbus_sde));
 	memset(&dbg->dbgbus_vbif_rt, 0, sizeof(dbg->dbgbus_vbif_rt));
 
-	if (IS_SM8150_TARGET(hwversion) || IS_SM6150_TARGET(hwversion) ||
+	if (IS_SDM845_TARGET(hwversion)) {
+		dbg->dbgbus_sde.entries = dbg_bus_sde_sdm845;
+		dbg->dbgbus_sde.cmn.entries_size =
+				ARRAY_SIZE(dbg_bus_sde_sdm845);
+		dbg->dbgbus_sde.cmn.flags = DBGBUS_FLAGS_DSPP;
+		dbg->dbgbus_sde.cmn.name = DBGBUS_NAME_SDE;
+		dbg->dbgbus_sde.cmn.enable_mask = DEFAULT_DBGBUS_SDE;
+
+		dbg->dbgbus_vbif_rt.entries = vbif_dbg_bus_msm8998;
+		dbg->dbgbus_vbif_rt.cmn.entries_size =
+				ARRAY_SIZE(vbif_dbg_bus_msm8998);
+		dbg->dbgbus_dsi.entries = dsi_dbg_bus_kona;
+		dbg->dbgbus_dsi.size = ARRAY_SIZE(dsi_dbg_bus_kona);
+		dbg->dbgbus_vbif_rt.cmn.name = DBGBUS_NAME_VBIF_RT;
+		dbg->dbgbus_vbif_rt.cmn.enable_mask = DEFAULT_DBGBUS_VBIFRT;
+	} else if (IS_SM8150_TARGET(hwversion) || IS_SM6150_TARGET(hwversion) ||
 				IS_SDMMAGPIE_TARGET(hwversion) ||
 				IS_SDMTRINKET_TARGET(hwversion)) {
 		dbg->dbgbus_sde.entries = dbg_bus_sde_sm8150;
