@@ -52,9 +52,14 @@ AUDIO_SELECT  += CONFIG_SND_SOC_SDM450=m
 AUDIO_SELECT  += CONFIG_SND_SOC_EXT_CODEC_SDM450=m
 endif
 
+ifeq ($(call is-board-platform,sdm845),true)
+TARGET := sdm845
+AUDIO_SELECT  := CONFIG_SND_SOC_SDM845=m
+endif
+
 AUDIO_CHIPSET := audio
 # Build/Package only in case of supported target
-ifeq ($(call is-board-platform-in-list,msmnile $(MSMSTEPPE) $(TRINKET) kona lito bengal sdmshrike sdm660 msm8953 msm8937),true)
+ifeq ($(call is-board-platform-in-list,msmnile $(MSMSTEPPE) $(TRINKET) kona lito bengal sdmshrike sdm660 msm8953 msm8937 sdm845),true)
 
 LOCAL_PATH := $(call my-dir)
 
