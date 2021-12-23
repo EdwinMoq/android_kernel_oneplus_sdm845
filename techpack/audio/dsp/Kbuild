@@ -14,6 +14,10 @@ ifeq ($(KERNEL_BUILD), 1)
 endif
 
 ifeq ($(KERNEL_BUILD), 0)
+	ifeq ($(CONFIG_ARCH_SDM845), y)
+		include $(AUDIO_ROOT)/config/sdm845auto.conf
+		INCS    +=  -include $(AUDIO_ROOT)/config/sdm845autoconf.h
+	endif
 	ifeq ($(CONFIG_ARCH_SM6150), y)
 		ifdef CONFIG_SND_SOC_SA6155
 			include $(AUDIO_ROOT)/config/sa6155auto.conf
