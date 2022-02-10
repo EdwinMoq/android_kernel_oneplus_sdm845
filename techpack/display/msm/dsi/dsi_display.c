@@ -5014,6 +5014,33 @@ error:
 	return rc;
 }
 
+static struct attribute *display_attrs[] = {
+	NULL,
+};
+
+static struct attribute_group display_attrs_group = {
+	.attrs = display_attrs,
+};
+
+static int dsi_display_sysfs_init(struct dsi_display *display)
+{
+	int rc = 0;
+	struct device *dev = &display->pdev->dev;
+
+	rc = sysfs_create_group(&dev->kobj, &display_attrs_group);
+	if (rc)
+		DSI_ERR("failed to create display sysfs attributes\n");
+
+	return rc;
+}
+
+static void dsi_display_sysfs_deinit(struct dsi_display *display)
+{
+	struct device *dev = &display->pdev->dev;
+
+	sysfs_remove_group(&dev->kobj, &display_attrs_group);
+}
+
 /**
  * dsi_display_bind - bind dsi device with controlling device
  * @dev:        Pointer to base of platform device
@@ -5081,6 +5108,10 @@ static int dsi_display_bind(struct device *dev,
 		DSI_ERR("[%s] debugfs init failed, rc=%d\n", display->name, rc);
 		goto error;
 	}
+
+	rc = dsi_display_sysfs_init(display);
+	if (rc)
+		goto error;
 
 	atomic_set(&display->clkrate_change_pending, 0);
 	display->cached_clk_rate = 0;
@@ -5235,6 +5266,7 @@ error_ctrl_deinit:
 		(void)dsi_ctrl_drv_deinit(display_ctrl->ctrl);
 	}
 	(void)dsi_display_debugfs_deinit(display);
+	dsi_display_sysfs_deinit(display);
 error:
 	mutex_unlock(&display->display_lock);
 	return rc;
