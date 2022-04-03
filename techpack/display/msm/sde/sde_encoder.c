@@ -4471,7 +4471,7 @@ void sde_encoder_trigger_kickoff_pending(struct drm_encoder *drm_enc)
 	sde_enc->idle_pc_restore = false;
 }
 
-extern bool sde_crtc_get_fingerprint_mode(struct drm_crtc_state *crtc_state);
+extern bool sde_crtc_get_dimlayer_mode(struct drm_crtc_state *crtc_state);
 static bool
 _sde_encoder_setup_dither_for_onscreenfingerprint(struct sde_encoder_phys *phys,
 						  void *dither_cfg, int len)
@@ -4482,7 +4482,7 @@ _sde_encoder_setup_dither_for_onscreenfingerprint(struct sde_encoder_phys *phys,
 	if (!drm_enc || !drm_enc->crtc)
 		return -EFAULT;
 
-	if (!sde_crtc_get_fingerprint_mode(drm_enc->crtc->state))
+	if (!sde_crtc_get_dimlayer_mode(drm_enc->crtc->state))
 		return -EINVAL;
 
 	if (len != sizeof(dither))
@@ -4901,6 +4901,7 @@ void sde_encoder_needs_hw_reset(struct drm_encoder *drm_enc)
 	}
 }
 
+extern int sde_connector_update_backlight(struct drm_connector *conn);
 int sde_encoder_prepare_for_kickoff(struct drm_encoder *drm_enc,
 		struct sde_encoder_kickoff_params *params)
 {
@@ -4936,6 +4937,9 @@ int sde_encoder_prepare_for_kickoff(struct drm_encoder *drm_enc,
 			CONNECTOR_PROP_CMD_FRAME_TRIGGER_MODE);
 
 	_sde_encoder_helper_hdr_plus_mempool_update(sde_enc);
+
+	if (sde_enc->cur_master)
+		sde_connector_update_backlight(sde_enc->cur_master->connector);
 
 	/* prepare for next kickoff, may include waiting on previous kickoff */
 	SDE_ATRACE_BEGIN("sde_encoder_prepare_for_kickoff");
