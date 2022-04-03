@@ -654,6 +654,8 @@ static int dsi_panel_dcs_set_display_brightness_c2(struct mipi_dsi_device *dsi,
 
 
 
+extern int op_dimlayer_bl_alpha;
+extern int op_dimlayer_bl_enabled;
 bool HBM_flag;
 
 int dsi_panel_update_backlight(struct dsi_panel *panel,
@@ -670,6 +672,10 @@ int dsi_panel_update_backlight(struct dsi_panel *panel,
 
 	dsi = &panel->mipi_device;
 	bl = &panel->bl_config;
+
+	if (op_dimlayer_bl_enabled) {
+		bl_lvl = op_dimlayer_bl_alpha;
+	}
 
 	if (panel->bl_config.bl_inverted_dbv)
 		bl_lvl = (((bl_lvl & 0xff) << 8) | (bl_lvl >> 8));
