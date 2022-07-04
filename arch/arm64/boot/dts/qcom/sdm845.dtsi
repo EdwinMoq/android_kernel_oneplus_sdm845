@@ -2558,6 +2558,7 @@
 		qcom,spss-test-firmware-name = "spss1t";  /* 8 chars max */
 		qcom,spss-prod-firmware-name = "spss1p";  /* 8 chars max */
 		qcom,spss-debug-reg-addr = <0x01886020>;
+		qcom,no-cmac-and-iar-feature-support;
 		status = "ok";
 	};
 
