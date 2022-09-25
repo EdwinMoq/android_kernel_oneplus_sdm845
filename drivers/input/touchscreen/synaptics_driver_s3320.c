@@ -1085,7 +1085,7 @@ int synaptics_rmi4_i2c_write_block(
 {
 	int retval;
 	unsigned char retry;
-	unsigned char buf[length + 1];
+	unsigned char buf[2];
 	struct i2c_msg msg[] = {
 		{
 			.addr = client->addr,
