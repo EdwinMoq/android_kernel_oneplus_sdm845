@@ -349,7 +349,7 @@ struct smb_charger {
 	struct delayed_work	dash_check_work;
 	struct delayed_work	revertboost_recovery_work;
 	struct delayed_work	connecter_check_work;
-	struct wakeup_source	chg_wake_lock;
+	struct wakeup_source	*chg_wake_lock;
 	struct delayed_work	clear_hdc_work;
 	struct work_struct	otg_oc_work;
 	struct work_struct	vconn_oc_work;
