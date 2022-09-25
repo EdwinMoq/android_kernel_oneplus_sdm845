@@ -7548,29 +7548,35 @@ static void op_otg_switch(struct work_struct *work)
 	g_chg->pre_cable_pluged = usb_pluged;
 }
 
-
+#define USB_CONNECTOR_DEFAULT_TEMP 25
 static int get_usb_temp(struct smb_charger *chg)
 {
-	struct qpnp_vadc_chip *vadc_dev;
-	struct qpnp_vadc_result result;
-	int ret, i;
+	int ret, i, result;
 
-	vadc_dev = qpnp_get_vadc(chg->dev, "usb-temp");
-	if (IS_ERR(vadc_dev)) {
-		ret = PTR_ERR(vadc_dev);
-			pr_err("vadc property missing, ret=%d\n", ret);
-		return ret;
+	if (chg->iio.op_connector_temp_chan) {
+		ret = iio_read_channel_processed(
+				chg->iio.op_connector_temp_chan,
+				&result);
+		if (ret < 0) {
+			smblib_err(chg, "Error in reading IIO channel data, rc=%d\n",
+					ret);
+			return USB_CONNECTOR_DEFAULT_TEMP;
+		}
+		chg->connecter_voltage = result/1000;
+	} else {
+		pr_err("op_connector_temp_chan no found!\n");
+		return USB_CONNECTOR_DEFAULT_TEMP;
 	}
-	ret = qpnp_vadc_read(vadc_dev, VADC_AMUX5_GPIO_PU1, &result);
-	chg->connecter_voltage = (int) result.physical/1000;
 	for (i = ARRAY_SIZE(con_volt_30k) - 1; i >= 0; i--) {
 		if (con_volt_30k[i] >= chg->connecter_voltage)
 			break;
 		else if (i == 0)
 			break;
 	}
+
 	pr_debug("connectter vol:%d,temp:%d\n",
 				chg->connecter_voltage, con_volt_30k[i]);
+
 	return con_temp_30k[i];
 }
 
@@ -8698,6 +8704,8 @@ static void smblib_iio_deinit(struct smb_charger *chg)
 		iio_channel_release(chg->iio.usbin_v_chan);
 	if (!IS_ERR_OR_NULL(chg->iio.batt_i_chan))
 		iio_channel_release(chg->iio.batt_i_chan);
+	if (!IS_ERR_OR_NULL(chg->iio.op_connector_temp_chan))
+		iio_channel_release(chg->iio.op_connector_temp_chan);
 }
 
 int smblib_init(struct smb_charger *chg)
