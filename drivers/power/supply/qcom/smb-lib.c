@@ -4143,10 +4143,10 @@ void smblib_usb_plugin_locked(struct smb_charger *chg)
 	if (last_vbus_present != chg->vbus_present) {
 		if (chg->vbus_present) {
 			pr_info("acquire chg_wake_lock\n");
-			__pm_stay_awake(&chg->chg_wake_lock);
+			__pm_stay_awake(chg->chg_wake_lock);
 		} else {
 			pr_info("release chg_wake_lock\n");
-			__pm_relax(&chg->chg_wake_lock);
+			__pm_relax(chg->chg_wake_lock);
 		}
 	}
 	if (vbus_rising) {
@@ -8740,7 +8740,7 @@ int smblib_init(struct smb_charger *chg)
 	schedule_delayed_work(&chg->heartbeat_work,
 			msecs_to_jiffies(HEARTBEAT_INTERVAL_MS));
 	notify_dash_unplug_register(&notify_unplug_event);
-	wakeup_source_init(&chg->chg_wake_lock, "chg_wake_lock");
+	chg->chg_wake_lock = wakeup_source_register(NULL, "chg_wake_lock");
 	g_chg = chg;
 
 	regsister_notify_usb_enumeration_status(&usb_enumeration);
