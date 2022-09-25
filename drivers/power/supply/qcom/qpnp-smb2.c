@@ -19,6 +19,7 @@
 #include <linux/regulator/driver.h>
 #include <linux/regulator/of_regulator.h>
 #include <linux/regulator/machine.h>
+#include <linux/iio/consumer.h>
 /* david.liu@bsp, 20171023 Battery & Charging porting */
 #include <linux/delay.h>
 #include <linux/proc_fs.h>
@@ -604,6 +605,22 @@ static int smb2_parse_dt(struct smb2 *chip)
 
 	chg->ufp_only_mode = of_property_read_bool(node,
 					"qcom,ufp-only-mode");
+
+	rc = of_property_match_string(node, "io-channel-names",
+			"gpio12_voltage");
+	if (rc >= 0) {
+		chg->iio.op_connector_temp_chan = iio_channel_get(chg->dev,
+				"gpio12_voltage");
+		if (IS_ERR(chg->iio.op_connector_temp_chan)) {
+			rc = PTR_ERR(chg->iio.op_connector_temp_chan);
+			if (rc != -EPROBE_DEFER)
+				dev_err(chg->dev,
+				"op_connector_temp_chan channel unavailable,%ld\n",
+				rc);
+			chg->iio.op_connector_temp_chan = NULL;
+			return rc;
+		}
+	}
 
 	return 0;
 }
@@ -2884,6 +2901,35 @@ static const struct file_operations proc_ship_mode_operations = {
 };
 #endif
 
+static int op_config_usb_temperature_adc(struct smb_charger *chip)
+{
+	if (IS_ERR_OR_NULL(chip->pinctrl)) {
+		chip->pinctrl = devm_pinctrl_get(chip->dev);
+		if (IS_ERR_OR_NULL(chip->pinctrl)) {
+			dev_err(chip->dev,
+					"Unable to acquire pinctrl\n");
+			chip->pinctrl = NULL;
+			return -EINVAL;
+		}
+	}
+
+	chip->usb_temperature_default =
+		pinctrl_lookup_state(chip->pinctrl, "op_usb_temp_adc_default");
+	if (IS_ERR_OR_NULL(chip->usb_temperature_default)) {
+		dev_err(chip->dev,
+				"Can not lookup op_usb_temp_adc_default\n");
+		devm_pinctrl_put(chip->pinctrl);
+		chip->pinctrl = NULL;
+		return PTR_ERR(chip->usb_temperature_default);
+	}
+
+	if (pinctrl_select_state(chip->pinctrl,
+				chip->usb_temperature_default) < 0)
+		dev_err(chip->dev, "pinctrl set op_usb_temp_adc_default fail\n");
+
+	return 0;
+}
+
 static irqreturn_t op_usb_plugin_irq_handler(int irq, void *dev_id)
 {
 	schedule_work(&g_chip->otg_switch_work);
@@ -2981,7 +3027,7 @@ static int smb2_probe(struct platform_device *pdev)
 	rc = smb2_parse_dt(chip);
 	if (rc < 0) {
 		pr_err("Couldn't parse device tree rc=%d\n", rc);
-		goto cleanup;
+		return rc;
 	}
 
 	rc = smblib_init(chg);
@@ -3137,6 +3183,7 @@ static int smb2_probe(struct platform_device *pdev)
 	device_init_wakeup(chg->dev, true);
 	chg->probe_done = true;
 	request_vbus_ctrl_gpio(chg);
+	op_config_usb_temperature_adc(chg);
 	request_plug_irq(chg);
 
 	pr_info("QPNP SMB2 probed successfully usb:present=%d type=%d batt:present = %d health = %d charge = %d\n",
