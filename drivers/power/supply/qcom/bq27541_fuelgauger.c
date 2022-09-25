@@ -224,7 +224,7 @@ struct bq27541_device_info {
 	struct  delayed_work		hw_config;
 	struct  delayed_work		modify_soc_smooth_parameter;
 	struct  delayed_work		battery_soc_work;
-	struct wakeup_source update_soc_wake_lock;
+	struct wakeup_source *update_soc_wake_lock;
 	struct power_supply	*batt_psy;
 	int saltate_counter;
 	/*  Add for retry when config fail */
@@ -1541,7 +1541,7 @@ static void update_pre_capacity_func(struct work_struct *w)
 	bq27541_get_batt_remaining_capacity();
 	bq27541_get_batt_full_chg_capacity();
 	bq27541_set_allow_reading(false);
-	__pm_relax(&bq27541_di->update_soc_wake_lock);
+	__pm_relax(bq27541_di->update_soc_wake_lock);
 	pr_info("exit\n");
 }
 
@@ -1994,7 +1994,7 @@ static int bq27541_battery_probe(struct i2c_client *client,
 
 	new_client = client;
 
-	wakeup_source_init(&di->update_soc_wake_lock, "bq_delt_soc_wake_lock");
+	di->update_soc_wake_lock = wakeup_source_register(NULL, "bq_delt_soc_wake_lock");
 	di->soc_pre = DEFAULT_INVALID_SOC_PRE;
 	di->temp_pre = 0;
 #ifndef CONFIG_GAUGE_BQ27411
@@ -2119,7 +2119,7 @@ static int bq27541_battery_resume(struct device *dev)
 	if (di->rtc_resume_time - di->lcd_off_time >= TWO_POINT_FIVE_MINUTES) {
 		pr_err("di->rtc_resume_time - di->lcd_off_time=%ld\n",
 				di->rtc_resume_time - di->lcd_off_time);
-		__pm_stay_awake(&di->update_soc_wake_lock);
+		__pm_stay_awake(di->update_soc_wake_lock);
 		get_current_time(&di->lcd_off_time);
 		queue_delayed_work_on(0,
 				update_pre_capacity_data.workqueue,
