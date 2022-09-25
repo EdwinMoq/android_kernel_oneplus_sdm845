@@ -9,6 +9,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+
+#include <dt-bindings/iio/qcom,spmi-vadc.h>
+
 /*recommand add our code to this dtsi*/
 #include "dsi-panel-samsung_s6e3fc1_cmd.dtsi"
 #include "dsi-panel-samsung_sofef00_m_cmd.dtsi"
@@ -1879,28 +1882,26 @@ status = "disabled";
 
 /* OnePlus add thermistor, by rio.zhao*/
 &pm8998_vadc {
-	chan@50 {
+	pa1_therm {
 		label = "pa1_therm";
-		reg = <0x50>;
-		qcom,decimation = <2>;
-		qcom,pre-div-channel-scaling = <0>;
-		qcom,calibration-type = "ratiometric";
-		qcom,scale-function = <2>;
-		qcom,hw-settle-time = <2>;
-		qcom,fast-avg-setup = <0>;
+		reg = <ADC_AMUX_THM4_PU2>;
+		qcom,ratiometric;
+		qcom,hw-settle-time = <200>;
+		qcom,pre-scaling = <1 1>;
 	};
 };
 
 &pm8998_adc_tm {
-	chan@50 {
-		label = "pa1_therm";
-		reg = <0x50>;
-		qcom,pre-div-channel-scaling = <0>;
-		qcom,calibration-type = "ratiometric";
-		qcom,scale-function = <2>;
-		qcom,hw-settle-time = <2>;
-		qcom,btm-channel-number = <0x90>;
-		qcom,thermal-node;
+	io-channels = <&pm8998_vadc ADC_VPH_PWR>,
+			<&pm8998_vadc ADC_XO_THERM_PU2>,
+			<&pm8998_vadc ADC_AMUX_THM1_PU2>,
+			<&pm8998_vadc ADC_AMUX_THM3_PU2>,
+			<&pm8998_vadc ADC_AMUX_THM5_PU2>,
+			<&pm8998_vadc ADC_AMUX_THM4_PU2>;
+	pa1_therm {
+		reg = <ADC_AMUX_THM4_PU2>;
+		qcom,ratiometric;
+		qcom,hw-settle-time = <200>;
 	};
 };
 
@@ -1908,8 +1909,9 @@ status = "disabled";
 	pa1-therml-adc {
 		polling-delay-passive = <0>;
 		polling-delay = <0>;
-		thermal-sensors = <&pm8998_adc_tm 0x50>;
+		thermal-sensors = <&pm8998_adc_tm ADC_AMUX_THM4_PU2>;
 		thermal-governor = "user_space";
+		wake-capable-sensor;
 
 		trips {
 			active-config0 {
