@@ -498,7 +498,7 @@ struct synaptics_ts_data {
 	int regulator_avdd_vmin;
 	int regulator_avdd_vmax;
 	int regulator_avdd_current;
-	struct wakeup_source	source;
+	struct wakeup_source	*source;
 
 	uint32_t irq_flags;
 	uint32_t max_x;
@@ -1995,9 +1995,9 @@ static irqreturn_t synaptics_irq_thread_fn(int irq, void *dev_id)
 {
 	struct synaptics_ts_data *ts = (struct synaptics_ts_data *)dev_id;
 	touch_disable(ts);
-	__pm_stay_awake(&ts->source);	//avoid system enter suspend lead to i2c error
+	__pm_stay_awake(ts->source);	//avoid system enter suspend lead to i2c error
 	synaptics_ts_work_func(&ts->report_work);
-	__pm_relax(&ts->source);
+	__pm_relax(ts->source);
 	return IRQ_HANDLED;
 }
 #endif
@@ -2074,7 +2074,7 @@ static ssize_t gesture_switch_write_func(struct file *file, const char __user *p
 		TPD_ERR("%s: read proc input error.\n", __func__);
 		return count;
 	}
-	__pm_stay_awake(&ts->source);	//avoid system enter suspend lead to i2c error
+	__pm_stay_awake(ts->source);	//avoid system enter suspend lead to i2c error
 	mutex_lock(&ts->mutex);
 	ret = sscanf(buf,"%d",&write_flag);
 	gesture_switch = write_flag;
@@ -2097,7 +2097,7 @@ static ssize_t gesture_switch_write_func(struct file *file, const char __user *p
 		}
 	}
 	mutex_unlock(&ts->mutex);
-	__pm_relax(&ts->source);
+	__pm_relax(ts->source);
 
 	return count;
 }
@@ -5911,7 +5911,7 @@ static int synaptics_ts_probe(struct i2c_client *client, const struct i2c_device
 		goto exit_createworkqueue_failed;
 	}
 	INIT_DELAYED_WORK(&ts->base_work,tp_baseline_get_work);
-	wakeup_source_init(&ts->source, "tp_syna");
+	ts->source = wakeup_source_register(NULL, "tp_syna");
 
 	ret = synaptics_init_panel(ts); /* will also switch back to page 0x04 */
 	if (ret < 0) {
