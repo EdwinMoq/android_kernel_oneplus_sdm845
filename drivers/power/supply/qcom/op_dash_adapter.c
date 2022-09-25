@@ -220,6 +220,7 @@ static unsigned char dash_uart_rx_byte(
 
 static void dash_uart_irq_fiq_enable(bool enable)
 {
+#if 0
 	if (enable) {
 		preempt_enable();
 		local_fiq_enable();
@@ -229,6 +230,7 @@ static void dash_uart_irq_fiq_enable(bool enable)
 		local_fiq_disable();
 		preempt_disable();
 	}
+#endif
 }
 
 static int dash_uart_write_some_addr(
