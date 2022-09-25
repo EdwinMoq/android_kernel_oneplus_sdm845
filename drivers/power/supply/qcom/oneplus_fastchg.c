@@ -71,8 +71,8 @@ struct fastchg_device_info {
 	struct work_struct fastcg_work;
 	struct work_struct charger_present_status_work;
 	struct timer_list watchdog;
-	struct wakeup_source fastchg_wake_lock;
-	struct wakeup_source fastchg_update_fireware_lock;
+	struct wakeup_source *fastchg_wake_lock;
+	struct wakeup_source *fastchg_update_fireware_lock;
 
 	struct delayed_work		update_firmware;
 	struct delayed_work update_fireware_version_work;
@@ -490,7 +490,7 @@ static void dashchg_fw_update(struct work_struct *work)
 	addr_buf[0] = fastchg_di->addr_low;
 	addr_buf[1] = fastchg_di->addr_high;
 	addr = (addr_buf[0] <<  8)  +  (addr_buf[1] & 0xFF);
-	__pm_stay_awake(&di->fastchg_update_fireware_lock);
+	__pm_stay_awake(di->fastchg_update_fireware_lock);
 	if (di->n76e_present)
 		rc = n76e_fw_check(di);
 	else
@@ -498,7 +498,7 @@ static void dashchg_fw_update(struct work_struct *work)
 	if (rc == FW_CHECK_SUCCESS) {
 		di->firmware_already_updated = true;
 		reset_mcu_and_request_irq(di);
-		__pm_relax(&di->fastchg_update_fireware_lock);
+		__pm_relax(di->fastchg_update_fireware_lock);
 		set_property_on_smbcharger(POWER_SUPPLY_PROP_SWITCH_DASH, true);
 		pr_info("FW check success\n"); /* david@bsp add log */
 		return;
@@ -555,7 +555,7 @@ update_fw:
 	/* jump to app code end */
 	di->firmware_already_updated = true;
 	reset_mcu_and_request_irq(di);
-	__pm_relax(&di->fastchg_update_fireware_lock);
+	__pm_relax(di->fastchg_update_fireware_lock);
 	set_property_on_smbcharger(POWER_SUPPLY_PROP_SWITCH_DASH, true);
 	pr_info("result=success\n");
 	return;
@@ -563,7 +563,7 @@ update_fw:
 update_fw_err:
 	di->firmware_already_updated = true;
 	reset_mcu_and_request_irq(di);
-	__pm_relax(&di->fastchg_update_fireware_lock);
+	__pm_relax(di->fastchg_update_fireware_lock);
 	set_property_on_smbcharger(POWER_SUPPLY_PROP_SWITCH_DASH, true);
 	pr_err("result=fail\n");
 }
@@ -900,7 +900,7 @@ void di_watchdog(unsigned long data)
 	schedule_work(&di->charger_present_status_work);
 	pr_err("switch off fastchg\n");
 
-	__pm_relax(&di->fastchg_wake_lock);
+	__pm_relax(di->fastchg_wake_lock);
 }
 
 #define MAX_BUFFER_SIZE 1024
@@ -1042,7 +1042,7 @@ static void adapter_update_work_func(struct work_struct *work)
 
 	pr_info("%s end update_result:%d\n",
 		__func__, update_result);
-	__pm_relax(&chip->fastchg_wake_lock);
+	__pm_relax(chip->fastchg_wake_lock);
 	op_bus_vote(true);
 
 }
@@ -1098,7 +1098,7 @@ static long  dash_dev_ioctl(struct file *filp, unsigned int cmd,
 		case DASH_NOTIFY_FAST_PRESENT:
 			oneplus_notify_dash_charger_present(true);
 			if (arg == DASH_NOTIFY_FAST_PRESENT + 1) {
-				__pm_stay_awake(&di->fastchg_wake_lock);
+				__pm_stay_awake(di->fastchg_wake_lock);
 				bq27541_data->set_allow_reading(false);
 				di->fast_chg_allow = false;
 				di->fast_normal_to_warm = false;
@@ -1131,7 +1131,7 @@ static long  dash_dev_ioctl(struct file *filp, unsigned int cmd,
 				notify_check_usb_suspend(true, true);
 				oneplus_notify_dash_charger_present(false);
 				oneplus_notify_pmic_check_charger_present();
-				__pm_relax(&di->fastchg_wake_lock);
+				__pm_relax(di->fastchg_wake_lock);
 			}
 			break;
 		case DASH_NOTIFY_ALLOW_READING_IIC:
@@ -1190,7 +1190,7 @@ static long  dash_dev_ioctl(struct file *filp, unsigned int cmd,
 				di->fast_chg_ing = false;
 				notify_check_usb_suspend(true, false);
 				oneplus_notify_pmic_check_charger_present();
-				__pm_relax(&di->fastchg_wake_lock);
+				__pm_relax(di->fastchg_wake_lock);
 			} else if (arg == DASH_NOTIFY_NORMAL_TEMP_FULL + 3) {
 				op_switch_normal_set();
 			}
@@ -1209,7 +1209,7 @@ static long  dash_dev_ioctl(struct file *filp, unsigned int cmd,
 				notify_check_usb_suspend(true, false);
 				oneplus_notify_pmic_check_charger_present();
 				oneplus_notify_dash_charger_present(false);
-				__pm_relax(&di->fastchg_wake_lock);
+				__pm_relax(di->fastchg_wake_lock);
 			}
 			break;
 		case DASH_NOTIFY_ADAPTER_FW_UPDATE:
@@ -1223,7 +1223,7 @@ static long  dash_dev_ioctl(struct file *filp, unsigned int cmd,
 				di->fast_chg_started = false;
 				oneplus_notify_dash_charger_present(true);
 				dash_write(di, ALLOW_DATA);
-				__pm_stay_awake(&di->fastchg_wake_lock);
+				__pm_stay_awake(di->fastchg_wake_lock);
 				dash_adapter_update(di);
 			}
 			break;
@@ -1235,7 +1235,7 @@ static long  dash_dev_ioctl(struct file *filp, unsigned int cmd,
 				/* data err */
 				bq27541_data->set_allow_reading(true);
 				di->fast_chg_started = false;
-			__pm_relax(&di->fastchg_wake_lock);
+			__pm_relax(di->fastchg_wake_lock);
 				di->fast_chg_allow = false;
 				di->fast_switch_to_normal = false;
 				di->fast_normal_to_warm = false;
@@ -1254,7 +1254,7 @@ static long  dash_dev_ioctl(struct file *filp, unsigned int cmd,
 				pr_err("DASH_NOTIFY_INVALID_DATA_CMD, switch off fastchg\n");
 				switch_mode_to_normal();
 				del_timer(&di->watchdog);
-			__pm_relax(&di->fastchg_wake_lock);
+			__pm_relax(di->fastchg_wake_lock);
 				notify_check_usb_suspend(true, true);
 				oneplus_notify_pmic_check_charger_present();
 			}
@@ -1563,9 +1563,8 @@ static int dash_probe(struct i2c_client *client, const struct i2c_device_id *id)
 	mutex_init(&di->read_mutex);
 
 	init_waitqueue_head(&di->read_wq);
-	wakeup_source_init(&di->fastchg_wake_lock, "fastcg_wake_lock");
-	wakeup_source_init(&di->fastchg_update_fireware_lock,
-		"fastchg_fireware_lock");
+	di->fastchg_wake_lock = wakeup_source_register(NULL, "fastcg_wake_lock");
+	di->fastchg_update_fireware_lock = wakeup_source_register(NULL, "fastchg_fireware_lock");
 
 	INIT_WORK(&di->fastcg_work, fastcg_work_func);
 	INIT_WORK(&di->charger_present_status_work,
