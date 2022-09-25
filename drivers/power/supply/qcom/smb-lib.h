@@ -243,6 +243,7 @@ struct smb_iio {
 	struct iio_channel	*connector_temp_thr1_chan;
 	struct iio_channel	*connector_temp_thr2_chan;
 	struct iio_channel	*connector_temp_thr3_chan;
+	struct iio_channel	*op_connector_temp_chan;
 };
 
 struct reg_info {
@@ -492,6 +493,8 @@ struct smb_charger {
 	bool			in_chg_lock;
 	bool			fcc_stepper_enable;
 	bool			ufp_only_mode;
+	struct pinctrl_state *usb_temperature_default;
+	struct pinctrl *pinctrl;
 
 	/* workaround flag */
 	u32			wa_flags;
@@ -517,6 +520,7 @@ struct smb_charger {
 	int			pulse_cnt;
 
 	int			die_health;
+	int			filter_count;
 };
 
 /* david.liu@bsp, 20171023 Battery & Charging porting */
