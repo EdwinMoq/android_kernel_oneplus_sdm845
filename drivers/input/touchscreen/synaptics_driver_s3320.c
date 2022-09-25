@@ -2330,7 +2330,7 @@ static ssize_t tp_sleep_write_func(struct file *file, const char *buffer, size_t
 }
 #endif
 
-static ssize_t tp_show(struct device_driver *ddri, char *buf)
+static ssize_t tp_debug_log_show(struct device_driver *ddri, char *buf)
 {
 	// uint8_t ret = 0;
 	struct synaptics_ts_data *ts = ts_g;
@@ -2340,19 +2340,19 @@ static ssize_t tp_show(struct device_driver *ddri, char *buf)
 		return 0;
 	a = synaptics_rmi4_i2c_read_word(ts->client, F01_RMI_DATA_BASE);
 	if( a < 0 )
-		TPD_ERR("tp_show read i2c err\n");
+		TPD_ERR("tp_debug_log_show read i2c err\n");
 	b = synaptics_rmi4_i2c_read_byte(ts->client, F01_RMI_DATA01);
 	if( b < 0 )
-		TPD_ERR("tp_show read i2c err\n");
+		TPD_ERR("tp_debug_log_show read i2c err\n");
 	c = synaptics_rmi4_i2c_read_byte(ts->client, F12_2D_DATA_BASE);
 	if( c < 0 )
-		TPD_ERR("tp_show read i2c err\n");
+		TPD_ERR("tp_debug_log_show read i2c err\n");
 
 	return sprintf(buf, "F01_RMI_DATA_BASE[0x%x]=0x%x;F01_RMI_DATA01[0x%x]=0x%x;F12_2D_DATA_BASE[0x%x]=0x%x;\n", \
 			F01_RMI_DATA_BASE,a,F01_RMI_DATA01,b,F12_2D_DATA_BASE,c);
 }
 
-static ssize_t store_tp(struct device_driver *ddri, const char *buf, size_t count)
+static ssize_t tp_debug_log_store(struct device_driver *ddri, const char *buf, size_t count)
 {
 	int tmp = 0;
 	if( 1 == sscanf(buf, "%d", &tmp) ){
@@ -2428,7 +2428,7 @@ static void checkCMD_RT133(void)
 
 #endif
 
-static ssize_t tp_baseline_show(struct device_driver *ddri, char *buf)
+static ssize_t tp_baseline_image_show(struct device_driver *ddri, char *buf)
 {
 	int ret = 0;
 	int x, y;
@@ -2526,7 +2526,7 @@ static ssize_t tp_baseline_show(struct device_driver *ddri, char *buf)
 
 }
 
-static ssize_t tp_rawdata_show(struct device_driver *ddri, char *buf)
+static ssize_t tp_delta_image_show(struct device_driver *ddri, char *buf)
 {
 	int ret = 0;
 	int x, y;
@@ -2571,7 +2571,14 @@ static ssize_t tp_rawdata_show(struct device_driver *ddri, char *buf)
 	return num_read_chars;
 }
 
-static ssize_t tp_delta_store(struct device_driver *ddri,
+static ssize_t tp_delta_image_store(struct device_driver *ddri,
+		const char *buf, size_t count)
+{
+	TPDTM_DMESG("tp_test_store is not support\n");
+	return count;
+}
+
+static ssize_t tp_baseline_image_store(struct device_driver *ddri,
 		const char *buf, size_t count)
 {
 	TPDTM_DMESG("tp_test_store is not support\n");
@@ -3408,7 +3415,7 @@ END:
 }
 
 
-static ssize_t tp_baseline_show_with_cbc(struct device_driver *ddri, char *buf)
+static ssize_t tp_baseline_image_with_cbc_show(struct device_driver *ddri, char *buf)
 {
 	int ret = 0;
 	int x,y;
@@ -3530,7 +3537,7 @@ static ssize_t synaptics_rmi4_baseline_show(struct device *dev,	char *buf, bool 
 	}
 }
 
-static ssize_t tp_test_store(struct device_driver *ddri,
+static ssize_t tp_baseline_image_with_cbc_store(struct device_driver *ddri,
 		const char *buf, size_t count)
 {
 	TPDTM_DMESG("tp_test_store is not support\n");
@@ -4093,12 +4100,11 @@ static ssize_t tp_gesture_touch_hold_store(struct device *dev,
 	return size;
 }
 
-//static DRIVER_ATTR(tp_baseline_image_with_cbc, 0664, tp_baseline_show_with_cbc, tp_test_store);
 static DEVICE_ATTR(test_limit, 0664, synaptics_test_limit_show, synaptics_test_limit_store);
-static DRIVER_ATTR(tp_baseline_image, 0664, tp_baseline_show, tp_delta_store);
-static DRIVER_ATTR(tp_baseline_image_with_cbc, 0664, tp_baseline_show_with_cbc, tp_test_store);
-static DRIVER_ATTR(tp_delta_image, 0664, tp_rawdata_show, NULL);
-static DRIVER_ATTR(tp_debug_log, 0664, tp_show, store_tp);
+static DRIVER_ATTR_RW(tp_baseline_image);
+static DRIVER_ATTR_RW(tp_baseline_image_with_cbc);
+static DRIVER_ATTR_RW(tp_delta_image);
+static DRIVER_ATTR_RW(tp_debug_log);
 static DEVICE_ATTR(tp_fw_update, 0664, synaptics_update_fw_show, synaptics_update_fw_store);
 static DEVICE_ATTR(tp_doze_time, 0664, tp_doze_time_show, tp_doze_time_store);
 static DEVICE_ATTR(tp_gesture_touch_hold, 0664,
