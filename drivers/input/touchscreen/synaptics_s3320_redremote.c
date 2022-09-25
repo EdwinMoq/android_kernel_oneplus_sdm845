@@ -403,7 +403,7 @@ int remote_rmi4_i2c_write(unsigned short addr, unsigned char *data, unsigned sho
 {
 	int retval;
 	unsigned char retry;
-	unsigned char buf[length + 1];
+	unsigned char buf[2];
 	struct i2c_client* i2c_client = remote_rmi4_get_i2c_client();
 	struct i2c_msg msg[] = {
 		{
@@ -523,7 +523,7 @@ static ssize_t rmidev_read(struct file *filp, char __user *buf,
 		size_t count, loff_t *f_pos)
 {
 	ssize_t retval;
-	unsigned char tmpbuf[count + 1];
+	unsigned char tmpbuf[16];
 	struct rmidev_data *dev_data = filp->private_data;
     //printk("synap %s\n",__func__);
 	if (IS_ERR(dev_data)) {
@@ -572,7 +572,7 @@ static ssize_t rmidev_write(struct file *filp, const char __user *buf,
 		size_t count, loff_t *f_pos)
 {
 	ssize_t retval;
-	unsigned char tmpbuf[count + 1];
+	unsigned char tmpbuf[16];
 	struct rmidev_data *dev_data = filp->private_data;
     printk("synap %s\n",__func__);
 
