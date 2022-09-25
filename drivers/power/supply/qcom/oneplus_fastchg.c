@@ -882,9 +882,9 @@ static void update_fireware_version_func(struct work_struct *work)
 	snprintf(di->manu_name, 255, "%s", "ONEPLUS");
 	push_component_info(FAST_CHARGE, di->fw_id, di->manu_name);
 }
-void di_watchdog(unsigned long data)
+void di_watchdog(struct timer_list *t)
 {
-	struct fastchg_device_info *di = (struct fastchg_device_info *)data;
+	struct fastchg_device_info *di = fastchg_di;
 
 	pr_err("di_watchdog can't receive mcu data\n");
 	bq27541_data->set_allow_reading(true);
@@ -1576,9 +1576,9 @@ static int dash_probe(struct i2c_client *client, const struct i2c_device_id *id)
 	/*pm_qos_add_request(&big_cpu_update_freq,
 		PM_QOS_C1_CPUFREQ_MIN, MIN_CPUFREQ);*/
 
-	init_timer(&di->watchdog);
-	di->watchdog.data = (unsigned long)di;
-	di->watchdog.function = di_watchdog;
+	__init_timer(&di->watchdog, di_watchdog, TIMER_IRQSAFE);
+	//di->watchdog.data = (unsigned long)di;//20190707
+	//di->watchdog.function = di_watchdog;//20190707
 
 	di->dash_device.minor = MISC_DYNAMIC_MINOR;
 	di->dash_device.name = "dash";
