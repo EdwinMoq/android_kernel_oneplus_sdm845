@@ -73,7 +73,7 @@ static int write_param_partition(const char *buf, unsigned long count,
 		goto out;
 	}
 	//ret = filp->f_op->write(filp,(char __user *)buf,count,&filp->f_pos);
-	ret = __vfs_write(filp, (char __user *)buf, count, &filp->f_pos);
+	ret = __kernel_write(filp, (char __user *)buf, count, &filp->f_pos);
 
 out:
 	set_fs(fs);
