@@ -2646,7 +2646,7 @@ READDATA_AGAIN:
 		old_fs = get_fs();
 		set_fs(KERNEL_DS);
 
-		fd = sys_open(data_buf, O_WRONLY | O_CREAT | O_TRUNC, 0);
+		fd = ksys_open(data_buf, O_WRONLY | O_CREAT | O_TRUNC, 0);
 		if (fd < 0) {
 			TPD_ERR("Open log file '%s' failed.\n", data_buf);
 			set_fs(old_fs);
@@ -2722,7 +2722,7 @@ TEST_WITH_CBC_s3508:
 			baseline_data = (tmp_h<<8)|tmp_l;
 			if (fd >= 0){
 				sprintf(data_buf, "%d,", baseline_data);
-				sys_write(fd, data_buf, strlen(data_buf));
+				ksys_write(fd, data_buf, strlen(data_buf));
 			}
 			if( (y < RX_NUM ) && (x < TX_NUM) ){
 				//printk("%4d ,",baseline_data);
@@ -2764,14 +2764,14 @@ TEST_WITH_CBC_s3508:
 		}
 		//printk("\n synaptics:s3320 TX_NUM:%d\n",x);
 		if (fd >= 0){
-			sys_write(fd, "\n", 1);
+			ksys_write(fd, "\n", 1);
 		}
 	}
 
 	if(!enable_cbc){
 		enable_cbc = 1;
 		if (fd >= 0){
-			sys_write(fd, "\n", 1);
+			ksys_write(fd, "\n", 1);
 		}
 		TPD_ERR("enable cbc baseline test again\n");
 		goto TEST_WITH_CBC_s3508;
@@ -2958,7 +2958,7 @@ TEST_WITH_CBC_s3508:
 	TPD_ERR("ROLAND----> err_RT253 is %d\n", err_RT253);
 END:
 	if (fd >= 0) {
-		sys_close(fd);
+		ksys_close(fd);
 		set_fs(old_fs);
 	}
 	//release_firmware(fw);
@@ -3062,7 +3062,7 @@ READDATA_AGAIN:
 		old_fs = get_fs();
 		set_fs(KERNEL_DS);
 
-		fd = sys_open(data_buf, O_WRONLY | O_CREAT | O_TRUNC, 0);
+		fd = ksys_open(data_buf, O_WRONLY | O_CREAT | O_TRUNC, 0);
 		if (fd < 0) {
 			TPD_ERR("Open log file '%s' failed.\n", data_buf);
 			set_fs(old_fs);
@@ -3157,7 +3157,7 @@ TEST_WITH_CBC_s3508:
 		baseline_data = (tmp_h << 8)  | tmp_l;
 		if (fd >= 0) {
 			snprintf(data_buf, 20, "%d,", baseline_data);
-			sys_write(fd, data_buf, strlen(data_buf));
+			ksys_write(fd, data_buf, strlen(data_buf));
 		}
 		if ((y < RX_NUM) && (x < TX_NUM)) {
 			/*printk("%4d ,",baseline_data);*/
@@ -3210,13 +3210,13 @@ TEST_WITH_CBC_s3508:
 		}
 		/*printk("\n synaptics:s3320 TX_NUM:%d\n",x);*/
 		if (fd >= 0)
-			sys_write(fd, "\n", 1);
+			ksys_write(fd, "\n", 1);
 	}
 
 	if (!enable_cbc) {
 		enable_cbc = 1;
 		if (fd >= 0)
-			sys_write(fd, "\n", 1);
+			ksys_write(fd, "\n", 1);
 		TPD_ERR("enable cbc baseline test again\n");
 		goto TEST_WITH_CBC_s3508;
 	}
@@ -3362,7 +3362,7 @@ TEST_WITH_CBC_s3508:
 	}
 END:
 	if (fd >= 0) {
-		sys_close(fd);
+		ksys_close(fd);
 		set_fs(old_fs);
 	}
 
