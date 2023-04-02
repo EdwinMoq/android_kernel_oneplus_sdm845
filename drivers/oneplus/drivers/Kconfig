@@ -29,4 +29,10 @@ config DEBUG_PARAM_DUMP
 	help
 		if you want to dump contents of param partition for debug purpose
 
+config OEM_BOOT_MODE
+	bool "OEM boot mode driver"
+	default n
+	help
+		Say y here to enable the boot mode driver
+
 source "drivers/oneplus/drivers/input/fingerprint/Kconfig"
