@@ -12,7 +12,7 @@
 #include <linux/string.h>
 #include <linux/types.h>
 #include <linux/project_info.h>
-#include <soc/qcom/smem.h>
+#include <linux/soc/qcom/smem.h>
 #include <linux/gpio.h>
 #include <soc/qcom/socinfo.h>
 #include <linux/of_gpio.h>
@@ -65,15 +65,14 @@ void save_dump_reason_to_smem(char *info, char *function_name)
 {
     int strl = 0, strl1 = 0;
     static int flag = 0;
+    size_t size;
 
     /* Make sure save_dump_reason_to_smem() is not called
      infinite times by panic()  during DDR bit flip crash etc */
     if (flag > 1)
 	return;
 
-    dp_info = smem_alloc(SMEM_DUMP_INFO,
-        sizeof(struct dump_info), 0,
-        SMEM_ANY_HOST_FLAG);
+    dp_info = qcom_smem_get(QCOM_SMEM_HOST_ANY, SMEM_DUMP_INFO, &size);
 
     if (IS_ERR_OR_NULL(dp_info))
         pr_err("%s: get dp_info failure\n", __func__);
@@ -543,16 +542,16 @@ struct a_borad_version a_borad_version_string_arry_gpio[]={
 
 uint32 get_hw_version(void)
 {
+    size_t size;
+
     if (strnstr(saved_command_line, "androidboot.platform_name=", strlen(saved_command_line)))
-        project_info_desc_v2 = smem_find(SMEM_PROJECT_INFO,
-                    sizeof(struct project_info_v2),
-                    0,
-                    SMEM_ANY_HOST_FLAG);
+        project_info_desc_v2 = qcom_smem_get(QCOM_SMEM_HOST_ANY,
+                    SMEM_PROJECT_INFO,
+                    &size);
     else
-        project_info_desc_v1 = smem_find(SMEM_PROJECT_INFO,
-                    sizeof(struct project_info),
-                    0,
-                    SMEM_ANY_HOST_FLAG);
+        project_info_desc_v1 = qcom_smem_get(QCOM_SMEM_HOST_ANY,
+                    SMEM_PROJECT_INFO,
+                    &size);
 
     if (IS_ERR_OR_NULL(project_info_desc_v1) && IS_ERR_OR_NULL(project_info_desc_v2))
         pr_err("%s: get project_info failure\n", __func__);
@@ -568,20 +567,19 @@ int __init init_project_info(void)
 {
     static bool project_info_init_done;
     int ddr_size = 0;
+    size_t size;
 
     if (project_info_init_done)
         return 0;
 
     if (strnstr(saved_command_line, "androidboot.platform_name=", strlen(saved_command_line)))
-        project_info_desc_v2 = smem_find(SMEM_PROJECT_INFO,
-                    sizeof(struct project_info_v2),
-                    0,
-                    SMEM_ANY_HOST_FLAG);
+        project_info_desc_v2 = qcom_smem_get(QCOM_SMEM_HOST_ANY,
+                    SMEM_PROJECT_INFO,
+                    &size);
     else
-        project_info_desc_v1 = smem_find(SMEM_PROJECT_INFO,
-                    sizeof(struct project_info),
-                    0,
-                    SMEM_ANY_HOST_FLAG);
+        project_info_desc_v1 = qcom_smem_get(QCOM_SMEM_HOST_ANY,
+                    SMEM_PROJECT_INFO,
+                    &size);
 
     if (IS_ERR_OR_NULL(project_info_desc_v1) && IS_ERR_OR_NULL(project_info_desc_v2)) {
         pr_err("%s: get project_info failure\n", __func__);
