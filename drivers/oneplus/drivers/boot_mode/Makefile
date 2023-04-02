@@ -1,1 +1,1 @@
-obj-$(CONFIG_OEM_DEBUG_SUPPORT) += boot_mode.o
+obj-$(CONFIG_OEM_BOOT_MODE) += boot_mode.o
