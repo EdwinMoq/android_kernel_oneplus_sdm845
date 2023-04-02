@@ -12,7 +12,7 @@
 #include <linux/string.h>
 #include <linux/types.h>
 #include <linux/project_info.h>
-#include <soc/qcom/smem.h>
+#include <linux/soc/qcom/smem.h>
 #include <linux/gpio.h>
 #include <linux/workqueue.h>
 #include <linux/interrupt.h>
@@ -35,7 +35,7 @@ struct cable_data {
 	struct delayed_work work;
 	struct workqueue_struct *wqueue;
 	struct device *dev;
-	struct wakeup_source wl;
+	struct wakeup_source *wl;
 	atomic_t running;
 	int rf_v3;
 	int rf_v3_pre;
@@ -52,9 +52,11 @@ static char *cmdline_find_option(char *str)
 
 int modify_rf_cable_smem_info(uint32 status)
 {
-	project_info_desc = smem_find(SMEM_PROJECT_INFO,
-		sizeof(struct project_info), 0,
-		SMEM_ANY_HOST_FLAG);
+	size_t size;
+
+	project_info_desc = qcom_smem_get(QCOM_SMEM_HOST_ANY,
+		SMEM_PROJECT_INFO,
+		&size);
 
 	if (IS_ERR_OR_NULL(project_info_desc))
 		pr_err("%s: get project_info failure\n", __func__);
@@ -99,7 +101,7 @@ static void rf_cable_work(struct work_struct *work)
 
 irqreturn_t cable_interrupt(int irq, void *_dev)
 {
-	__pm_wakeup_event(&_cdata->wl,
+	__pm_wakeup_event(_cdata->wl,
 		msecs_to_jiffies(CABLE_WAKELOCK_HOLD_TIME));
 	queue_delayed_work(_cdata->wqueue,
 		&_cdata->work, msecs_to_jiffies(1));
@@ -289,8 +291,7 @@ static int op_rf_cable_probe(struct platform_device *pdev)
 		pr_err("requested irq %d\n", _cdata->irq_1);
 		enable_irq_wake(_cdata->irq_1);
 
-		wakeup_source_init(&_cdata->wl,
-			"rf_cable_wake_lock");
+		_cdata->wl = wakeup_source_register(NULL, "rf_cable_wake_lock");
 		spin_lock_init(&_cdata->lock);
 		atomic_set(&_cdata->running,
 			gpio_get_value(_cdata->cable_gpio_0) ||
