@@ -809,11 +809,6 @@ status = "disabled";
 	status = "disabled";
 };
 
-&pm8998_rtc {
-	compatible = "qcom,qpnp-rtc";
-	qcom,qpnp-rtc-alarm-pwrup = <1>;
-};
-
 &pmi8998_haptics {
 	status = "okay";
 	qcom,wave-shape = "sine";
