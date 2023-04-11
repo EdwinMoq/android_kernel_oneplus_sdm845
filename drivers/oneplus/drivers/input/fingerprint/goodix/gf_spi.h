@@ -168,6 +168,7 @@ struct gf_dev {
 	signed enable_gpio;
 	int screen_state;
 	int proximity_state; /* 0:far 1:near */
+	struct wakeup_source *fp_wakelock;
 };
 int gf_pinctrl_init(struct gf_dev* gf_dev);
 int gf_parse_dts(struct gf_dev* gf_dev);
