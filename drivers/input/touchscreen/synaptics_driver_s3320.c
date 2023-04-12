@@ -367,7 +367,6 @@ static int synaptics_rmi4_i2c_write_word(struct i2c_client* client,
 		unsigned char addr,unsigned short data);
 static int synaptics_mode_change(int mode);
 int tp_single_tap_en(struct synaptics_ts_data *ts, bool enable);
-int opticalfp_irq_handler(struct fp_underscreen_info *tp_info);
 int gf_opticalfp_irq_handler(int event);
 
 #ifdef TPD_USE_EINT
@@ -1235,7 +1234,6 @@ static int set_tp_info(struct synaptics_ts_data *ts, uint8_t up_down)
 	tp_info.y = tp_infor[3]<<8|tp_infor[2];
 	tp_info.area_rate = tp_infor[5]<<8|tp_infor[4];
 	tp_info.touch_state = up_down;
-	opticalfp_irq_handler(&tp_info);
 
 	return ret;
 }
