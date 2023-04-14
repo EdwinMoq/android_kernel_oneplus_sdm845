@@ -11124,6 +11124,36 @@ struct afe_spkr_prot_calib_get_resp {
 	struct asm_calib_res_cfg res_cfg;
 } __packed;
 
+#ifdef CONFIG_SND_SOC_MAX98927
+/*Maxim DSM module and parameters IDs*/
+#define AFE_RX_TOPOLOGY_ID_DSM 0x10001061
+#define AFE_TX_TOPOLOGY_ID_DSM 0x10001060
+#define AFE_MODULE_DSM_TX 0x10001068
+#define AFE_MODULE_DSM_RX 0x10001062
+#define AFE_PARAM_ID_DSM_ENABLE 0x10001063
+#define AFE_PARAM_ID_CALIB 0x10001065
+#define AFE_PARAM_ID_DSM_CFG 0x10001066
+#define AFE_PARAM_ID_DSM_INFO 0x10001067
+#define AFE_PARAM_ID_DSM_STAT 0x10001069
+
+#define DSM_RX_PORT_ID AFE_PORT_ID_QUATERNARY_MI2S_RX
+#define DSM_TX_PORT_ID AFE_PORT_ID_QUATERNARY_MI2S_TX
+
+struct afe_dsm_param_array {
+	uint32_t data[112];
+} __packed;
+
+struct afe_dsm_get_param {
+	struct param_hdr_v3 pdata;
+	struct afe_dsm_param_array param;
+} __packed;
+
+struct afe_dsm_get_resp {
+	uint32_t status;
+	struct param_hdr_v3 pdata;
+	struct afe_dsm_param_array param;
+} __packed;
+#endif
 
 #define AFE_MODULE_SPEAKER_PROTECTION_V4_RX       0x000102C7
 #define AFE_PARAM_ID_SP_V4_OP_MODE                0x000102C9
@@ -11484,45 +11514,6 @@ union afe_spkr_prot_config {
 	struct afe_sp_v4_param_vi_channel_map_cfg v4_ch_map_cfg;
 } __packed;
 
-#ifdef CONFIG_SND_SOC_MAX98927
-/*Maxim DSM module and parameters IDs*/
-#define AFE_RX_TOPOLOGY_ID_DSM                              0x10001061
-#define AFE_TX_TOPOLOGY_ID_DSM                              0x10001060
-#define AFE_MODULE_DSM_TX                                   0x10001068
-#define AFE_MODULE_DSM_RX                                   0x10001062
-#define AFE_PARAM_ID_DSM_ENABLE                             0x10001063
-#define AFE_PARAM_ID_CALIB                                  0x10001065
-#define AFE_PARAM_ID_DSM_CFG                                0x10001066
-#define AFE_PARAM_ID_DSM_INFO                               0x10001067
-
-#define DSM_RX_PORT_ID      AFE_PORT_ID_QUATERNARY_MI2S_RX
-#define DSM_TX_PORT_ID      AFE_PORT_ID_QUATERNARY_MI2S_TX
-
-struct afe_dsm_param_array {
-    uint32_t    count;
-    uint32_t    flagToWrite;
-    uint32_t    Reserve[2];
-    uint32_t    params[100];
-};
-
-struct afe_dsm_set_command {
-    struct apr_hdr hdr;
-    struct afe_port_cmd_set_param_v2 param;
-    struct afe_port_param_data_v2 pdata;
-} __packed;
-
-struct afe_dsm_get_command {
-    struct apr_hdr hdr;
-    struct afe_port_cmd_get_param_v2 param;
-    struct afe_port_param_data_v2 pdata;
-} __packed;
-
-struct afe_dsm_get_resp {
-    uint32_t status;
-    struct afe_port_param_data_v2 pdata;
-    uint32_t payload[0];
-} __packed;
-#endif
 
 /* SRS TRUMEDIA start */
 /* topology */
