@@ -1077,9 +1077,10 @@ static int __cam_req_mgr_reset_in_q(struct cam_req_mgr_req_data *req)
  * @data  : timer pointer
  *
  */
-static void __cam_req_mgr_sof_freeze(unsigned long data)
+static void __cam_req_mgr_sof_freeze(struct timer_list *timer_data)
 {
-	struct cam_req_mgr_timer     *timer = (struct cam_req_mgr_timer *)data;
+	struct cam_req_mgr_timer     *timer =
+		container_of(timer_data, struct cam_req_mgr_timer, sys_timer);
 	struct cam_req_mgr_core_link    *link = NULL;
 	struct cam_req_mgr_core_session *session = NULL;
 	struct cam_req_mgr_message       msg;
