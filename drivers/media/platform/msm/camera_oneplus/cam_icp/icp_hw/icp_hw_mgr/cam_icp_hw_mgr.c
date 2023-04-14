@@ -454,12 +454,13 @@ static int32_t cam_icp_ctx_timer(void *priv, void *data)
 	return 0;
 }
 
-static void cam_icp_ctx_timer_cb(unsigned long data)
+static void cam_icp_ctx_timer_cb(struct timer_list *timer_data)
 {
 	unsigned long flags;
 	struct crm_workq_task *task;
 	struct clk_work_data *task_data;
-	struct cam_req_mgr_timer *timer = (struct cam_req_mgr_timer *)data;
+	struct cam_req_mgr_timer *timer =
+		container_of(timer_data, struct cam_req_mgr_timer, sys_timer);
 
 	spin_lock_irqsave(&icp_hw_mgr.hw_mgr_lock, flags);
 	task = cam_req_mgr_workq_get_task(icp_hw_mgr.timer_work);
@@ -478,12 +479,13 @@ static void cam_icp_ctx_timer_cb(unsigned long data)
 	spin_unlock_irqrestore(&icp_hw_mgr.hw_mgr_lock, flags);
 }
 
-static void cam_icp_device_timer_cb(unsigned long data)
+static void cam_icp_device_timer_cb(struct timer_list *timer_data)
 {
 	unsigned long flags;
 	struct crm_workq_task *task;
 	struct clk_work_data *task_data;
-	struct cam_req_mgr_timer *timer = (struct cam_req_mgr_timer *)data;
+	struct cam_req_mgr_timer *timer =
+		container_of(timer_data, struct cam_req_mgr_timer, sys_timer);
 
 	spin_lock_irqsave(&icp_hw_mgr.hw_mgr_lock, flags);
 	task = cam_req_mgr_workq_get_task(icp_hw_mgr.timer_work);
@@ -1941,7 +1943,7 @@ static int cam_icp_alloc_shared_mem(struct cam_mem_mgr_memory_desc *qtbl)
 static int cam_icp_allocate_fw_mem(void)
 {
 	int rc;
-	uint64_t kvaddr;
+	uintptr_t kvaddr;
 	size_t len;
 	dma_addr_t iova;
 
@@ -1955,7 +1957,7 @@ static int cam_icp_allocate_fw_mem(void)
 	icp_hw_mgr.hfi_mem.fw_buf.iova = iova;
 	icp_hw_mgr.hfi_mem.fw_buf.smmu_hdl = icp_hw_mgr.iommu_hdl;
 
-	CAM_DBG(CAM_ICP, "kva: %llX, iova: %llx, len: %zu",
+	CAM_DBG(CAM_ICP, "kva: %zX, iova: %llx, len: %zu",
 		kvaddr, iova, len);
 
 	return rc;
@@ -1977,6 +1979,28 @@ static int cam_icp_allocate_qdss_mem(void)
 	icp_hw_mgr.hfi_mem.qdss_buf.smmu_hdl = icp_hw_mgr.iommu_hdl;
 
 	CAM_DBG(CAM_ICP, "iova: %llx, len: %zu", iova, len);
+
+	return rc;
+}
+
+static int cam_icp_get_io_mem_info(void)
+{
+	int rc;
+	size_t len, discard_iova_len;
+	dma_addr_t iova, discard_iova_start;
+
+	rc = cam_smmu_get_io_region_info(icp_hw_mgr.iommu_hdl,
+		&iova, &len, &discard_iova_start, &discard_iova_len);
+	if (rc)
+		return rc;
+
+	icp_hw_mgr.hfi_mem.io_mem.iova_len = len;
+	icp_hw_mgr.hfi_mem.io_mem.iova_start = iova;
+	icp_hw_mgr.hfi_mem.io_mem.discard_iova_start = discard_iova_start;
+	icp_hw_mgr.hfi_mem.io_mem.discard_iova_len = discard_iova_len;
+
+	CAM_DBG(CAM_ICP, "iova: %llx, len: %zu discard iova %llx len %llx",
+		iova, len, discard_iova_start, discard_iova_len);
 
 	return rc;
 }
@@ -2035,7 +2059,15 @@ static int cam_icp_allocate_hfi_mem(void)
 		goto sec_heap_alloc_failed;
 	}
 
+	rc = cam_icp_get_io_mem_info();
+	if (rc) {
+		CAM_ERR(CAM_ICP, "Unable to get I/O region info");
+		goto get_io_mem_failed;
+	}
+
 	return rc;
+get_io_mem_failed:
+	cam_mem_mgr_free_memory_region(&icp_hw_mgr.hfi_mem.sec_heap);
 sec_heap_alloc_failed:
 	cam_mem_mgr_release_mem(&icp_hw_mgr.hfi_mem.dbg_q);
 dbg_q_alloc_failed:
@@ -2994,10 +3026,11 @@ static int cam_icp_mgr_process_cmd_desc(struct cam_icp_hw_mgr *hw_mgr,
 {
 	int rc = 0;
 	int i, j, k;
-	uint64_t addr;
+	int num_cmd_buf = 0;
+	dma_addr_t addr;
 	size_t len;
 	struct cam_cmd_buf_desc *cmd_desc = NULL;
-	uint64_t cpu_addr = 0;
+	uintptr_t cpu_addr = 0;
 	struct ipe_frame_process_data *frame_process_data = NULL;
 	struct bps_frame_process_data *bps_frame_process_data = NULL;
 
@@ -3005,32 +3038,56 @@ static int cam_icp_mgr_process_cmd_desc(struct cam_icp_hw_mgr *hw_mgr,
 		((uint32_t *) &packet->payload + packet->cmd_buf_offset/4);
 
 	*fw_cmd_buf_iova_addr = 0;
-	for (i = 0; i < packet->num_cmd_buf; i++) {
+	for (i = 0; i < packet->num_cmd_buf; i++, num_cmd_buf++) {
 		if (cmd_desc[i].type == CAM_CMD_BUF_FW) {
 			rc = cam_mem_get_io_buf(cmd_desc[i].mem_handle,
 				hw_mgr->iommu_hdl, &addr, &len);
 			if (rc) {
 				CAM_ERR(CAM_ICP, "get cmd buf failed %x",
 					hw_mgr->iommu_hdl);
+
+				if (num_cmd_buf > 0)
+					num_cmd_buf--;
 				return rc;
 			}
 			*fw_cmd_buf_iova_addr = addr;
+
+			if ((cmd_desc[i].offset >= len) ||
+				((len - cmd_desc[i].offset) <
+				cmd_desc[i].size)){
+				CAM_ERR(CAM_ICP,
+					"Invalid offset, i: %d offset: %u len: %zu size: %zu",
+					i, cmd_desc[i].offset,
+					len, cmd_desc[i].size);
+				return -EINVAL;
+			}
+
 			*fw_cmd_buf_iova_addr =
 				(*fw_cmd_buf_iova_addr + cmd_desc[i].offset);
 			rc = cam_mem_get_cpu_buf(cmd_desc[i].mem_handle,
 				&cpu_addr, &len);
-			if (rc) {
+			if (rc || !cpu_addr) {
 				CAM_ERR(CAM_ICP, "get cmd buf failed %x",
 					hw_mgr->iommu_hdl);
 				*fw_cmd_buf_iova_addr = 0;
+
+				if (num_cmd_buf > 0)
+					num_cmd_buf--;
 				return rc;
+			}
+			if ((len <= cmd_desc[i].offset) ||
+				(cmd_desc[i].size < cmd_desc[i].length) ||
+				((len - cmd_desc[i].offset) <
+				cmd_desc[i].length)) {
+				CAM_ERR(CAM_ICP, "Invalid offset or length");
+				return -EINVAL;
 			}
 			cpu_addr = cpu_addr + cmd_desc[i].offset;
 		}
 	}
 
 	if (!cpu_addr) {
-		CAM_ERR(CAM_ICP, "Invalid cpu addr");
+		CAM_ERR(CAM_ICP, "invalid number of cmd buf");
 		return -EINVAL;
 	}
 
@@ -3808,7 +3865,7 @@ static int cam_icp_mgr_acquire_hw(void *hw_mgr_priv, void *acquire_hw_args)
 {
 	int rc = 0, bitmap_size = 0;
 	uint32_t ctx_id = 0;
-	uint64_t io_buf_addr;
+	dma_addr_t io_buf_addr;
 	size_t io_buf_size;
 	struct cam_icp_hw_mgr *hw_mgr = hw_mgr_priv;
 	struct cam_icp_hw_ctx_data *ctx_data = NULL;
@@ -3971,7 +4028,7 @@ static int cam_icp_mgr_get_hw_caps(void *hw_mgr_priv, void *hw_caps_args)
 
 	mutex_lock(&hw_mgr->hw_mgr_mutex);
 	if (copy_from_user(&icp_hw_mgr.icp_caps,
-		(void __user *)query_cap->caps_handle,
+		u64_to_user_ptr(query_cap->caps_handle),
 		sizeof(struct cam_icp_query_cap_cmd))) {
 		CAM_ERR(CAM_ICP, "copy_from_user failed");
 		rc = -EFAULT;
@@ -3985,7 +4042,7 @@ static int cam_icp_mgr_get_hw_caps(void *hw_mgr_priv, void *hw_caps_args)
 	icp_hw_mgr.icp_caps.dev_iommu_handle.non_secure = hw_mgr->iommu_hdl;
 	icp_hw_mgr.icp_caps.dev_iommu_handle.secure = hw_mgr->iommu_sec_hdl;
 
-	if (copy_to_user((void __user *)query_cap->caps_handle,
+	if (copy_to_user(u64_to_user_ptr(query_cap->caps_handle),
 		&icp_hw_mgr.icp_caps, sizeof(struct cam_icp_query_cap_cmd))) {
 		CAM_ERR(CAM_ICP, "copy_to_user failed");
 		rc = -EFAULT;
@@ -4205,7 +4262,8 @@ cmd_work_failed:
 	return rc;
 }
 
-int cam_icp_hw_mgr_init(struct device_node *of_node, uint64_t *hw_mgr_hdl)
+int cam_icp_hw_mgr_init(struct device_node *of_node, uint64_t *hw_mgr_hdl,
+	int *iommu_hdl)
 {
 	int i, rc = 0;
 	struct cam_hw_mgr_intf *hw_mgr_intf;
@@ -4255,12 +4313,6 @@ int cam_icp_hw_mgr_init(struct device_node *of_node, uint64_t *hw_mgr_hdl)
 		goto icp_get_hdl_failed;
 	}
 
-	rc = cam_smmu_ops(icp_hw_mgr.iommu_hdl, CAM_SMMU_ATTACH);
-	if (rc) {
-		CAM_ERR(CAM_ICP, "icp attach failed: %d", rc);
-		goto icp_attach_failed;
-	}
-
 	rc = cam_smmu_get_handle("cam-secure", &icp_hw_mgr.iommu_sec_hdl);
 	if (rc) {
 		CAM_ERR(CAM_ICP, "get secure mmu handle failed: %d", rc);
@@ -4271,6 +4323,9 @@ int cam_icp_hw_mgr_init(struct device_node *of_node, uint64_t *hw_mgr_hdl)
 	if (rc)
 		goto icp_wq_create_failed;
 
+	if (iommu_hdl)
+		*iommu_hdl = icp_hw_mgr.iommu_hdl;
+
 	init_completion(&icp_hw_mgr.a5_complete);
 	return rc;
 
@@ -4278,8 +4333,6 @@ icp_wq_create_failed:
 	cam_smmu_destroy_handle(icp_hw_mgr.iommu_sec_hdl);
 	icp_hw_mgr.iommu_sec_hdl = -1;
 secure_hdl_failed:
-	cam_smmu_ops(icp_hw_mgr.iommu_hdl, CAM_SMMU_DETACH);
-icp_attach_failed:
 	cam_smmu_destroy_handle(icp_hw_mgr.iommu_hdl);
 	icp_hw_mgr.iommu_hdl = -1;
 icp_get_hdl_failed:

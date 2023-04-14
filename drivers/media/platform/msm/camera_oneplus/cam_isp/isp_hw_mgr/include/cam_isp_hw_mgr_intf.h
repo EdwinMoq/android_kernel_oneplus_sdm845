@@ -205,9 +205,9 @@ struct cam_isp_hw_cmd_args {
  * @of_node:            Device node input
  * @hw_mgr:             Input/output structure for the ISP hardware manager
  *                          initialization
- *
+ * @iommu_hdl:          Iommu handle to be returned
  */
 int cam_isp_hw_mgr_init(struct device_node *of_node,
-	struct cam_hw_mgr_intf *hw_mgr);
+	struct cam_hw_mgr_intf *hw_mgr, int *iommu_hdl);
 
 #endif /* __CAM_ISP_HW_MGR_INTF_H__ */
