@@ -17,7 +17,6 @@
 #include <linux/io.h>
 #include <linux/of.h>
 #include <linux/platform_device.h>
-#include <linux/dma-buf.h>
 
 #define IPE_COLLAPSE_MASK 0x1
 #define IPE_PWR_ON_MASK   0x2

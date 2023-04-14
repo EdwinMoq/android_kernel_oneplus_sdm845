@@ -135,7 +135,7 @@ int cam_eeprom_parse_dt_memory_map(struct device_node *node,
 		return rc;
 	}
 
-	map = kzalloc((sizeof(*map) * data->num_map), GFP_KERNEL);
+	map = vzalloc((sizeof(*map) * data->num_map));
 	if (!map) {
 		rc = -ENOMEM;
 		return rc;
@@ -184,23 +184,15 @@ int cam_eeprom_parse_dt_memory_map(struct device_node *node,
 		data->num_data += map[i].mem.valid_size;
 	}
 
-	if (data->num_data < PAGE_SIZE) {
-		data->mapdata = kzalloc(data->num_data, GFP_KERNEL);
-		if (!data->mapdata) {
-			rc = -ENOMEM;
-			goto ERROR;
-		}
-	} else {
-		data->mapdata = vzalloc(data->num_data);
-		if (!data->mapdata) {
-			rc = -ENOMEM;
-			goto ERROR;
-		}
+	data->mapdata = vzalloc(data->num_data);
+	if (!data->mapdata) {
+		rc = -ENOMEM;
+		goto ERROR;
 	}
 	return rc;
 
 ERROR:
-	kfree(data->map);
+	vfree(data->map);
 	memset(data, 0, sizeof(*data));
 	return rc;
 }

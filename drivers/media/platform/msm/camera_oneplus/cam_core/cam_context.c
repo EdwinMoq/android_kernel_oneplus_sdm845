@@ -12,6 +12,8 @@
 
 #include <linux/slab.h>
 #include <linux/uaccess.h>
+#include <linux/refcount.h>
+
 #include "cam_context.h"
 #include "cam_debug_util.h"
 #include "cam_node.h"
@@ -214,6 +216,32 @@ int cam_context_handle_crm_process_evt(struct cam_context *ctx,
 		/* handling of this message is optional */
 		CAM_DBG(CAM_CORE, "No crm process evt in dev %d, state %d",
 			ctx->dev_hdl, ctx->state);
+	}
+	mutex_unlock(&ctx->ctx_mutex);
+
+	return rc;
+}
+
+int cam_context_dump_pf_info(struct cam_context *ctx, unsigned long iova,
+	uint32_t buf_info)
+{
+	int rc = 0;
+
+	if (!ctx->state_machine) {
+		CAM_ERR(CAM_CORE, "Context is not ready");
+		return -EINVAL;
+	}
+
+	mutex_lock(&ctx->ctx_mutex);
+	if ((ctx->state > CAM_CTX_AVAILABLE) &&
+		(ctx->state < CAM_CTX_STATE_MAX)) {
+		if (ctx->state_machine[ctx->state].pagefault_ops) {
+			rc = ctx->state_machine[ctx->state].pagefault_ops(
+				ctx, iova, buf_info);
+		} else {
+			CAM_WARN(CAM_CORE, "No dump ctx in dev %d, state %d",
+				ctx->dev_hdl, ctx->state);
+		}
 	}
 	mutex_unlock(&ctx->ctx_mutex);
 
@@ -479,7 +507,7 @@ void cam_context_putref(struct cam_context *ctx)
 	kref_put(&ctx->refcount, cam_node_put_ctxt_to_free_list);
 	CAM_DBG(CAM_CORE,
 		"ctx device hdl %ld, ref count %d, dev_name %s",
-		ctx->dev_hdl, atomic_read(&(ctx->refcount.refcount)),
+		ctx->dev_hdl, refcount_read(&(ctx->refcount.refcount)),
 		ctx->dev_name);
 }
 
@@ -487,10 +515,10 @@ void cam_context_getref(struct cam_context *ctx)
 {
 	if (kref_get_unless_zero(&ctx->refcount) == 0) {
 		/* should never happen */
-		WARN(1, "cam_context_getref fail\n");
+		WARN(1, "%s fail\n", __func__);
 	}
 	CAM_DBG(CAM_CORE,
 		"ctx device hdl %ld, ref count %d, dev_name %s",
-		ctx->dev_hdl, atomic_read(&(ctx->refcount.refcount)),
+		ctx->dev_hdl, refcount_read(&(ctx->refcount.refcount)),
 		ctx->dev_name);
 }
