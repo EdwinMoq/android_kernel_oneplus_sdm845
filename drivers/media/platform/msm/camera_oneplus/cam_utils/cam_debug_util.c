@@ -1,13 +1,6 @@
-/* Copyright (c) 2017, The Linux Foundataion. All rights reserved.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 and
- * only version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+// SPDX-License-Identifier: GPL-2.0-only
+/*
+ * Copyright (c) 2017-2019, The Linux Foundataion. All rights reserved.
  */
 
 #include <linux/io.h>
@@ -30,7 +23,7 @@ const char *cam_get_module_name(unsigned int module_id)
 		name = "CAM-CORE";
 		break;
 	case CAM_CRM:
-		name = "CAM_CRM";
+		name = "CAM-CRM";
 		break;
 	case CAM_CPAS:
 		name = "CAM-CPAS";
@@ -86,6 +79,9 @@ const char *cam_get_module_name(unsigned int module_id)
 	case CAM_OIS:
 		name = "CAM-OIS";
 		break;
+	case CAM_REQ:
+		name = "CAM-REQ";
+		break;
 	default:
 		name = "CAM";
 		break;
@@ -104,9 +100,11 @@ void cam_debug_log(unsigned int module_id, const char *func, const int line,
 
 	if (debug_mdl & module_id) {
 		vsnprintf(str_buffer, STR_BUFFER_MAX_LENGTH, fmt, args);
-		pr_info("CAM_DBG: %s: %s: %d: %s\n",
+		pr_info("[%d %d] CAM_DBG: %s: %s: %d: %s\n",
+		    task_tgid_nr(current),  task_pid_nr(current),
 			cam_get_module_name(module_id),
 			func, line, str_buffer);
-		va_end(args);
 	}
+
+	va_end(args);
 }

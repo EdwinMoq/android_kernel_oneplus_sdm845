@@ -1,15 +1,9 @@
-/* Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 and
- * only version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+// SPDX-License-Identifier: GPL-2.0-only
+/*
+ * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
  */
 
+#include <linux/dma-contiguous.h>
 #include "cam_sensor_spi.h"
 #include "cam_debug_util.h"
 
@@ -133,7 +127,7 @@ static int32_t cam_spi_tx_helper(struct camera_io_master *client,
 	} else {
 		txr = PAGE_ALIGN(len) >> PAGE_SHIFT;
 		page_tx = cma_alloc(dev_get_cma_area(dev),
-			txr, 0);
+			txr, 0, GFP_KERNEL);
 		if (!page_tx)
 			return -ENOMEM;
 
@@ -146,7 +140,7 @@ static int32_t cam_spi_tx_helper(struct camera_io_master *client,
 		} else {
 			rxr = PAGE_ALIGN(len) >> PAGE_SHIFT;
 			page_rx = cma_alloc(dev_get_cma_area(dev),
-				rxr, 0);
+				rxr, 0, GFP_KERNEL);
 			if (!page_rx) {
 				if (!tx)
 					cma_release(dev_get_cma_area(dev),

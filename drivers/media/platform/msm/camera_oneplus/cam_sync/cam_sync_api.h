@@ -1,13 +1,6 @@
-/* Copyright (c) 2017, The Linux Foundation. All rights reserved.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 and
- * only version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+/* SPDX-License-Identifier: GPL-2.0-only */
+/*
+ * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
  */
 
 #ifndef __CAM_SYNC_API_H__
@@ -99,6 +92,29 @@ int cam_sync_signal(int32_t sync_obj, uint32_t status);
  * @return Status of operation. Negative in case of error. Zero otherwise.
  */
 int cam_sync_merge(int32_t *sync_obj, uint32_t num_objs, int32_t *merged_obj);
+
+/**
+ * @brief: get ref count of sync obj
+ *
+ * This function will increment ref count for the sync object, and the ref
+ * count will be decremented when this sync object is signaled.
+ *
+ * @param sync_obj: sync object
+ *
+ * @return Status of operation. Negative in case of error. Zero otherwise.
+ */
+int cam_sync_get_obj_ref(int32_t sync_obj);
+
+/**
+ * @brief: put ref count of sync obj
+ *
+ * This function will decrement ref count for the sync object.
+ *
+ * @param sync_obj: sync object
+ *
+ * @return Status of operation. Negative in case of error. Zero otherwise.
+ */
+int cam_sync_put_obj_ref(int32_t sync_obj);
 
 /**
  * @brief: Destroys a sync object

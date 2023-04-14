@@ -1,13 +1,6 @@
-/* Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 and
- * only version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+// SPDX-License-Identifier: GPL-2.0-only
+/*
+ * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
  */
 
 #include <linux/slab.h>
@@ -94,7 +87,8 @@ static int cam_ife_mgr_get_hw_caps(void *hw_mgr_priv,
 
 	CAM_DBG(CAM_ISP, "enter");
 
-	if (copy_from_user(&query_isp, (void __user *)query->caps_handle,
+	if (copy_from_user(&query_isp,
+		u64_to_user_ptr(query->caps_handle),
 		sizeof(struct cam_isp_query_cap_cmd))) {
 		rc = -EFAULT;
 		return rc;
@@ -113,8 +107,8 @@ static int cam_ife_mgr_get_hw_caps(void *hw_mgr_priv,
 		query_isp.dev_caps[i].hw_version.reserved = 0;
 	}
 
-	if (copy_to_user((void __user *)query->caps_handle, &query_isp,
-		sizeof(struct cam_isp_query_cap_cmd)))
+	if (copy_to_user(u64_to_user_ptr(query->caps_handle),
+		&query_isp, sizeof(struct cam_isp_query_cap_cmd)))
 		rc = -EFAULT;
 
 	CAM_DBG(CAM_ISP, "exit rc :%d", rc);
@@ -1419,7 +1413,8 @@ static int cam_ife_mgr_acquire_hw(void *hw_mgr_priv,
 			isp_resource[i].res_hdl,
 			isp_resource[i].length);
 
-		in_port = memdup_user((void __user *)isp_resource[i].res_hdl,
+		in_port = memdup_user(
+			u64_to_user_ptr(isp_resource[i].res_hdl),
 			isp_resource[i].length);
 		if (in_port > 0) {
 			rc = cam_ife_mgr_acquire_hw_for_ctx(ife_ctx, in_port,
@@ -4030,7 +4025,7 @@ err:
 	return -ENOMEM;
 }
 
-int cam_ife_hw_mgr_init(struct cam_hw_mgr_intf *hw_mgr_intf)
+int cam_ife_hw_mgr_init(struct cam_hw_mgr_intf *hw_mgr_intf, int *iommu_hdl)
 {
 	int rc = -EFAULT;
 	int i, j;
@@ -4100,12 +4095,6 @@ int cam_ife_hw_mgr_init(struct cam_hw_mgr_intf *hw_mgr_intf)
 		&g_ife_hw_mgr.mgr_common.img_iommu_hdl)) {
 		CAM_ERR(CAM_ISP, "Can not get iommu handle");
 		return -EINVAL;
-	}
-
-	if (cam_smmu_ops(g_ife_hw_mgr.mgr_common.img_iommu_hdl,
-		CAM_SMMU_ATTACH)) {
-		CAM_ERR(CAM_ISP, "Attach iommu handle failed.");
-		goto attach_fail;
 	}
 
 	if (cam_smmu_get_handle("cam-secure",
@@ -4198,6 +4187,9 @@ int cam_ife_hw_mgr_init(struct cam_hw_mgr_intf *hw_mgr_intf)
 	hw_mgr_intf->hw_config = cam_ife_mgr_config_hw;
 	hw_mgr_intf->hw_cmd = cam_ife_mgr_cmd;
 
+	if (iommu_hdl)
+		*iommu_hdl = g_ife_hw_mgr.mgr_common.img_iommu_hdl;
+
 	cam_ife_hw_mgr_debug_register();
 	CAM_DBG(CAM_ISP, "Exit");
 
@@ -4216,9 +4208,6 @@ end:
 		g_ife_hw_mgr.mgr_common.img_iommu_hdl_secure);
 	g_ife_hw_mgr.mgr_common.img_iommu_hdl_secure = -1;
 secure_fail:
-	cam_smmu_ops(g_ife_hw_mgr.mgr_common.img_iommu_hdl,
-		CAM_SMMU_DETACH);
-attach_fail:
 	cam_smmu_destroy_handle(g_ife_hw_mgr.mgr_common.img_iommu_hdl);
 	g_ife_hw_mgr.mgr_common.img_iommu_hdl = -1;
 	return rc;

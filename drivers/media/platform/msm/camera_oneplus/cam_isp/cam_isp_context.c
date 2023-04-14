@@ -1,13 +1,6 @@
-/* Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 and
- * only version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+// SPDX-License-Identifier: GPL-2.0-only
+/*
+ * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
  */
 
 #include <linux/debugfs.h>
@@ -1819,10 +1812,10 @@ static int __cam_isp_ctx_release_dev_in_top_state(struct cam_context *ctx,
 static int __cam_isp_ctx_config_dev_in_top_state(
 	struct cam_context *ctx, struct cam_config_dev_cmd *cmd)
 {
-	int rc = 0;
+	int rc = 0, i;
 	struct cam_ctx_request           *req = NULL;
 	struct cam_isp_ctx_req           *req_isp;
-	uint64_t                          packet_addr;
+	uintptr_t                         packet_addr;
 	struct cam_packet                *packet;
 	size_t                            len = 0;
 	struct cam_hw_prepare_update_args cfg;
@@ -1843,8 +1836,7 @@ static int __cam_isp_ctx_config_dev_in_top_state(
 
 	if (!req) {
 		CAM_ERR(CAM_ISP, "No more request obj free");
-		rc = -ENOMEM;
-		goto end;
+		return -ENOMEM;
 	}
 
 	req_isp = (struct cam_isp_ctx_req *) req->req_priv;
@@ -1852,14 +1844,14 @@ static int __cam_isp_ctx_config_dev_in_top_state(
 	/* for config dev, only memory handle is supported */
 	/* map packet from the memhandle */
 	rc = cam_mem_get_cpu_buf((int32_t) cmd->packet_handle,
-		(uint64_t *) &packet_addr, &len);
+		&packet_addr, &len);
 	if (rc != 0) {
 		CAM_ERR(CAM_ISP, "Can not get packet address");
 		rc = -EINVAL;
 		goto free_req;
 	}
 
-	packet = (struct cam_packet *) (packet_addr + cmd->offset);
+	packet = (struct cam_packet *)(packet_addr + (uint32_t)cmd->offset);
 	CAM_DBG(CAM_ISP, "pack_handle %llx", cmd->packet_handle);
 	CAM_DBG(CAM_ISP, "packet address is 0x%llx", packet_addr);
 	CAM_DBG(CAM_ISP, "packet with length %zu, offset 0x%llx",
@@ -1894,6 +1886,15 @@ static int __cam_isp_ctx_config_dev_in_top_state(
 	req_isp->num_fence_map_out = cfg.num_out_map_entries;
 	req_isp->num_fence_map_in = cfg.num_in_map_entries;
 	req_isp->num_acked = 0;
+
+	for (i = 0; i < req_isp->num_fence_map_out; i++) {
+		rc = cam_sync_get_obj_ref(req_isp->fence_map_out[i].sync_id);
+		if (rc) {
+			CAM_ERR(CAM_ISP, "Can't get ref for fence %d",
+				req_isp->fence_map_out[i].sync_id);
+			goto put_ref;
+		}
+	}
 
 	CAM_DBG(CAM_ISP, "num_entry: %d, num fence out: %d, num fence in: %d",
 		req_isp->num_cfg, req_isp->num_fence_map_out,
@@ -1936,18 +1937,24 @@ static int __cam_isp_ctx_config_dev_in_top_state(
 		}
 	}
 	if (rc)
-		goto free_req;
+		goto put_ref;
 
 	CAM_DBG(CAM_ISP, "Preprocessing Config %lld successful",
 		req->request_id);
 
 	return rc;
 
+put_ref:
+	for (--i; i >= 0; i--) {
+		if (cam_sync_put_obj_ref(req_isp->fence_map_out[i].sync_id))
+			CAM_ERR(CAM_CTXT, "Failed to put ref of fence %d",
+				req_isp->fence_map_out[i].sync_id);
+	}
 free_req:
 	spin_lock_bh(&ctx->lock);
 	list_add_tail(&req->list, &ctx->free_req_list);
 	spin_unlock_bh(&ctx->lock);
-end:
+
 	return rc;
 }
 
@@ -1997,7 +2004,7 @@ static int __cam_isp_ctx_acquire_dev_in_available(struct cam_context *ctx,
 	CAM_DBG(CAM_ISP, "start copy %d resources from user",
 		 cmd->num_resources);
 
-	if (copy_from_user(isp_res, (void __user *)cmd->resource_hdl,
+	if (copy_from_user(isp_res, u64_to_user_ptr(cmd->resource_hdl),
 		sizeof(*isp_res)*cmd->num_resources)) {
 		rc = -EFAULT;
 		goto free_res;

@@ -1,13 +1,6 @@
-/* Copyright (c) 2017, The Linux Foundation. All rights reserved.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 and
- * only version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+// SPDX-License-Identifier: GPL-2.0-only
+/*
+ * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
  */
 
 #include <linux/types.h>
@@ -21,7 +14,7 @@ int cam_packet_util_get_cmd_mem_addr(int handle, uint32_t **buf_addr,
 	size_t *len)
 {
 	int rc = 0;
-	uint64_t kmd_buf_addr = 0;
+	uintptr_t kmd_buf_addr = 0;
 
 	rc = cam_mem_get_cpu_buf(handle, &kmd_buf_addr, len);
 	if (rc) {
@@ -39,6 +32,12 @@ int cam_packet_util_get_cmd_mem_addr(int handle, uint32_t **buf_addr,
 
 int cam_packet_util_validate_cmd_desc(struct cam_cmd_buf_desc *cmd_desc)
 {
+
+	if (!cmd_desc) {
+		CAM_ERR(CAM_UTIL, "Invalid cmd desc");
+		return -EINVAL;
+	}
+
 	if ((cmd_desc->length > cmd_desc->size) ||
 		(cmd_desc->mem_handle <= 0)) {
 		CAM_ERR(CAM_UTIL, "invalid cmd arg %d %d %d %d",
@@ -127,8 +126,8 @@ int cam_packet_util_process_patches(struct cam_packet *packet,
 	int32_t iommu_hdl, int32_t sec_mmu_hdl)
 {
 	struct cam_patch_desc *patch_desc = NULL;
-	uint64_t   iova_addr;
-	uint64_t   cpu_addr;
+	dma_addr_t iova_addr;
+	uintptr_t  cpu_addr = 0;
 	uint32_t   temp;
 	uint32_t  *dst_cpu_addr;
 	uint32_t  *src_buf_iova_addr;
@@ -161,7 +160,7 @@ int cam_packet_util_process_patches(struct cam_packet *packet,
 
 		rc = cam_mem_get_cpu_buf(patch_desc[i].dst_buf_hdl,
 			&cpu_addr, &dst_buf_len);
-		if (rc < 0) {
+		if (rc < 0 || !cpu_addr || (dst_buf_len == 0)) {
 			CAM_ERR(CAM_UTIL, "unable to get dst buf address");
 			return rc;
 		}
@@ -190,8 +189,8 @@ int cam_packet_util_process_generic_cmd_buffer(
 	struct cam_cmd_buf_desc *cmd_buf,
 	cam_packet_generic_blob_handler blob_handler_cb, void *user_data)
 {
-	int       rc;
-	uint64_t  cpu_addr;
+	int       rc = 0;
+	uintptr_t  cpu_addr = 0;
 	size_t    buf_size;
 	uint32_t *blob_ptr;
 	uint32_t  blob_type, blob_size, blob_block_size, len_read;
@@ -215,7 +214,8 @@ int cam_packet_util_process_generic_cmd_buffer(
 		return rc;
 	}
 
-	blob_ptr = (uint32_t *)((uint8_t *)cpu_addr + cmd_buf->offset);
+	blob_ptr = (uint32_t *)(((uint8_t *)cpu_addr) +
+		cmd_buf->offset);
 
 	CAM_DBG(CAM_UTIL,
 		"GenericCmdBuffer cpuaddr=%pK, blobptr=%pK, len=%d",

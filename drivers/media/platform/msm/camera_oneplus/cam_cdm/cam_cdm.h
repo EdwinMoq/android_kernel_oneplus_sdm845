@@ -1,19 +1,11 @@
-/* Copyright (c) 2017, The Linux Foundation. All rights reserved.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 and
- * only version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+/* SPDX-License-Identifier: GPL-2.0-only */
+/*
+ * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
  */
 
 #ifndef _CAM_CDM_H_
 #define _CAM_CDM_H_
 
-#include <linux/dma-direction.h>
 #include <linux/module.h>
 #include <linux/of_platform.h>
 #include <linux/random.h>
@@ -195,11 +187,11 @@ struct cam_cdm_hw_intf_cmd_submit_bl {
 	struct cam_cdm_bl_request *data;
 };
 
-/* struct cam_cdm_hw_mem - CDM hw memory.struct */
+/* struct cam_cdm_hw_mem - CDM hw memory struct */
 struct cam_cdm_hw_mem {
 	int32_t handle;
 	uint32_t vaddr;
-	uint64_t kmdvaddr;
+	uintptr_t kmdvaddr;
 	size_t size;
 };
 

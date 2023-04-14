@@ -1,13 +1,6 @@
-/* Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 and
- * only version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+/* SPDX-License-Identifier: GPL-2.0-only */
+/*
+ * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
  */
 
 #ifndef _CAM_CDM_API_H_
@@ -105,10 +98,10 @@ struct cam_cdm_bl_cmd {
 	union {
 		int32_t mem_handle;
 		uint32_t *hw_iova;
-		void *kernel_iova;
+		uintptr_t kernel_iova;
 	} bl_addr;
-	uint32_t  offset;
-	uint32_t  len;
+	uint32_t offset;
+	uint32_t len;
 };
 
 /**

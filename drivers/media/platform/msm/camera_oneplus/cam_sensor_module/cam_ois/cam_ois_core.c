@@ -1,17 +1,11 @@
-/* Copyright (c) 2017, The Linux Foundation. All rights reserved.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 and
- * only version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+// SPDX-License-Identifier: GPL-2.0-only
+/*
+ * Copyright (c) 2017-2020, The Linux Foundation. All rights reserved.
  */
 
 #include <linux/module.h>
 #include <linux/firmware.h>
+#include <linux/dma-contiguous.h>
 #include <cam_sensor_cmn_header.h>
 #include "cam_ois_core.h"
 #include "cam_ois_soc.h"
@@ -77,8 +71,7 @@ static int cam_ois_get_dev_handle(struct cam_ois_ctrl_t *o_ctrl,
 		CAM_ERR(CAM_OIS, "Device is already acquired");
 		return -EFAULT;
 	}
-
-	if (copy_from_user(&ois_acq_dev, (void __user *) cmd->handle,
+	if (copy_from_user(&ois_acq_dev, u64_to_user_ptr(cmd->handle),
 		sizeof(ois_acq_dev)))
 		return -EFAULT;
 
@@ -94,7 +87,7 @@ static int cam_ois_get_dev_handle(struct cam_ois_ctrl_t *o_ctrl,
 	o_ctrl->bridge_intf.session_hdl = ois_acq_dev.session_handle;
 
 	CAM_DBG(CAM_OIS, "Device Handle: %d", ois_acq_dev.device_handle);
-	if (copy_to_user((void __user *) cmd->handle, &ois_acq_dev,
+	if (copy_to_user(u64_to_user_ptr(cmd->handle), &ois_acq_dev,
 		sizeof(struct cam_sensor_acquire_dev))) {
 		CAM_ERR(CAM_OIS, "ACQUIRE_DEV: copy to user failed");
 		return -EFAULT;
@@ -338,7 +331,7 @@ static int cam_ois_fw_download(struct cam_ois_ctrl_t *o_ctrl)
 	fw_size = PAGE_ALIGN(sizeof(struct cam_sensor_i2c_reg_array) *
 		total_bytes) >> PAGE_SHIFT;
 	page = cma_alloc(dev_get_cma_area((o_ctrl->soc_info.dev)),
-		fw_size, 0);
+		fw_size, 0, GFP_KERNEL);
 	if (!page) {
 		CAM_ERR(CAM_OIS, "Failed in allocating i2c_array");
 		release_firmware(fw);
@@ -383,7 +376,7 @@ static int cam_ois_fw_download(struct cam_ois_ctrl_t *o_ctrl)
 	fw_size = PAGE_ALIGN(sizeof(struct cam_sensor_i2c_reg_array) *
 		total_bytes) >> PAGE_SHIFT;
 	page = cma_alloc(dev_get_cma_area((o_ctrl->soc_info.dev)),
-		fw_size, 0);
+		fw_size, 0, GFP_KERNEL);
 	if (!page) {
 		CAM_ERR(CAM_OIS, "Failed in allocating i2c_array");
 		release_firmware(fw);
@@ -428,12 +421,12 @@ static int cam_ois_pkt_parse(struct cam_ois_ctrl_t *o_ctrl, void *arg)
 	int32_t                         i = 0;
 	uint32_t                        total_cmd_buf_in_bytes = 0;
 	struct common_header           *cmm_hdr = NULL;
-	uint64_t                        generic_ptr;
+	uintptr_t                       generic_ptr;
 	struct cam_control             *ioctl_ctrl = NULL;
 	struct cam_config_dev_cmd       dev_config;
 	struct i2c_settings_array      *i2c_reg_settings = NULL;
 	struct cam_cmd_buf_desc        *cmd_desc = NULL;
-	uint64_t                        generic_pkt_addr;
+	uintptr_t                       generic_pkt_addr;
 	size_t                          pkt_len;
 	struct cam_packet              *csl_packet = NULL;
 	size_t                          len_of_buff = 0;
@@ -447,12 +440,13 @@ static int cam_ois_pkt_parse(struct cam_ois_ctrl_t *o_ctrl, void *arg)
 	uint32_t						red_reg_data = 0;
 	ioctl_ctrl = (struct cam_control *)arg;
 
-	if (copy_from_user(&dev_config, (void __user *) ioctl_ctrl->handle,
+	if (copy_from_user(&dev_config,
+		u64_to_user_ptr(ioctl_ctrl->handle),
 		sizeof(dev_config)))
 		return -EFAULT;
 
 	rc = cam_mem_get_cpu_buf(dev_config.packet_handle,
-		(uint64_t *)&generic_pkt_addr, &pkt_len);
+		&generic_pkt_addr, &pkt_len);
 	if (rc) {
 		CAM_ERR(CAM_OIS,
 			"error in converting command Handle Error: %d", rc);
@@ -467,7 +461,8 @@ static int cam_ois_pkt_parse(struct cam_ois_ctrl_t *o_ctrl, void *arg)
 	}
 
 	csl_packet = (struct cam_packet *)
-		(generic_pkt_addr + dev_config.offset);
+		(generic_pkt_addr + (uint32_t)dev_config.offset);
+
 	switch (csl_packet->header.op_code & 0xFFFFFF) {
 	case CAM_OIS_PACKET_OPCODE_INIT:
 		offset = (uint32_t *)&csl_packet->payload;
@@ -481,7 +476,7 @@ static int cam_ois_pkt_parse(struct cam_ois_ctrl_t *o_ctrl, void *arg)
 				continue;
 
 			rc = cam_mem_get_cpu_buf(cmd_desc[i].mem_handle,
-				(uint64_t *)&generic_ptr, &len_of_buff);
+				&generic_ptr, &len_of_buff);
 			if (rc < 0) {
 				CAM_ERR(CAM_OIS, "Failed to get cpu buf");
 				return rc;
@@ -803,7 +798,7 @@ int cam_ois_driver_cmd(struct cam_ois_ctrl_t *o_ctrl, void *arg)
 	case CAM_QUERY_CAP:
 		ois_cap.slot_info = o_ctrl->soc_info.index;
 
-		if (copy_to_user((void __user *) cmd->handle,
+		if (copy_to_user(u64_to_user_ptr(cmd->handle),
 			&ois_cap,
 			sizeof(struct cam_ois_query_cap_t))) {
 			CAM_ERR(CAM_OIS, "Failed Copy to User");

@@ -1,20 +1,12 @@
-/* Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 and
- * only version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+// SPDX-License-Identifier: GPL-2.0-only
+/*
+ * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
  */
 
 #include <linux/delay.h>
 #include <linux/io.h>
 #include <linux/of.h>
 #include <linux/module.h>
-#include <linux/ion.h>
 #include <linux/kernel.h>
 
 #include "cam_node.h"
@@ -22,10 +14,30 @@
 #include "cam_jpeg_hw_mgr_intf.h"
 #include "cam_jpeg_dev.h"
 #include "cam_debug_util.h"
+#include "cam_smmu_api.h"
 
 #define CAM_JPEG_DEV_NAME "cam-jpeg"
 
 static struct cam_jpeg_dev g_jpeg_dev;
+
+static void cam_jpeg_dev_iommu_fault_handler(
+	struct iommu_domain *domain, struct device *dev, unsigned long iova,
+	int flags, void *token, uint32_t buf_info)
+{
+	int i = 0;
+	struct cam_node *node = NULL;
+
+	if (!token) {
+		CAM_ERR(CAM_JPEG, "invalid token in page handler cb");
+		return;
+	}
+
+	node = (struct cam_node *)token;
+
+	for (i = 0; i < node->ctx_size; i++)
+		cam_context_dump_pf_info(&(node->ctx_list[i]), iova,
+			buf_info);
+}
 
 static const struct of_device_id cam_jpeg_dt_match[] = {
 	{
@@ -78,6 +90,7 @@ static int cam_jpeg_dev_probe(struct platform_device *pdev)
 	int i;
 	struct cam_hw_mgr_intf hw_mgr_intf;
 	struct cam_node *node;
+	int iommu_hdl = -1;
 
 	g_jpeg_dev.sd.internal_ops = &cam_jpeg_subdev_internal_ops;
 	rc = cam_subdev_probe(&g_jpeg_dev.sd, pdev, CAM_JPEG_DEV_NAME,
@@ -89,7 +102,7 @@ static int cam_jpeg_dev_probe(struct platform_device *pdev)
 	node = (struct cam_node *)g_jpeg_dev.sd.token;
 
 	rc = cam_jpeg_hw_mgr_init(pdev->dev.of_node,
-		(uint64_t *)&hw_mgr_intf);
+		(uint64_t *)&hw_mgr_intf, &iommu_hdl);
 	if (rc) {
 		CAM_ERR(CAM_JPEG, "Can not initialize JPEG HWmanager %d", rc);
 		goto unregister;
@@ -113,6 +126,9 @@ static int cam_jpeg_dev_probe(struct platform_device *pdev)
 		CAM_ERR(CAM_JPEG, "JPEG node init failed %d", rc);
 		goto ctx_init_fail;
 	}
+
+	cam_smmu_set_client_page_fault_handler(iommu_hdl,
+		cam_jpeg_dev_iommu_fault_handler, node);
 
 	mutex_init(&g_jpeg_dev.jpeg_mutex);
 

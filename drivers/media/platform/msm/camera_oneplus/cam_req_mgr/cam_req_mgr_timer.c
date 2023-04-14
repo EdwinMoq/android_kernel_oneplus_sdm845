@@ -1,17 +1,12 @@
-/* Copyright (c) 2016-2018, The Linux Foundation. All rights reserved.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 and
- * only version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+// SPDX-License-Identifier: GPL-2.0-only
+/*
+ * Copyright (c) 2016-2019, The Linux Foundation. All rights reserved.
  */
 
 #include "cam_req_mgr_timer.h"
 #include "cam_debug_util.h"
+
+extern struct kmem_cache *g_cam_req_mgr_timer_cachep;
 
 void crm_timer_reset(struct cam_req_mgr_timer *crm_timer)
 {
@@ -23,10 +18,10 @@ void crm_timer_reset(struct cam_req_mgr_timer *crm_timer)
 		(jiffies + msecs_to_jiffies(crm_timer->expires)));
 }
 
-void crm_timer_callback(unsigned long data)
+void crm_timer_callback(struct timer_list *timer_data)
 {
-	struct cam_req_mgr_timer *timer = (struct cam_req_mgr_timer *)data;
-
+	struct cam_req_mgr_timer *timer =
+		container_of(timer_data, struct cam_req_mgr_timer, sys_timer);
 	if (!timer) {
 		CAM_ERR(CAM_CRM, "NULL timer");
 		return;
@@ -46,7 +41,7 @@ void crm_timer_modify(struct cam_req_mgr_timer *crm_timer,
 }
 
 int crm_timer_init(struct cam_req_mgr_timer **timer,
-	int32_t expires, void *parent, void (*timer_cb)(unsigned long))
+	int32_t expires, void *parent, void (*timer_cb)(struct timer_list *))
 {
 	int                       ret = 0;
 	struct cam_req_mgr_timer *crm_timer = NULL;
@@ -54,9 +49,7 @@ int crm_timer_init(struct cam_req_mgr_timer **timer,
 	CAM_DBG(CAM_CRM, "init timer %d %pK", expires, *timer);
 	if (*timer == NULL) {
 		if (g_cam_req_mgr_timer_cachep) {
-			crm_timer = (struct cam_req_mgr_timer *)
-				kmem_cache_alloc(
-					g_cam_req_mgr_timer_cachep,
+			crm_timer = kmem_cache_alloc(g_cam_req_mgr_timer_cachep,
 					__GFP_ZERO | GFP_KERNEL);
 			if (!crm_timer) {
 				ret = -ENOMEM;
@@ -76,8 +69,8 @@ int crm_timer_init(struct cam_req_mgr_timer **timer,
 
 		crm_timer->expires = expires;
 		crm_timer->parent = parent;
-		setup_timer(&crm_timer->sys_timer,
-			crm_timer->timer_cb, (unsigned long)crm_timer);
+		timer_setup(&crm_timer->sys_timer,
+			crm_timer->timer_cb, 0);
 		crm_timer_reset(crm_timer);
 		*timer = crm_timer;
 	} else {
@@ -97,4 +90,3 @@ void crm_timer_exit(struct cam_req_mgr_timer **crm_timer)
 		*crm_timer = NULL;
 	}
 }
-

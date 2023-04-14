@@ -1,13 +1,6 @@
-/* Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 and
- * only version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+// SPDX-License-Identifier: GPL-2.0-only
+/*
+ * Copyright (c) 2017-2020, The Linux Foundation. All rights reserved.
  */
 
 #include <linux/module.h>
@@ -538,7 +531,7 @@ apply_setting_err:
 int cam_flash_parser(struct cam_flash_ctrl *fctrl, void *arg)
 {
 	int rc = 0, i = 0;
-	uint64_t generic_ptr;
+	uintptr_t generic_ptr;
 	uint32_t *cmd_buf =  NULL;
 	uint32_t *offset = NULL;
 	uint32_t frame_offset = 0;
@@ -561,7 +554,8 @@ int cam_flash_parser(struct cam_flash_ctrl *fctrl, void *arg)
 	/* getting CSL Packet */
 	ioctl_ctrl = (struct cam_control *)arg;
 
-	if (copy_from_user((&config), (void __user *) ioctl_ctrl->handle,
+	if (copy_from_user((&config),
+		u64_to_user_ptr(ioctl_ctrl->handle),
 		sizeof(config))) {
 		CAM_ERR(CAM_FLASH, "Copy cmd handle from user failed");
 		rc = -EFAULT;
@@ -569,7 +563,7 @@ int cam_flash_parser(struct cam_flash_ctrl *fctrl, void *arg)
 	}
 
 	rc = cam_mem_get_cpu_buf(config.packet_handle,
-		(uint64_t *)&generic_ptr, &len_of_buffer);
+		&generic_ptr, &len_of_buffer);
 	if (rc) {
 		CAM_ERR(CAM_FLASH, "Failed in getting the buffer : %d", rc);
 		return rc;
@@ -594,8 +588,8 @@ int cam_flash_parser(struct cam_flash_ctrl *fctrl, void *arg)
 		fctrl->flash_init_setting.cmn_attr.is_settings_valid = true;
 		cmd_desc = (struct cam_cmd_buf_desc *)(offset);
 		rc = cam_mem_get_cpu_buf(cmd_desc->mem_handle,
-			(uint64_t *)&generic_ptr, &len_of_buffer);
-		cmd_buf = (uint32_t *)((uint8_t *)generic_ptr +
+			&generic_ptr, &len_of_buffer);
+		cmd_buf = (uint32_t *)(generic_ptr +
 			cmd_desc->offset);
 		cam_flash_info = (struct cam_flash_init *)cmd_buf;
 
@@ -665,8 +659,8 @@ int cam_flash_parser(struct cam_flash_ctrl *fctrl, void *arg)
 			true;
 		cmd_desc = (struct cam_cmd_buf_desc *)(offset);
 		rc = cam_mem_get_cpu_buf(cmd_desc->mem_handle,
-			(uint64_t *)&generic_ptr, &len_of_buffer);
-		cmd_buf = (uint32_t *)((uint8_t *)generic_ptr +
+			&generic_ptr, &len_of_buffer);
+		cmd_buf = (uint32_t *)(generic_ptr +
 			cmd_desc->offset);
 
 		if (!cmd_buf)
@@ -721,8 +715,8 @@ int cam_flash_parser(struct cam_flash_ctrl *fctrl, void *arg)
 		fctrl->nrt_info.cmn_attr.is_settings_valid = true;
 		cmd_desc = (struct cam_cmd_buf_desc *)(offset);
 		rc = cam_mem_get_cpu_buf(cmd_desc->mem_handle,
-			(uint64_t *)&generic_ptr, &len_of_buffer);
-		cmd_buf = (uint32_t *)((uint8_t *)generic_ptr +
+			&generic_ptr, &len_of_buffer);
+		cmd_buf = (uint32_t *)(generic_ptr +
 			cmd_desc->offset);
 		cmn_hdr = (struct common_header *)cmd_buf;
 

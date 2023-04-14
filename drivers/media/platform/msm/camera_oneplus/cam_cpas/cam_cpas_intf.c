@@ -1,13 +1,6 @@
-/* Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 and
- * only version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+// SPDX-License-Identifier: GPL-2.0-only
+/*
+ * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
  */
 
 #include <linux/of.h>
@@ -367,7 +360,7 @@ int cam_cpas_subdev_cmd(struct cam_cpas_intf *cpas_intf,
 	case CAM_QUERY_CAP: {
 		struct cam_cpas_query_cap query;
 
-		rc = copy_from_user(&query, (void __user *) cmd->handle,
+		rc = copy_from_user(&query, u64_to_user_ptr(cmd->handle),
 			sizeof(query));
 		if (rc) {
 			CAM_ERR(CAM_CPAS, "Failed in copy from user, rc=%d",
@@ -381,7 +374,7 @@ int cam_cpas_subdev_cmd(struct cam_cpas_intf *cpas_intf,
 		if (rc)
 			break;
 
-		rc = copy_to_user((void __user *) cmd->handle, &query,
+		rc = copy_to_user(u64_to_user_ptr(cmd->handle), &query,
 			sizeof(query));
 		if (rc)
 			CAM_ERR(CAM_CPAS, "Failed in copy to user, rc=%d", rc);

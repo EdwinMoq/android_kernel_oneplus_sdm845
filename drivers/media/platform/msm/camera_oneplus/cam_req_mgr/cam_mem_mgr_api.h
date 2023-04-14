@@ -1,13 +1,6 @@
-/* Copyright (c) 2016-2017, The Linux Foundation. All rights reserved.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 and
- * only version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+/* SPDX-License-Identifier: GPL-2.0-only */
+/*
+ * Copyright (c) 2016-2019, The Linux Foundation. All rights reserved.
  */
 
 #ifndef _CAM_MEM_MGR_API_H_
@@ -43,7 +36,7 @@ struct cam_mem_mgr_request_desc {
  * @region     : Region to which allocated memory belongs
  */
 struct cam_mem_mgr_memory_desc {
-	uint64_t kva;
+	uintptr_t kva;
 	uint32_t iova;
 	int32_t smmu_hdl;
 	uint32_t mem_handle;
@@ -82,9 +75,11 @@ int cam_mem_mgr_release_mem(struct cam_mem_mgr_memory_desc *inp);
  * @return Status of operation. Negative in case of error. Zero otherwise.
  */
 int cam_mem_get_io_buf(int32_t buf_handle, int32_t mmu_handle,
-	uint64_t *iova_ptr, size_t *len_ptr);
+	dma_addr_t *iova_ptr, size_t *len_ptr);
+
 /**
- * @brief: Returns CPU address information about buffer
+ * @brief: This indicates begin of CPU access.
+ *         Also returns CPU address information about DMA buffer
  *
  * @buf_handle: Handle for the buffer
  * @vaddr_ptr : pointer to kernel virtual address
@@ -92,7 +87,7 @@ int cam_mem_get_io_buf(int32_t buf_handle, int32_t mmu_handle,
  *
  * @return Status of operation. Negative in case of error. Zero otherwise.
  */
-int cam_mem_get_cpu_buf(int32_t buf_handle, uint64_t *vaddr_ptr,
+int cam_mem_get_cpu_buf(int32_t buf_handle, uintptr_t *vaddr_ptr,
 	size_t *len);
 
 static inline bool cam_mem_is_secure_buf(int32_t buf_handle)

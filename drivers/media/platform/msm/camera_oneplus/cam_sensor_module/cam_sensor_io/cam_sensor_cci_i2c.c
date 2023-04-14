@@ -1,13 +1,6 @@
-/* Copyright (c) 2017, The Linux Foundation. All rights reserved.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 and
- * only version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+// SPDX-License-Identifier: GPL-2.0-only
+/*
+ * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
  */
 
 #include "cam_sensor_cmn_header.h"
@@ -20,7 +13,7 @@ int32_t cam_cci_i2c_read(struct cam_sensor_cci_client *cci_client,
 	enum camera_sensor_i2c_type data_type)
 {
 	int32_t rc = -EINVAL;
-	unsigned char buf[data_type];
+	unsigned char buf[CAMERA_SENSOR_I2C_TYPE_DWORD];
 	struct cam_cci_ctrl cci_ctrl;
 
 	if (addr_type <= CAMERA_SENSOR_I2C_TYPE_INVALID

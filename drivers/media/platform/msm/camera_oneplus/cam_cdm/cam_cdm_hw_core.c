@@ -1,21 +1,12 @@
-/* Copyright (c) 2017, The Linux Foundation. All rights reserved.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 and
- * only version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+// SPDX-License-Identifier: GPL-2.0-only
+/*
+ * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
  */
 
 #include <linux/delay.h>
 #include <linux/io.h>
 #include <linux/of.h>
 #include <linux/module.h>
-#include <linux/ion.h>
-#include <linux/iommu.h>
 #include <linux/timer.h>
 #include <linux/kernel.h>
 
@@ -422,7 +413,7 @@ int cam_hw_cdm_submit_bl(struct cam_hw_info *cdm_hw,
 	}
 
 	for (i = 0; i < req->data->cmd_arrary_count ; i++) {
-		uint64_t hw_vaddr_ptr = 0;
+		dma_addr_t hw_vaddr_ptr = 0;
 		size_t len = 0;
 
 		if ((!cdm_cmd->cmd[i].len) &&
@@ -482,6 +473,17 @@ int cam_hw_cdm_submit_bl(struct cam_hw_info *cdm_hw,
 
 		if ((!rc) && (hw_vaddr_ptr) && (len) &&
 			(len >= cdm_cmd->cmd[i].offset)) {
+
+			if ((len - cdm_cmd->cmd[i].offset) <
+				cdm_cmd->cmd[i].len) {
+				CAM_ERR(CAM_CDM,
+					"Not enough buffer cmd offset: %u cmd length: %u",
+					cdm_cmd->cmd[i].offset,
+					cdm_cmd->cmd[i].len);
+				rc = -EINVAL;
+				break;
+			}
+
 			CAM_DBG(CAM_CDM, "Got the HW VA");
 			if (core->bl_tag >=
 				(CAM_CDM_HWFIFO_SIZE - 1))
@@ -509,8 +511,8 @@ int cam_hw_cdm_submit_bl(struct cam_hw_info *cdm_hw,
 
 		if (!rc) {
 			CAM_DBG(CAM_CDM,
-				"write BL success for cnt=%d with tag=%d",
-				i, core->bl_tag);
+				"write BL success for cnt=%d with tag=%d total_cnt=%d",
+				i, core->bl_tag, req->data->cmd_arrary_count);
 
 			CAM_DBG(CAM_CDM, "Now commit the BL");
 			if (cam_hw_cdm_commit_bl_write(cdm_hw)) {
@@ -624,7 +626,8 @@ static void cam_hw_cdm_work(struct work_struct *work)
 }
 
 static void cam_hw_cdm_iommu_fault_handler(struct iommu_domain *domain,
-	struct device *dev, unsigned long iova, int flags, void *token)
+	struct device *dev, unsigned long iova, int flags, void *token,
+	uint32_t buf_info)
 {
 	struct cam_hw_info *cdm_hw = NULL;
 	struct cam_cdm *core = NULL;
@@ -910,14 +913,9 @@ int cam_hw_cdm_probe(struct platform_device *pdev)
 		CAM_ERR(CAM_CDM, "cpas-cdm get iommu handle failed");
 		goto unlock_release_mem;
 	}
-	cam_smmu_reg_client_page_fault_handler(cdm_core->iommu_hdl.non_secure,
+	cam_smmu_set_client_page_fault_handler(cdm_core->iommu_hdl.non_secure,
 		cam_hw_cdm_iommu_fault_handler, cdm_hw);
 
-	rc = cam_smmu_ops(cdm_core->iommu_hdl.non_secure, CAM_SMMU_ATTACH);
-	if (rc < 0) {
-		CAM_ERR(CAM_CDM, "Attach iommu non secure handle failed");
-		goto destroy_non_secure_hdl;
-	}
 	cdm_core->iommu_hdl.secure = -1;
 
 	cdm_core->work_queue = alloc_workqueue(cdm_core->name,
@@ -1034,7 +1032,7 @@ release_platform_resource:
 	flush_workqueue(cdm_core->work_queue);
 	destroy_workqueue(cdm_core->work_queue);
 destroy_non_secure_hdl:
-	cam_smmu_reg_client_page_fault_handler(cdm_core->iommu_hdl.non_secure,
+	cam_smmu_set_client_page_fault_handler(cdm_core->iommu_hdl.non_secure,
 		NULL, cdm_hw);
 	if (cam_smmu_destroy_handle(cdm_core->iommu_hdl.non_secure))
 		CAM_ERR(CAM_CDM, "Release iommu secure hdl failed");
@@ -1106,8 +1104,8 @@ int cam_hw_cdm_remove(struct platform_device *pdev)
 
 	if (cam_smmu_destroy_handle(cdm_core->iommu_hdl.non_secure))
 		CAM_ERR(CAM_CDM, "Release iommu secure hdl failed");
-	cam_smmu_reg_client_page_fault_handler(cdm_core->iommu_hdl.non_secure,
-		NULL, cdm_hw);
+	cam_smmu_unset_client_page_fault_handler(
+		cdm_core->iommu_hdl.non_secure, cdm_hw);
 
 	mutex_destroy(&cdm_hw->hw_mutex);
 	kfree(cdm_hw->soc_info.soc_private);

@@ -1,13 +1,6 @@
-/* Copyright (c) 2017, The Linux Foundation. All rights reserved.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 and
- * only version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+// SPDX-License-Identifier: GPL-2.0-only
+/*
+ * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
  */
 
 #include <linux/platform_device.h>
@@ -161,12 +154,6 @@ static int cam_lrme_hw_dev_probe(struct platform_device *pdev)
 		goto release_cdm;
 	}
 
-	rc = cam_smmu_ops(lrme_core->device_iommu.non_secure, CAM_SMMU_ATTACH);
-	if (rc) {
-		CAM_ERR(CAM_LRME, "LRME attach iommu handle failed, rc=%d", rc);
-		goto destroy_smmu;
-	}
-
 	rc = cam_lrme_hw_start(lrme_hw, NULL, 0);
 	if (rc) {
 		CAM_ERR(CAM_LRME, "Failed to hw init, rc=%d", rc);
@@ -224,8 +211,6 @@ static int cam_lrme_hw_dev_probe(struct platform_device *pdev)
 	return rc;
 
 detach_smmu:
-	cam_smmu_ops(lrme_core->device_iommu.non_secure, CAM_SMMU_DETACH);
-destroy_smmu:
 	cam_smmu_destroy_handle(lrme_core->device_iommu.non_secure);
 release_cdm:
 	cam_cdm_release(lrme_core->hw_cdm_info->cdm_handle);
@@ -265,7 +250,6 @@ static int cam_lrme_hw_dev_remove(struct platform_device *pdev)
 		goto deinit_platform_res;
 	}
 
-	cam_smmu_ops(lrme_core->device_iommu.non_secure, CAM_SMMU_DETACH);
 	cam_smmu_destroy_handle(lrme_core->device_iommu.non_secure);
 	cam_cdm_release(lrme_core->hw_cdm_info->cdm_handle);
 	cam_lrme_mgr_deregister_device(lrme_core->hw_idx);

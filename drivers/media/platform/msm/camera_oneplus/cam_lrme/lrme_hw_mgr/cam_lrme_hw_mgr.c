@@ -1,13 +1,6 @@
-/* Copyright (c) 2017, The Linux Foundation. All rights reserved.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 and
- * only version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+// SPDX-License-Identifier: GPL-2.0-only
+/*
+ * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
  */
 
 #include <linux/module.h>
@@ -150,7 +143,7 @@ static int cam_lrme_mgr_util_prepare_io_buffer(int32_t iommu_hdl,
 	int rc = -EINVAL;
 	uint32_t num_in_buf, num_out_buf, i, j, plane;
 	struct cam_buf_io_cfg *io_cfg;
-	uint64_t io_addr[CAM_PACKET_MAX_PLANES];
+	dma_addr_t io_addr[CAM_PACKET_MAX_PLANES];
 	size_t size;
 
 	num_in_buf = 0;
@@ -166,13 +159,6 @@ static int cam_lrme_mgr_util_prepare_io_buffer(int32_t iommu_hdl,
 			io_cfg[i].resource_type,
 			io_cfg[i].fence, io_cfg[i].format);
 
-		if ((num_in_buf > io_buf_size) ||
-			(num_out_buf > io_buf_size)) {
-			CAM_ERR(CAM_LRME, "Invalid number of buffers %d %d %d",
-				num_in_buf, num_out_buf, io_buf_size);
-			return -EINVAL;
-		}
-
 		memset(io_addr, 0, sizeof(io_addr));
 		for (plane = 0; plane < CAM_PACKET_MAX_PLANES; plane++) {
 			if (!io_cfg[i].mem_handle[plane])
@@ -186,13 +172,13 @@ static int cam_lrme_mgr_util_prepare_io_buffer(int32_t iommu_hdl,
 				return -ENOMEM;
 			}
 
-			io_addr[plane] += io_cfg[i].offsets[plane];
-
-			if (io_addr[plane] >> 32) {
-				CAM_ERR(CAM_LRME, "Invalid io addr for %d %d",
-					plane, rc);
-				return -ENOMEM;
+			if ((size_t)io_cfg[i].offsets[plane] >= size) {
+				CAM_ERR(CAM_LRME, "Invalid plane offset: %zu",
+					(size_t)io_cfg[i].offsets[plane]);
+				return -EINVAL;
 			}
+
+			io_addr[plane] += io_cfg[i].offsets[plane];
 
 			CAM_DBG(CAM_LRME, "IO Address[%d][%d] : %llu",
 				io_cfg[i].direction, plane, io_addr[plane]);
@@ -200,6 +186,12 @@ static int cam_lrme_mgr_util_prepare_io_buffer(int32_t iommu_hdl,
 
 		switch (io_cfg[i].direction) {
 		case CAM_BUF_INPUT: {
+			if (num_in_buf >= io_buf_size) {
+				CAM_ERR(CAM_LRME,
+					"Invalid number of buffers %d %d %d",
+					num_in_buf, num_out_buf, io_buf_size);
+				return -EINVAL;
+			}
 			prepare->in_map_entries[num_in_buf].resource_handle =
 				io_cfg[i].resource_type;
 			prepare->in_map_entries[num_in_buf].sync_id =
@@ -215,6 +207,12 @@ static int cam_lrme_mgr_util_prepare_io_buffer(int32_t iommu_hdl,
 			break;
 		}
 		case CAM_BUF_OUTPUT: {
+			if (num_out_buf >= io_buf_size) {
+				CAM_ERR(CAM_LRME,
+					"Invalid number of buffers %d %d %d",
+					num_in_buf, num_out_buf, io_buf_size);
+				return -EINVAL;
+			}
 			prepare->out_map_entries[num_out_buf].resource_handle =
 				io_cfg[i].resource_type;
 			prepare->out_map_entries[num_out_buf].sync_id =
@@ -575,7 +573,8 @@ static int cam_lrme_mgr_get_caps(void *hw_mgr_priv, void *hw_get_caps_args)
 		return -EFAULT;
 	}
 
-	if (copy_to_user((void __user *)args->caps_handle, &(hw_mgr->lrme_caps),
+	if (copy_to_user(u64_to_user_ptr(args->caps_handle),
+		&(hw_mgr->lrme_caps),
 		sizeof(struct cam_lrme_query_cap_cmd))) {
 		CAM_ERR(CAM_LRME, "copy to user failed");
 		return -EFAULT;

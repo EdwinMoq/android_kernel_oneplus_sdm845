@@ -1,13 +1,6 @@
-/* Copyright (c) 2017, The Linux Foundation. All rights reserved.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 and
- * only version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+/* SPDX-License-Identifier: GPL-2.0-only */
+/*
+ * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
  */
 
 #ifndef __CAM_SYNC_PRIVATE_H__
@@ -138,6 +131,7 @@ struct sync_user_payload {
  * @signaled          : Completion variable on which block calls will wait
  * @callback_list     : Linked list of kernel callbacks registered
  * @user_payload_list : LInked list of user space payloads registered
+ * @ref_cnt           : ref count of the number of usage of the fence.
  */
 struct sync_table_row {
 	char name[CAM_SYNC_OBJ_NAME_LEN];
@@ -152,6 +146,7 @@ struct sync_table_row {
 	struct completion signaled;
 	struct list_head callback_list;
 	struct list_head user_payload_list;
+	atomic_t ref_cnt;
 };
 
 /**
