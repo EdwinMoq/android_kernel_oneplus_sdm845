@@ -920,9 +920,9 @@ static int32_t sp_make_afe_callback(uint32_t opcode, uint32_t *payload,
 
 #ifdef CONFIG_SND_SOC_MAX98927
 	if (
-			param_id == AFE_PARAM_ID_DSM_CFG  ||
-			param_id == AFE_PARAM_ID_DSM_INFO ||
-			param_id == AFE_PARAM_ID_CALIB){
+			param_hdr.param_id == AFE_PARAM_ID_DSM_CFG  ||
+			param_hdr.param_id == AFE_PARAM_ID_DSM_INFO ||
+			param_hdr.param_id == AFE_PARAM_ID_CALIB){
 		struct afe_dsm_get_resp *dsm_resp =
 			(struct afe_dsm_get_resp *) payload;
 
