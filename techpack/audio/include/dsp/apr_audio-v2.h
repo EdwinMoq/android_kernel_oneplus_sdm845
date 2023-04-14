@@ -2047,6 +2047,30 @@ struct afe_port_cmd_set_param_v2 {
 	u8 param_data[0];
 } __packed;
 
+struct afe_port_param_data_v2 {
+    u32 module_id;
+/* ID of the module to be configured.
+ * Supported values: Valid module ID
+ */
+
+u32 param_id;
+/* ID of the parameter corresponding to the supported parameters
+ * for the module ID.
+ * Supported values: Valid parameter ID
+ */
+
+u16 param_size;
+/* Actual size of the data for the
+ * module_id/param_id pair. The size is a
+ * multiple of four bytes.
+ * Supported values: > 0
+ */
+
+u16 reserved;
+/* This field must be set to zero.
+ */
+} __packed;
+
 #define AFE_PORT_CMD_SET_PARAM_V3 0x000100FA
 struct afe_port_cmd_set_param_v3 {
 	/* APR Header */
