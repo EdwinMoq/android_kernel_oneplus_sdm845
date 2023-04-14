@@ -289,7 +289,7 @@ int cam_sensor_i2c_command_parser(struct i2c_settings_array *i2c_reg_settings,
 {
 	int16_t                   rc = 0, i = 0;
 	size_t                    len_of_buff = 0;
-	uint64_t                  generic_ptr;
+	uintptr_t                 generic_ptr;
 
 	for (i = 0; i < num_cmd_buffers; i++) {
 		uint32_t                  *cmd_buf = NULL;
@@ -311,7 +311,7 @@ int cam_sensor_i2c_command_parser(struct i2c_settings_array *i2c_reg_settings,
 			continue;
 
 		rc = cam_mem_get_cpu_buf(cmd_desc[i].mem_handle,
-			(uint64_t *)&generic_ptr, &len_of_buff);
+			&generic_ptr, &len_of_buff);
 		cmd_buf = (uint32_t *)generic_ptr;
 		if (rc < 0) {
 			CAM_ERR(CAM_SENSOR,

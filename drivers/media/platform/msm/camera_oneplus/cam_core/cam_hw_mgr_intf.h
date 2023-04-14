@@ -25,9 +25,28 @@
 /* maximum buf done irqs */
 #define CAM_NUM_OUT_PER_COMP_IRQ_MAX        12
 
+/**
+ * enum cam_context_dump_id -
+ *              context dump type
+ *
+ */
+enum cam_context_dump_id {
+	CAM_CTX_DUMP_TYPE_NONE,
+	CAM_CTX_DUMP_ACQ_INFO,
+	CAM_CTX_DUMP_TYPE_MAX,
+};
+
 /* hardware event callback function type */
 typedef int (*cam_hw_event_cb_func)(void *context, uint32_t evt_id,
 	void *evt_data);
+
+/* hardware page fault callback function type */
+typedef int (*cam_hw_pagefault_cb_func)(void *context, unsigned long iova,
+	uint32_t buf_info);
+
+/* ctx dump callback function type */
+typedef int (*cam_ctx_info_dump_cb_func)(void *context,
+	enum cam_context_dump_id dump_id);
 
 /**
  * struct cam_hw_update_entry - Entry for hardware config
