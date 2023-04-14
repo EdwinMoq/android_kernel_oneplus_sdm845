@@ -13,7 +13,6 @@
 #ifndef _CAM_CDM_H_
 #define _CAM_CDM_H_
 
-#include <linux/dma-direction.h>
 #include <linux/module.h>
 #include <linux/of_platform.h>
 #include <linux/random.h>
@@ -195,11 +194,11 @@ struct cam_cdm_hw_intf_cmd_submit_bl {
 	struct cam_cdm_bl_request *data;
 };
 
-/* struct cam_cdm_hw_mem - CDM hw memory.struct */
+/* struct cam_cdm_hw_mem - CDM hw memory struct */
 struct cam_cdm_hw_mem {
 	int32_t handle;
 	uint32_t vaddr;
-	uint64_t kmdvaddr;
+	uintptr_t kmdvaddr;
 	size_t size;
 };
 

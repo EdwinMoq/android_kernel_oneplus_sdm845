@@ -14,8 +14,6 @@
 #include <linux/io.h>
 #include <linux/of.h>
 #include <linux/module.h>
-#include <linux/ion.h>
-#include <linux/iommu.h>
 #include <linux/timer.h>
 #include <linux/kernel.h>
 
@@ -166,7 +164,7 @@ int cam_cdm_acquire(struct cam_cdm_acquire_data *data)
 	struct cam_hw_intf *hw;
 	uint32_t hw_index = 0;
 
-	if (!data || !data->base_array_cnt)
+	if ((!data) || (!data->base_array_cnt))
 		return -EINVAL;
 
 	if (get_cdm_mgr_refcount()) {

@@ -13,7 +13,6 @@
 #include <linux/io.h>
 #include <linux/of.h>
 #include <linux/platform_device.h>
-#include <linux/dma-buf.h>
 #include <media/cam_defs.h>
 #include <media/cam_icp.h>
 #include "ipe_soc.h"
