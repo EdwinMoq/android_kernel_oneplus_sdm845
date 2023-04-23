@@ -16,6 +16,7 @@
 #include <linux/gpio_keys.h>
 #include <linux/of_platform.h>
 #include <linux/of_gpio.h>
+#include "extcon.h"
 
 #include <linux/extcon.h>
 #include <linux/workqueue.h>
@@ -144,7 +145,7 @@ static irqreturn_t extcon_dev_interrupt(int irq, void *_dev)
 	return IRQ_HANDLED;
 }
 
-static void timer_handle(unsigned long arg)
+static void timer_handle(struct timer_list *t)
 {
 	schedule_work(&extcon_data->work);
 }
@@ -297,8 +298,8 @@ static int tristate_dev_probe(struct platform_device *pdev)
 
 	INIT_WORK(&extcon_data->work, extcon_dev_work);
 
-	init_timer(&extcon_data->s_timer);
-	extcon_data->s_timer.function = &timer_handle;
+	__init_timer(&extcon_data->s_timer, timer_handle, 0);
+	//extcon_data->s_timer.function = &timer_handle;
 	extcon_data->s_timer.expires = jiffies + 5*HZ;
 
 	add_timer(&extcon_data->s_timer);
