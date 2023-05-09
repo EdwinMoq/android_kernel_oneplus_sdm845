@@ -4720,6 +4720,7 @@ int check_blur_restrictions(struct msm_vidc_inst *inst)
 int msm_venc_set_properties(struct msm_vidc_inst *inst)
 {
 	int rc = 0;
+	uint32_t vpu = inst->core->platform_data->vpu_ver;
 
 	rc = msm_venc_update_entropy_mode(inst);
 	if (rc)
@@ -4840,9 +4841,12 @@ int msm_venc_set_properties(struct msm_vidc_inst *inst)
 	rc = msm_venc_set_video_csc(inst);
 	if (rc)
 		goto exit;
-	rc = msm_venc_set_chroma_qp_offset(inst);
-	if (rc)
-		goto exit;
+	if ((vpu != VPU_VERSION_AR50) &&
+		(vpu != VPU_VERSION_IRIS1)) {
+		rc = msm_venc_set_chroma_qp_offset(inst);
+		if (rc)
+			goto exit;
+	}
 	rc = msm_venc_set_blur_resolution(inst);
 	if (rc)
 		goto exit;
