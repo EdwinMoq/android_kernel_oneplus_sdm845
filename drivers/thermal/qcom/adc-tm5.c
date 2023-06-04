@@ -1043,7 +1043,8 @@ static int adc_tm5_init(struct adc_tm_chip *chip, uint32_t dt_chans)
 	unsigned int offset_btm_idx = 0, i;
 
 	if ((chip->pmic_rev_id) &&
-		(chip->pmic_rev_id->pmic_subtype == PM660_SUBTYPE)) {
+		(chip->pmic_rev_id->pmic_subtype == PM660_SUBTYPE ||
+		chip->pmic_rev_id->pmic_subtype == PM8998_SUBTYPE)) {
 		dig_param_len = 2;
 		pmic_subtype_660 = true;
 	} else {
