@@ -816,6 +816,18 @@ enum color_fmts {
 	COLOR_FMT_NV12_512,
 };
 
+static inline unsigned int VENUS_EXTRADATA_SIZE(int width, int height)
+{
+	(void)height;
+	(void)width;
+
+	/*
+	 * In the future, calculate the size based on the w/h but just
+	 * hardcode it for now since 16K satisfies all current usecases.
+	 */
+	return 16 * 1024;
+}
+
 /*
  * Function arguments:
  * @color_fmt
