@@ -37,7 +37,7 @@
 #include <linux/timer.h>
 
 #define MSM_VIDC_DRV_NAME "msm_vidc_driver"
-#define MSM_VIDC_VERSION KERNEL_VERSION(0, 0, 1)
+#define MSM_VIDC_VERSION     ((0 << 16) + (4 << 8) + 19)
 #define MAX_DEBUGFS_NAME 50
 #define DEFAULT_TIMEOUT 3
 #define DEFAULT_HEIGHT 1088
