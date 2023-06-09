@@ -4229,10 +4229,19 @@ static int __init_subcaches(struct venus_hfi_device *device)
 		return 0;
 
 	venus_hfi_for_each_subcache(device, sinfo) {
-		sinfo->subcache = llcc_slice_getd(&device->res->pdev->dev,
-			sinfo->name);
+		if (!strcmp("vidsc0", sinfo->name)) {
+			sinfo->subcache = llcc_slice_getd(LLCC_VIDSC0);
+		} else if (!strcmp("vidsc1", sinfo->name)) {
+			sinfo->subcache = llcc_slice_getd(LLCC_VIDSC1);
+		} else if (!strcmp("vidscfw", sinfo->name)) {
+			sinfo->subcache = llcc_slice_getd(LLCC_VIDFW);
+		} else {
+			dprintk(VIDC_ERR, "Invalid subcache name %s\n",
+					sinfo->name);
+		}
 		if (IS_ERR_OR_NULL(sinfo->subcache)) {
-			rc = PTR_ERR(sinfo->subcache) ? : -EBADHANDLE;
+			rc = PTR_ERR(sinfo->subcache) ?
+				PTR_ERR(sinfo->subcache) : -EBADHANDLE;
 			dprintk(VIDC_ERR,
 				 "init_subcaches: invalid subcache: %s rc %d\n",
 				sinfo->name, rc);
@@ -4519,8 +4528,8 @@ static int __set_subcaches(struct venus_hfi_device *device)
 
 	venus_hfi_for_each_subcache(device, sinfo) {
 		if (sinfo->isactive == true) {
-			sc_res[c].size = sinfo->subcache->llcc_slice_size;
-			sc_res[c].sc_id = sinfo->subcache->llcc_slice_id;
+			sc_res[c].size = sinfo->subcache->slice_size;
+			sc_res[c].sc_id = sinfo->subcache->slice_id;
 			c++;
 		}
 	}
@@ -4579,8 +4588,8 @@ static int __release_subcaches(struct venus_hfi_device *device)
 	venus_hfi_for_each_subcache_reverse(device, sinfo) {
 		if (sinfo->isset == true) {
 			/* Update the entry */
-			sc_res[c].size = sinfo->subcache->llcc_slice_size;
-			sc_res[c].sc_id = sinfo->subcache->llcc_slice_id;
+			sc_res[c].size = sinfo->subcache->slice_size;
+			sc_res[c].sc_id = sinfo->subcache->slice_id;
 			c++;
 			sinfo->isset = false;
 		}
