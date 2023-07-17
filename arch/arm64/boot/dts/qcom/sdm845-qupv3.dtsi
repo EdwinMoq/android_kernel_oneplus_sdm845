@@ -14,7 +14,7 @@
 		qcom,bus-slv-id = <MSM_BUS_SLAVE_EBI_CH0>;
 		iommus = <&apps_smmu 0x003 0x0>;
 		qcom,iommu-dma-addr-pool = <0x40000000 0xc0000000>;
-		qcom,iommu-dma = "fastmap";
+		qcom,iommu-dma = "bypass";
 	};
 
 	/*
@@ -405,7 +405,7 @@
 		qcom,bus-slv-id = <MSM_BUS_SLAVE_EBI_CH0>;
 		iommus = <&apps_smmu 0x6c3 0x0>;
 		qcom,iommu-dma-addr-pool = <0x40000000 0xc0000000>;
-		qcom,iommu-dma = "fastmap";
+		qcom,iommu-dma = "bypass";
 	};
 
 	/* 2-wire UART */

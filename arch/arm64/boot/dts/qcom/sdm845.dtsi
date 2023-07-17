@@ -2875,7 +2875,7 @@
 			qcom,iommu-dma-addr-pool = <0x20000000 0x40000000>;
 			/* modem tables in IMEM */
 			qcom,additional-mapping = <0x146BD000 0x146BD000 0x2000>;
-			qcom,iommu-dma = "fastmap";
+			qcom,iommu-dma = "bypass";
 		};
 
 		ipa_smmu_wlan: ipa_smmu_wlan {
@@ -2883,13 +2883,14 @@
 			iommus = <&apps_smmu 0x721 0x0>;
 			/* ipa-uc ram */
 			qcom,additional-mapping = <0x1E60000 0x1E60000 0x80000>;
-			qcom,iommu-dma = "atomic";
+			qcom,iommu-dma = "bypass";
 		};
 
 		ipa_smmu_uc: ipa_smmu_uc {
 			compatible = "qcom,ipa-smmu-uc-cb";
 			iommus = <&apps_smmu 0x722 0x0>;
 			qcom,iommu-dma-addr-pool = <0x40000000 0x20000000>;
+			qcom,iommu-dma = "bypass";
 		};
 	};
 
@@ -3163,7 +3164,7 @@
 			     <GIC_SPI 424 IRQ_TYPE_LEVEL_HIGH /* CE10 */ >,
 			     <GIC_SPI 425 IRQ_TYPE_LEVEL_HIGH /* CE11 */ >;
 		qcom,iommu-dma-addr-pool = <0xa0000000 0x10000000>;
-		qcom,iommu-dma = "fastmap";
+		qcom,iommu-dma = "bypass";
 		qcom,iommu-faults = "stall-disable", "non-fatal";
 		qcom,hyp_enabled;
 		qcom,wlan-msa-memory = <0x100000>;
@@ -4059,7 +4060,7 @@
 
 		iommus = <&apps_smmu 0x20 0x0f>;
 		qcom,iommu-dma-addr-pool = <0x10000000 0x40000000>;
-		qcom,smmu-s1-enable;
+		qcom,iommu-dma = "bypass";
 	};
 };
 
