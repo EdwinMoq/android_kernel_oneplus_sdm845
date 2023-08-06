@@ -301,6 +301,7 @@ static void _sde_debug_bus_ppb1_dump(void __iomem *mem_base,
 			entry->wr_addr, entry->block_id, entry->test_id, val);
 }
 
+#if defined(CONFIG_DEBUG_FS)
 static void _sde_debug_bus_axi_dump_sdm845(void __iomem *mem_base,
 		struct sde_debug_bus_entry *entry, u32 val)
 {
@@ -323,6 +324,7 @@ static void _sde_debug_bus_axi_dump_sdm845(void __iomem *mem_base,
 			entry->test_id, status);
 	}
 }
+#endif
 
 static struct sde_debug_bus_entry dbg_bus_sde_sdm845[] = {
 
@@ -1306,8 +1308,10 @@ static struct sde_debug_bus_entry dbg_bus_sde_sdm845[] = {
 	{ DBGBUS_PERIPH, 71, 4},
 	{ DBGBUS_PERIPH, 71, 5},
 
+#if defined(CONFIG_DEBUG_FS)
 	/* axi - should be last entry */
 	{ DBGBUS_AXI_INTF, 62, 0, _sde_debug_bus_axi_dump_sdm845},
+#endif
 };
 
 static struct sde_debug_bus_entry dbg_bus_sde_sm8150[] = {
