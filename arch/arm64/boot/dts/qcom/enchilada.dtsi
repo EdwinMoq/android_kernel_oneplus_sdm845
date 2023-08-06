@@ -814,11 +814,20 @@ status = "disabled";
 
 &pmi8998_haptics {
 	status = "okay";
+	compatible = "qcom,qpnp-haptics";
+	qcom,pmic-misc = <&pmi8998_misc>;
+	qcom,misc-clk-trim-error-reg = <0xf3>;
+	qcom,actuator-type = <0>;
 	qcom,wave-shape = "sine";
 	qcom,play-mode = "buffer";
+	qcom,ilim-ma = <800>;
 	qcom,brake-pattern = <0x3 0x3 0x3 0x3>;
 	qcom,drive-period-code-max-variation-pct = <5>;
 	qcom,drive-period-code-min-variation-pct = <5>;
+	qcom,lra-auto-mode;
+	qcom,lra-high-z = "opt1";
+	qcom,sc-dbc-cycles = <8>;
+	qcom,en-brake;
 	qcom,wave-rep-cnt = <1>;
 	qcom,wave-samp-rep-cnt = <1>;
 	qcom,vmax-mv = <2088>;
