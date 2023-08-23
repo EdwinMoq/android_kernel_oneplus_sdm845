@@ -1017,7 +1017,10 @@ static int __unvote_buses(struct venus_hfi_device *device)
 
 	venus_hfi_for_each_bus(device, bus) {
 		if (!bus->is_prfm_gov_used) {
-			freq = __calc_bw(bus, &device->bus_vote);
+			if (bus->is_ar50_gov_used)
+				freq = __calc_bw_ar50(bus, &device->bus_vote);
+			else
+				freq = __calc_bw(bus, &device->bus_vote);
 			rc = __vote_bandwidth(bus, &freq);
 		}
 		else
@@ -1062,7 +1065,10 @@ no_data_count:
 	venus_hfi_for_each_bus(device, bus) {
 		if (bus && bus->client) {
 			if (!bus->is_prfm_gov_used) {
-				freq = __calc_bw(bus, &device->bus_vote);
+				if (bus->is_ar50_gov_used)
+					freq = __calc_bw_ar50(bus, &device->bus_vote);
+				else
+					freq = __calc_bw(bus, &device->bus_vote);
 			} else {
 				freq = bus->range[1];
 				dprintk(VIDC_DBG, "%s %s perf Vote %u\n",

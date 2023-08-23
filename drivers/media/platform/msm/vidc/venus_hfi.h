@@ -52,6 +52,8 @@
 
 extern unsigned long __calc_bw(struct bus_info *bus,
 			struct msm_vidc_gov_data *vidc_data);
+extern unsigned long __calc_bw_ar50(struct bus_info *bus,
+			struct msm_vidc_gov_data *vidc_data);
 
 struct hfi_queue_table_header {
 	u32 qtbl_version;

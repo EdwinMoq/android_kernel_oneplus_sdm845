@@ -442,6 +442,9 @@ static int msm_vidc_populate_bus(struct device *dev,
 	if (!strcmp(bus->mode, PERF_GOV))
 		bus->is_prfm_gov_used = true;
 
+	if (strstr(bus->mode, "ar50"))
+		bus->is_ar50_gov_used = true;
+
 	rc = of_property_read_u32_array(dev->of_node, "qcom,bus-range-kbps",
 			range, ARRAY_SIZE(range));
 	if (rc) {
