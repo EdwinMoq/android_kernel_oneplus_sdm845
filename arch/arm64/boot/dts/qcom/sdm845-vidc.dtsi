@@ -52,10 +52,10 @@
 
 		venus_bus_ddr {
 			compatible = "qcom,msm-vidc,bus";
-			label = "venus-ddr";
+			label = "venus-ar50-ddr";
 			qcom,bus-master = <MSM_BUS_MASTER_LLCC>;
 			qcom,bus-slave = <MSM_BUS_SLAVE_EBI_CH0>;
-			qcom,mode = "venus-ddr";
+			qcom,mode = "venus-ar50-ddr";
 			qcom,bus-range-kbps = <1000 3388000>;
 		};
 		arm9_bus_ddr {
@@ -68,10 +68,10 @@
 		};
 		venus_bus_llcc {
 			compatible = "qcom,msm-vidc,bus";
-			label = "venus-llcc";
+			label = "venus-ar50-llcc";
 			qcom,bus-master = <MSM_BUS_MASTER_VIDEO_P0>;
 			qcom,bus-slave = <MSM_BUS_SLAVE_LLCC>;
-			qcom,mode = "venus-llcc";
+			qcom,mode = "venus-ar50-llcc";
 			qcom,bus-range-kbps = <17000 3388000>;
 		};
 
