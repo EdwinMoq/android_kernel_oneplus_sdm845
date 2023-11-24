@@ -320,7 +320,7 @@ static int hfi_process_sess_evt_seq_changed(u32 device_id,
 				event_notify.max_reorder_frames =
 					dpb_counts->max_reorder_frames;
 				event_notify.fw_min_cnt =
-					dpb_counts->max_dec_buffering + 2;
+					dpb_counts->max_dpb_count + 3;
 				s_vpr_h(sid,
 					"FW DPB counts: dpb %d ref %d buff %d reorder %d fw_min_cnt %d\n",
 					dpb_counts->max_dpb_count,
