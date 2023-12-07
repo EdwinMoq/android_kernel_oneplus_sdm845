@@ -1489,6 +1489,7 @@ void *msm_vidc_open(int core_id, int session_type)
 	inst->full_range = COLOR_RANGE_UNSPECIFIED;
 	inst->active = true;
 	inst->supported = true;
+	inst->clk_data.work_route = 1;
 
 	for (i = SESSION_MSG_INDEX(SESSION_MSG_START);
 		i <= SESSION_MSG_INDEX(SESSION_MSG_END); i++) {
