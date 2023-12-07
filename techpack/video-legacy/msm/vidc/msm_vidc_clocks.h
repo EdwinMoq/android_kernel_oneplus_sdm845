@@ -27,6 +27,7 @@ int msm_vidc_decide_work_route_iris1(struct msm_vidc_inst *inst);
 int msm_vidc_decide_work_mode_iris1(struct msm_vidc_inst *inst);
 int msm_vidc_decide_work_route_iris2(struct msm_vidc_inst *inst);
 int msm_vidc_decide_work_mode_iris2(struct msm_vidc_inst *inst);
+int msm_vidc_decide_core_and_power_mode_ar50(struct msm_vidc_inst *inst);
 int msm_vidc_decide_core_and_power_mode_ar50lt(struct msm_vidc_inst *inst);
 int msm_vidc_decide_core_and_power_mode_iris1(struct msm_vidc_inst *inst);
 int msm_vidc_decide_core_and_power_mode_iris2(struct msm_vidc_inst *inst);
