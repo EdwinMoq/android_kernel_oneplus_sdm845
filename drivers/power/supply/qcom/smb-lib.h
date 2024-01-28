@@ -293,11 +293,7 @@ struct smb_charger {
 	/* notifiers */
 	struct notifier_block	nb;
 /* david.liu@bsp, 20171023 Battery & Charging porting */
-#if defined(CONFIG_FB)
-	struct notifier_block		fb_notif;
-#elif defined(CONFIG_MSM_RDM_NOTIFY)
 	struct notifier_block		msm_drm_notifier;
-#endif
 
 	/* parallel charging */
 	struct parallel_params	pl;
