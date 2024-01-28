@@ -5,8 +5,6 @@
 /* david.liu@bsp, 20171023 Battery & Charging porting */
 #define pr_fmt(fmt) "SMBLIB: %s: " fmt, __func__
 
-#define CONFIG_MSM_RDM_NOTIFY
-#undef CONFIG_FB
 #include <linux/device.h>
 #include <linux/regmap.h>
 #include <linux/delay.h>
@@ -28,13 +26,8 @@
 #include <linux/delay.h>
 #include <linux/input/qpnp-power-on.h>
 #include <linux/spmi.h>
-#if defined(CONFIG_FB)
-#include <linux/notifier.h>
-#include <linux/fb.h>
-#elif defined(CONFIG_MSM_RDM_NOTIFY)
 #include <linux/msm_drm_notify.h>
 #include <linux/notifier.h>
-#endif /*CONFIG_FB*/
 #include <linux/moduleparam.h>
 #include <linux/msm-bus.h>
 #include <linux/qpnp/qpnp-adc.h>
@@ -7055,36 +7048,6 @@ static void op_check_charger_uovp(struct smb_charger *chg, int vchg_mv)
 	pre_uovp_satus = uovp_satus;
 }
 
-#if defined(CONFIG_FB)
-static int fb_notifier_callback(struct notifier_block *self,
-		unsigned long event, void *data)
-{
-	struct fb_event *evdata = data;
-	int *blank;
-	struct smb_charger *chip =
-		container_of(self, struct smb_charger, fb_notif);
-
-	if (evdata && evdata->data && chip) {
-		if (event == FB_EVENT_BLANK) {
-			blank = evdata->data;
-			if (*blank == FB_BLANK_UNBLANK) {
-				if (!chip->oem_lcd_is_on)
-					set_property_on_fg(chip,
-					POWER_SUPPLY_PROP_UPDATE_LCD_IS_OFF, 0);
-				chip->oem_lcd_is_on = true;
-			} else if (*blank == FB_BLANK_POWERDOWN) {
-				if (chip->oem_lcd_is_on != false)
-					set_property_on_fg(chip,
-					POWER_SUPPLY_PROP_UPDATE_LCD_IS_OFF, 1);
-				chip->oem_lcd_is_on = false;
-			}
-		}
-
-	}
-
-	return 0;
-}
-#elif defined(CONFIG_MSM_RDM_NOTIFY)
 static int msm_drm_notifier_callback(struct notifier_block *self,
 		unsigned long event, void *data)
 {
@@ -7118,7 +7081,6 @@ static int msm_drm_notifier_callback(struct notifier_block *self,
 
 	return 0;
 }
-#endif
 
 static void ffc_exit(struct smb_charger *chg) {
 	int icharging, batt_volt, temp;
@@ -8752,20 +8714,13 @@ int smblib_init(struct smb_charger *chg)
 	g_chg = chg;
 
 	regsister_notify_usb_enumeration_status(&usb_enumeration);
-#if defined(CONFIG_FB)
-	chg->fb_notif.notifier_call = fb_notifier_callback;
 
-	rc = fb_register_client(&chg->fb_notif);
-
-	if (rc)
-		pr_err("Unable to register fb_notifier: %d\n", rc);
-#elif defined(CONFIG_MSM_RDM_NOTIFY)
 	chg->msm_drm_notifier.notifier_call = msm_drm_notifier_callback;
 
 	rc = msm_drm_register_client(&chg->msm_drm_notifier);
 	if (rc)
 		pr_err("Smb unable to register notifier: %d\n", rc);
-#endif /*CONFIG_FB*/
+
 	INIT_DELAYED_WORK(&chg->clear_hdc_work, clear_hdc_work);
 	INIT_WORK(&chg->otg_oc_work, smblib_otg_oc_work);
 	INIT_WORK(&chg->vconn_oc_work, smblib_vconn_oc_work);
