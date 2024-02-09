@@ -197,7 +197,7 @@ static int is_usb_pluged(void)
 		return -EINVAL;
 	}
 
-	pr_info("%s usb_present [%d]\n", __func__, usb_present);
+	pr_debug("%s usb_present [%d]\n", __func__, usb_present);
 	usb_present = ret.intval;
 	return usb_present;
 }
@@ -1164,16 +1164,13 @@ static long  dash_dev_ioctl(struct file *filp, unsigned int cmd,
 			dash_write(di, ALLOW_DATA);
 			break;
 		case DASH_NOTIFY_UPDATE_ADAPTER_INFO:
-			if (is_usb_pluged() > 0) {
+			if (is_usb_pluged())
 				di->dash_enhance = arg;
-				if (!di->batt_psy)
-					di->batt_psy =
-						power_supply_get_by_name("battery");
-				if (di->batt_psy)
-					power_supply_changed(di->batt_psy);
-			} else {
-				pr_err("usb is not online.");
-			}
+			if (!di->batt_psy)
+				di->batt_psy =
+					power_supply_get_by_name("battery");
+			if (di->batt_psy)
+				power_supply_changed(di->batt_psy);
 			break;
 
 		case DASH_NOTIFY_BAD_CONNECTED:
