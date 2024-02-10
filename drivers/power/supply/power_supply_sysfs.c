@@ -47,7 +47,7 @@ static const char * const power_supply_type_text[] = {
 	"USB_HVDCP", "USB_HVDCP_3", "USB_HVDCP_3P5", "Wireless", "USB_FLOAT",
 	"BMS", "Parallel", "Main", "USB_C_UFP", "USB_C_DFP",
 /* david.liu@bsp, 20171023 Battery & Charging porting */
-	"Charge_Pump", "DASH"
+	"Charge_Pump", "Wipower", "DASH"
 };
 
 /* david.liu@bsp, 20171023 Battery & Charging porting */
