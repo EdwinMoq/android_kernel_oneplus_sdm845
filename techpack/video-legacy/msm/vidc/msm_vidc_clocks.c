@@ -1717,7 +1717,7 @@ static u32 get_core_load(struct msm_vidc_core *core,
 
 int msm_vidc_decide_core_and_power_mode_ar50(struct msm_vidc_inst *inst)
 {
-	int rc = 0;
+	int rc = 0, hier_mode = 0,hybrid_hp = 0;
 	struct hfi_device *hdev;
 	struct msm_vidc_core *core;
 	unsigned long max_freq, lp_cycles = 0;
@@ -1728,6 +1728,8 @@ int msm_vidc_decide_core_and_power_mode_ar50(struct msm_vidc_inst *inst)
 		min_load = 0, min_lp_load = 0;
 	u32 min_core_id, min_lp_core_id;
 	u32 mbpf, mbps, max_hq_mbpf, max_hq_mbps;
+
+	hybrid_hp = inst->hybrid_hp;
 
 	if (!inst || !inst->core || !inst->core->device) {
 		d_vpr_e("%s: Invalid args: Inst = %pK\n",
@@ -1760,12 +1762,12 @@ int msm_vidc_decide_core_and_power_mode_ar50(struct msm_vidc_inst *inst)
 	 * Incase there is only 1 core enabled, mark it as the core
 	 * with min load. This ensures that this core is selected and
 	 * video session is set to run on the enabled core.
-	 *
-	 * ToDo: Add support for dual core
 	 */
-	min_core_id = min_lp_core_id = VIDC_CORE_ID_1;
-	min_load = core0_load;
-	min_lp_load = core0_lp_load;
+	if (inst->capability.cap[CAP_MAX_VIDEOCORES].max <= VIDC_CORE_ID_1) {
+		min_core_id = min_lp_core_id = VIDC_CORE_ID_1;
+		min_load = core0_load;
+		min_lp_load = core0_lp_load;
+	}
 
 	current_inst_load = (msm_comm_get_inst_load(inst, LOAD_POWER) *
 	inst->clk_data.entry->vpp_cycles)/inst->clk_data.work_route;
@@ -1785,6 +1787,30 @@ int msm_vidc_decide_core_and_power_mode_ar50(struct msm_vidc_inst *inst)
 	s_vpr_h(inst->sid, "Max Load = %lu\n", max_freq);
 	s_vpr_h(inst->sid, "Current Load = %d, Current LP Load = %d\n",
 		current_inst_load, current_inst_lp_load);
+
+	if (inst->session_type == MSM_VIDC_ENCODER){
+		hier_mode = msm_comm_g_ctrl_for_id(inst,
+				V4L2_CID_MPEG_VIDEO_HEVC_HIER_CODING_TYPE);
+		hier_mode |= hybrid_hp;
+	}
+
+	/* Try for preferred core based on settings. */
+	if (inst->session_type == MSM_VIDC_ENCODER && hier_mode &&
+		inst->capability.cap[CAP_MAX_VIDEOCORES].max >= 2) {
+		if (inst->clk_data.work_mode == HFI_WORKMODE_2){
+			if (current_inst_load / 2 + core0_load <= max_freq &&
+				current_inst_load / 2 + core1_load <= max_freq) {
+					inst->clk_data.core_id = VIDC_CORE_ID_3;
+					msm_vidc_power_save_mode_enable(inst, false);
+					goto decision_done;
+			} else if (current_inst_lp_load / 2 +core0_lp_load <= max_freq &&
+				current_inst_lp_load / 2 +core1_lp_load <= max_freq) {
+					inst->clk_data.core_id = VIDC_CORE_ID_3;
+					msm_vidc_power_save_mode_enable(inst, true);
+					goto decision_done;
+			}
+		}
+	}
 
 	/* Power saving always disabled for HEIF image sessions */
 	if (is_image_session(inst)){
@@ -1808,7 +1834,7 @@ int msm_vidc_decide_core_and_power_mode_ar50(struct msm_vidc_inst *inst)
 		s_vpr_e(inst->sid, "Core cannot support this load\n");
 		return -EINVAL;
 	}
-
+decision_done:
 	core_info.video_core_enable_mask = inst->clk_data.core_id;
 
 	s_vpr_h(inst->sid, "Configuring core usage = %u",
