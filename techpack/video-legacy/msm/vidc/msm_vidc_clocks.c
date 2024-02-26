@@ -18,6 +18,9 @@
 
 #define MSM_VIDC_SESSION_INACTIVE_THRESHOLD_MS 1000
 
+#define MAX_8K_WIDTH_VALUE 7680
+#define MAX_8K_HEIGHT_VALUE 3840
+
 static int msm_vidc_decide_work_mode_ar50(struct msm_vidc_inst *inst);
 static unsigned long msm_vidc_calc_freq_ar50(struct msm_vidc_inst *inst,
 	u32 filled_len);
@@ -1722,12 +1725,18 @@ int msm_vidc_decide_core_and_power_mode_ar50(struct msm_vidc_inst *inst)
 	struct msm_vidc_core *core;
 	unsigned long max_freq, lp_cycles = 0;
 	struct hfi_videocores_usage_type core_info;
+	struct v4l2_format *out_f;
 	u32 core0_load = 0, core1_load = 0, core0_lp_load = 0,
 		core1_lp_load = 0;
-	u32 current_inst_load = 0, current_inst_lp_load = 0,
-		min_load = 0, min_lp_load = 0;
+	unsigned long current_inst_load = 0;
+	u32 current_inst_lp_load = 0, min_load = 0, min_lp_load = 0;
 	u32 min_core_id, min_lp_core_id;
 	u32 mbpf, mbps, max_hq_mbpf, max_hq_mbps;
+	u32 out_height, out_width;
+
+	out_f = &inst->fmts[OUTPUT_PORT].v4l2_fmt;
+	out_height = out_f->fmt.pix_mp.height;
+	out_width = out_f->fmt.pix_mp.width;
 
 	hybrid_hp = inst->hybrid_hp;
 
@@ -1785,7 +1794,7 @@ int msm_vidc_decide_core_and_power_mode_ar50(struct msm_vidc_inst *inst)
 	s_vpr_h(inst->sid, "Core 0 RT LP Load = %d, Core 1 RT LP Load = %d\n",
 		core0_lp_load, core1_lp_load);
 	s_vpr_h(inst->sid, "Max Load = %lu\n", max_freq);
-	s_vpr_h(inst->sid, "Current Load = %d, Current LP Load = %d\n",
+	s_vpr_h(inst->sid, "Current Load = %lu, Current LP Load = %d\n",
 		current_inst_load, current_inst_lp_load);
 
 	if (inst->session_type == MSM_VIDC_ENCODER){
@@ -1810,6 +1819,15 @@ int msm_vidc_decide_core_and_power_mode_ar50(struct msm_vidc_inst *inst)
 					goto decision_done;
 			}
 		}
+	}
+	if (inst->session_type == MSM_VIDC_ENCODER &&
+		((out_width *out_height) >=(MAX_8K_WIDTH_VALUE * MAX_8K_HEIGHT_VALUE)) &&
+		(inst->capability.cap[CAP_MAX_VIDEOCORES].max >= 2)) {
+			if (inst->clk_data.work_mode == HFI_WORKMODE_2) {
+				inst->clk_data.core_id = VIDC_CORE_ID_3;
+				msm_vidc_power_save_mode_enable(inst, false);
+				goto decision_done;
+			}
 	}
 
 	/* Power saving always disabled for HEIF image sessions */
