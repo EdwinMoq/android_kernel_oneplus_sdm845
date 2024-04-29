@@ -1833,6 +1833,9 @@ int msm_vidc_decide_core_and_power_mode_ar50(struct msm_vidc_inst *inst)
 	/* Power saving always disabled for HEIF image sessions */
 	if (is_image_session(inst)){
 		msm_vidc_power_save_mode_enable(inst, false);
+	} else if (!is_realtime_session(inst)){
+		inst->clk_data.core_id = min_core_id;
+		msm_vidc_power_save_mode_enable(inst, false);
 	} else if (current_inst_load + min_load < max_freq) {
 		inst->clk_data.core_id = min_core_id;
 		if (mbpf > max_hq_mbpf || mbps > max_hq_mbps) {
