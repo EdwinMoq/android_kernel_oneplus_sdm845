@@ -3767,7 +3767,12 @@ static int fg_psy_get_property(struct power_supply *psy,
 		rc = fg_get_sram_prop(fg, FG_SRAM_OCV, &pval->intval);
 		break;
 	case POWER_SUPPLY_PROP_CHARGE_FULL_DESIGN:
-		pval->intval = chip->cl.nom_cap_uah;
+		if (!get_extern_fg_regist_done() && get_extern_bq_present())
+			pval->intval = -EINVAL;
+		else if (fg->use_external_fg && external_fg && external_fg->get_batt_design_capacity)
+			pval->intval = external_fg->get_batt_design_capacity();
+		else
+			pval->intval = chip->cl.nom_cap_uah;
 		break;
 	case POWER_SUPPLY_PROP_RESISTANCE_ID:
 		pval->intval = fg->batt_id_ohms;
