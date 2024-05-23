@@ -1853,6 +1853,8 @@ int msm_vidc_decide_core_and_power_mode_ar50(struct msm_vidc_inst *inst)
 		msm_vidc_move_core_to_power_save_mode(core, min_lp_core_id, inst->sid);
 	} else {
 		s_vpr_e(inst->sid, "Core cannot support this load\n");
+		msm_print_core_status(core, VIDC_CORE_ID_1, inst->sid);
+		msm_print_core_status(core, VIDC_CORE_ID_2, inst->sid);
 		return -EINVAL;
 	}
 decision_done:
