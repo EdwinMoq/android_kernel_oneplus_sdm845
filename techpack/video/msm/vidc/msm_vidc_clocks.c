@@ -1855,7 +1855,7 @@ int msm_vidc_decide_core_and_power_mode_ar50(struct msm_vidc_inst *inst)
 		s_vpr_e(inst->sid, "Core cannot support this load\n");
 		msm_print_core_status(core, VIDC_CORE_ID_1, inst->sid);
 		msm_print_core_status(core, VIDC_CORE_ID_2, inst->sid);
-		return -EINVAL;
+		return -ENOMEM;
 	}
 decision_done:
 	core_info.video_core_enable_mask = inst->clk_data.core_id;
