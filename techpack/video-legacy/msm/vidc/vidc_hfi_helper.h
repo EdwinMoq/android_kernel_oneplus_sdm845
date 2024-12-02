@@ -481,6 +481,10 @@ struct hfi_enable {
 	u32 enable;
 };
 
+struct hfi_priority {
+        u32 prioritytohfi;
+};
+
 #define HFI_H264_DB_MODE_DISABLE			(HFI_COMMON_BASE + 0x1)
 #define HFI_H264_DB_MODE_SKIP_SLICE_BOUNDARY	\
 	(HFI_COMMON_BASE + 0x2)
