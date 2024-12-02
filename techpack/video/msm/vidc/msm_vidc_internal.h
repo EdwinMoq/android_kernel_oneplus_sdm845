@@ -578,6 +578,9 @@ struct msm_vidc_inst {
 	u64 last_qbuf_time_ns;
 	bool active;
 	bool supported;
+	bool adjust_core_load;
+	u32 priority;
+	u32 adjusted_priority;
 };
 
 extern struct msm_vidc_drv *vidc_driver;

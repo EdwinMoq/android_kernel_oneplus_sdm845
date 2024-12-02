@@ -249,6 +249,7 @@ int msm_comm_set_color_format_constraints(struct msm_vidc_inst *inst,
 struct buf_queue *msm_comm_get_vb2q(
 		struct msm_vidc_inst *inst, enum v4l2_buf_type type);
 int msm_comm_try_state(struct msm_vidc_inst *inst, int state);
+int msm_check_and_adjust_core_load(struct msm_vidc_inst *current_inst);
 int msm_comm_try_get_bufreqs(struct msm_vidc_inst *inst);
 int msm_comm_try_get_buff_req(struct msm_vidc_inst *inst,
 	union hal_get_property *hprop);
