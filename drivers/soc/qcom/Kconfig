@@ -666,6 +666,19 @@ config MSM_SPCOM
 	  spcom provides clients/server API, although currently only one client
 	  or server is allowed per logical channel.
 
+config MSM_SPCOM_LEGACY
+	depends on QCOM_GLINK
+	bool "Secure Processor Communication over GLINK"
+	help
+	  spcom driver allows loading Secure Processor Applications and
+	  sending messages to Secure Processor Applications.
+	  spcom provides interface to both user space app and kernel driver.
+	  It is using glink as the transport layer, which provides multiple
+	  logical channels over single physical channel.
+	  The physical layer is based on shared memory and interrupts.
+	  spcom provides clients/server API, although currently only one client
+	  or server is allowed per logical channel.
+
 config QSEE_IPC_IRQ
 	bool "QSEE interrupt manager"
 	help
