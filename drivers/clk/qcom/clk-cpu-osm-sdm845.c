@@ -799,6 +799,7 @@ static int osm_cpufreq_cpu_init(struct cpufreq_policy *policy)
 
 	policy->freq_table = table;
 	policy->driver_data = c;
+	policy->dvfs_possible_from_any_cpu = true;
 	cpumask_copy(policy->cpus, &c->related_cpus);
 	return 0;
 }
