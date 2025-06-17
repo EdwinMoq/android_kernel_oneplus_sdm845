@@ -155,6 +155,11 @@ static int tsens2xxx_get_temp(struct tsens_sensor *sensor, int *temp)
 	sensor_addr = TSENS_TM_SN_STATUS(tmdev->tsens_tm_addr);
 	trdy = TSENS_TM_TRDY(tmdev->tsens_tm_addr);
 
+	if (sensor->cached_temp != INT_MIN) {
+		*temp = sensor->cached_temp;
+		goto dbg;
+	}
+
 	code = readl_relaxed_no_log(trdy);
 
 	if (!((code & TSENS_TM_TRDY_FIRST_ROUND_COMPLETE) >>
@@ -762,10 +767,12 @@ static irqreturn_t tsens_tm_irq_thread(int irq, void *data)
 
 		if (upper_thr || lower_thr) {
 			/* Use id for multiple controllers */
+			tm->sensor[i].cached_temp = temp;
 			pr_debug("sensor:%d trigger temp (%d degC)\n",
 				tm->sensor[i].hw_id, temp);
 			of_thermal_handle_trip_temp(tm->sensor[i].tzd, temp);
 		}
+		tm->sensor[i].cached_temp = INT_MIN;
 	}
 
 	/* Disable monitoring sensor trip threshold for triggered sensor */
