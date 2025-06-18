@@ -1530,6 +1530,12 @@ static void msm_geni_serial_set_manual_flow(bool enable,
 	}
 }
 
+static bool legacy_machine_check_geni(void)
+{
+	return ((of_machine_is_compatible("qcom,sdm845")) ||
+			(of_machine_is_compatible("qcom,sm8150")));
+}
+
 static int stop_rx_sequencer(struct uart_port *uport)
 {
 	unsigned int geni_status;
@@ -1553,7 +1559,7 @@ static int stop_rx_sequencer(struct uart_port *uport)
 	}
 
 	if (!uart_console(uport)) {
-		if (!port->bypass_flow_control)
+		if (!port->bypass_flow_control && !legacy_machine_check_geni())
 			msm_geni_serial_set_manual_flow(false, port);
 		/*
 		 * Wait for the stale timeout around 10msec to happen
@@ -1708,7 +1714,7 @@ exit_enable_irq:
 	port->s_cmd = false;
 
 exit_rx_seq:
-	if (!uart_console(uport) && !port->bypass_flow_control)
+	if ((!uart_console(uport) && !port->bypass_flow_control) && !legacy_machine_check_geni())
 		msm_geni_serial_set_manual_flow(true, port);
 
 	geni_status = geni_read_reg_nolog(uport->membase, SE_GENI_STATUS);
