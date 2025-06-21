@@ -790,6 +790,7 @@ static const struct of_device_id clk_debug_match_table[] = {
 	{}
 };
 
+#define GCC_REGMAP(_mux, _index) ((struct regmap **)(_mux)->regmap)[_index]
 static int clk_debug_845_probe(struct platform_device *pdev)
 {
 	struct clk *clk;
@@ -822,62 +823,62 @@ static int clk_debug_845_probe(struct platform_device *pdev)
 		return -ENOMEM;
 
 	if (of_get_property(pdev->dev.of_node, "qcom,gcc", NULL)) {
-		gcc_debug_mux.regmap[GCC] =
+		GCC_REGMAP(&gcc_debug_mux, GCC) =
 			syscon_regmap_lookup_by_phandle(pdev->dev.of_node,
 					"qcom,gcc");
-		if (IS_ERR(gcc_debug_mux.regmap[GCC])) {
+		if (IS_ERR(GCC_REGMAP(&gcc_debug_mux, GCC))) {
 			pr_err("Failed to map qcom,gcc\n");
-			return PTR_ERR(gcc_debug_mux.regmap[GCC]);
+			return PTR_ERR(GCC_REGMAP(&gcc_debug_mux, GCC));
 		}
 	}
 
 	if (of_get_property(pdev->dev.of_node, "qcom,dispcc", NULL)) {
-		gcc_debug_mux.regmap[DISP_CC] =
+		GCC_REGMAP(&gcc_debug_mux, DISP_CC) =
 			syscon_regmap_lookup_by_phandle(pdev->dev.of_node,
 					"qcom,dispcc");
-		if (IS_ERR(gcc_debug_mux.regmap[DISP_CC])) {
+		if (IS_ERR(GCC_REGMAP(&gcc_debug_mux, DISP_CC))) {
 			pr_err("Failed to map qcom,dispcc\n");
-			return PTR_ERR(gcc_debug_mux.regmap[DISP_CC]);
+			return PTR_ERR(GCC_REGMAP(&gcc_debug_mux, DISP_CC));
 		}
 	}
 
 	if (of_get_property(pdev->dev.of_node, "qcom,videocc", NULL)) {
-		gcc_debug_mux.regmap[VIDEO_CC] =
+		GCC_REGMAP(&gcc_debug_mux, VIDEO_CC) =
 			syscon_regmap_lookup_by_phandle(pdev->dev.of_node,
 					"qcom,videocc");
-		if (IS_ERR(gcc_debug_mux.regmap[VIDEO_CC])) {
+		if (IS_ERR(GCC_REGMAP(&gcc_debug_mux, VIDEO_CC))) {
 			pr_err("Failed to map qcom,videocc\n");
-			return PTR_ERR(gcc_debug_mux.regmap[VIDEO_CC]);
+			return PTR_ERR(GCC_REGMAP(&gcc_debug_mux, VIDEO_CC));
 		}
 	}
 
 	if (of_get_property(pdev->dev.of_node, "qcom,camcc", NULL)) {
-		gcc_debug_mux.regmap[CAM_CC] =
+		GCC_REGMAP(&gcc_debug_mux, CAM_CC) =
 			syscon_regmap_lookup_by_phandle(pdev->dev.of_node,
 					"qcom,camcc");
-		if (IS_ERR(gcc_debug_mux.regmap[CAM_CC])) {
+		if (IS_ERR(GCC_REGMAP(&gcc_debug_mux, CAM_CC))) {
 			pr_err("Failed to map qcom,camcc\n");
-			return PTR_ERR(gcc_debug_mux.regmap[CAM_CC]);
+			return PTR_ERR(GCC_REGMAP(&gcc_debug_mux, CAM_CC));
 		}
 	}
 
 	if (of_get_property(pdev->dev.of_node, "qcom,gpucc", NULL)) {
-		gcc_debug_mux.regmap[GPU_CC] =
+		GCC_REGMAP(&gcc_debug_mux, GPU_CC) =
 			syscon_regmap_lookup_by_phandle(pdev->dev.of_node,
 					"qcom,gpucc");
-		if (IS_ERR(gcc_debug_mux.regmap[GPU_CC])) {
+		if (IS_ERR(GCC_REGMAP(&gcc_debug_mux, GPU_CC))) {
 			pr_err("Failed to map qcom,gpucc\n");
-			return PTR_ERR(gcc_debug_mux.regmap[GPU_CC]);
+			return PTR_ERR(GCC_REGMAP(&gcc_debug_mux, GPU_CC));
 		}
 	}
 
 	if (of_get_property(pdev->dev.of_node, "qcom,cpucc", NULL)) {
-		gcc_debug_mux.regmap[CPU] =
+		GCC_REGMAP(&gcc_debug_mux, CPU) =
 			syscon_regmap_lookup_by_phandle(pdev->dev.of_node,
 					"qcom,cpucc");
-		if (IS_ERR(gcc_debug_mux.regmap[CPU])) {
+		if (IS_ERR(GCC_REGMAP(&gcc_debug_mux, CPU))) {
 			pr_err("Failed to map qcom,cpucc\n");
-			return PTR_ERR(gcc_debug_mux.regmap[CPU]);
+			return PTR_ERR(GCC_REGMAP(&gcc_debug_mux, CPU));
 		}
 	}
 
