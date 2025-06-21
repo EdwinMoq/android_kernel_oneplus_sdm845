@@ -36,6 +36,63 @@ struct measure_clk_data {
 	u32 xo_div4_cbcr;
 };
 
+#ifdef CONFIG_MSM_DEBUGCC_SDM845
+/**
+ * List of Debug clock controllers.
+ */
+enum debug_cc {
+	GCC,
+	CAM_CC,
+	DISP_CC,
+	NPU_CC,
+	GPU_CC,
+	VIDEO_CC,
+	CPU_CC,
+	MC_CC,
+	MAX_NUM_CC,
+	CPU,
+};
+
+/**
+ * struct clk_src - Structure of clock source for debug mux
+ *
+ * @parents:		clock name to be used as parent for debug mux.
+ * @prim_mux_sel:	debug mux index at global clock controller.
+ * @prim_mux_div_val:	PLL post-divider setting for the primary mux.
+ * @dbg_cc:		indicates the clock controller for recursive debug
+ *			clock controllers.
+ * @dbg_cc_mux_sel:	indicates the debug mux index at recursive debug mux.
+ * @mux_sel_mask:	indicates the mask for the mux selection.
+ * @mux_sel_shift:	indicates the shift required for mux selection.
+ * @post_div_mask:	indicates the post div mask to be used at recursive
+ *			debug mux.
+ * @post_div_shift:	indicates the shift required for post divider
+ *			configuration.
+ * @post_div_val:	indicates the post div value to be used at recursive
+ *			debug mux.
+ * @mux_offset:		the debug mux offset.
+ * @post_div_offset:	register with post-divider settings for the debug mux.
+ * @cbcr_offset:	branch register to turn on debug mux.
+ * @misc_div_val:	includes any pre-set dividers in the measurement logic.
+ */
+struct clk_src {
+	const char *parents;
+	int prim_mux_sel;
+	u32 prim_mux_div_val;
+	enum debug_cc dbg_cc;
+	int dbg_cc_mux_sel;
+	u32 mux_sel_mask;
+	u32 mux_sel_shift;
+	u32 post_div_mask;
+	u32 post_div_shift;
+	u32 post_div_val;
+	u32 mux_offset;
+	u32 post_div_offset;
+	u32 cbcr_offset;
+	u32 misc_div_val;
+};
+#endif
+
 /**
  * struct clk_debug_mux - Structure of clock debug mux
  *
@@ -63,6 +120,9 @@ struct measure_clk_data {
  * @hw:			handle between common and hardware-specific interfaces.
  */
 struct clk_debug_mux {
+#ifdef CONFIG_MSM_DEBUGCC_SDM845
+	struct clk_src *parent;
+#endif
 	int *mux_sels;
 	int *pre_div_vals;
 	int num_parents;
@@ -81,6 +141,12 @@ struct clk_debug_mux {
 	u32 bus_cl_id;
 	struct clk_hw hw;
 };
+
+#ifdef CONFIG_MSM_DEBUGCC_SDM845
+#define MUX_SRC_LIST(...) \
+	.parent = (struct clk_src[]){__VA_ARGS__}, \
+	.num_parents = ARRAY_SIZE(((struct clk_src[]){__VA_ARGS__}))
+#endif
 
 #define to_clk_measure(_hw) container_of((_hw), struct clk_debug_mux, hw)
 
