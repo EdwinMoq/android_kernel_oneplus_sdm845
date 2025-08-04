@@ -202,6 +202,7 @@ const char * const *v4l2_ctrl_get_menu(u32 id)
 		"Variable Bitrate",
 		"Constant Bitrate",
 		"Maximum Bitrate",
+		"RC OFF",
 		"CBR VFR",
 		"MBR VFR",
 		"Constant Quality",
