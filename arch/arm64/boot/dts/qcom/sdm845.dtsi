@@ -4068,8 +4068,8 @@
 		reg = <0x17d70800 0x1000>,
 			<0x17d45800 0x1000>;
 		#thermal-sensor-cells = <0>;
-		isens_vref-supply = <&pm8998_l1_ao>;
-		isens-vref-settings = <880000 880000 20000>;
+		isens_vref_0p8-supply = <&pm8998_l1_ao>;
+		isens-vref-0p8-settings = <880000 880000 20000>;
 		qcom,legacy-lmh-enable;
 		qcom,no-cooling-device-register;
 	};
