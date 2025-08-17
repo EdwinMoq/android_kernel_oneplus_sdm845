@@ -418,7 +418,7 @@
 			};
 		};
 
-		pmi8998_rgb_led: qcom,pwms@d000 {
+		pmi8998_rgb_led: qcom,leds@d000 {
 			compatible = "qcom,tri-led";
 			reg = <0xd000 0x100>;
 
