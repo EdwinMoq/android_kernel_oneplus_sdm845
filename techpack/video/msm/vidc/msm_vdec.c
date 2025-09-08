@@ -480,6 +480,16 @@ struct msm_vidc_format_constraint dec_pix_format_constraints[] = {
 		.uv_max_stride = 8192,
 		.uv_buffer_alignment = 256,
 	},
+#ifdef CONFIG_VIDC_LEGACY_SUPPORT
+	{
+		.fourcc = V4L2_PIX_FMT_NV12,
+		.num_planes = 2,
+		.y_max_stride = 8192,
+		.y_buffer_alignment = 128,
+		.uv_max_stride = 8192,
+		.uv_buffer_alignment = 32,
+	},
+#else
 	{
 		.fourcc = V4L2_PIX_FMT_NV12,
 		.num_planes = 2,
@@ -488,6 +498,17 @@ struct msm_vidc_format_constraint dec_pix_format_constraints[] = {
 		.uv_max_stride = 8192,
 		.uv_buffer_alignment = 256,
 	},
+#endif
+#ifdef CONFIG_VIDC_LEGACY_SUPPORT
+	{
+		.fourcc = V4L2_PIX_FMT_NV21,
+		.num_planes = 2,
+		.y_max_stride = 8192,
+		.y_buffer_alignment = 128,
+		.uv_max_stride = 8192,
+		.uv_buffer_alignment = 32,
+	},
+#else
 	{
 		.fourcc = V4L2_PIX_FMT_NV21,
 		.num_planes = 2,
@@ -496,6 +517,7 @@ struct msm_vidc_format_constraint dec_pix_format_constraints[] = {
 		.uv_max_stride = 8192,
 		.uv_buffer_alignment = 256,
 	},
+#endif
 };
 
 static bool msm_vidc_check_for_vp9d_overload(struct msm_vidc_core *core)

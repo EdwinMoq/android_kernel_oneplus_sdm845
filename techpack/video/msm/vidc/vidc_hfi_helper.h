@@ -604,6 +604,14 @@ struct hfi_dpb_counts {
 	u32 fw_min_cnt;
 };
 
+#ifdef CONFIG_VIDC_LEGACY_SUPPORT
+struct hfi_dpb_counts_legacy {
+	u32 max_dpb_count;
+	u32 max_ref_frames;
+	u32 max_dec_buffering;
+};
+#endif
+
 struct hfi_profile_level_supported {
 	u32 profile_count;
 	struct hfi_profile_level rg_profile_level[1];

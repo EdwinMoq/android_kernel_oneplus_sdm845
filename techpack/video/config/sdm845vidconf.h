@@ -4,3 +4,4 @@
  */
 
 #define CONFIG_MSM_VIDC_V4L2 1
+#define CONFIG_VIDC_LEGACY_SUPPORT 1

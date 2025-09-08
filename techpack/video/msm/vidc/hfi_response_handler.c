@@ -109,6 +109,10 @@ static int hfi_process_sess_evt_seq_changed(u32 device_id,
 	struct hfi_profile_level *profile_level;
 	struct hfi_bit_depth *pixel_depth;
 	struct hfi_pic_struct *pic_struct;
+#ifdef CONFIG_VIDC_LEGACY_SUPPORT
+	struct hfi_buffer_requirements *buf_req;
+	struct hfi_dpb_counts_legacy *dpb_counts_legacy;
+#endif
 	struct hfi_dpb_counts *dpb_counts;
 	u32 rem_size,entropy_mode = 0;
 	u8 *data_ptr;
@@ -262,6 +266,13 @@ static int hfi_process_sess_evt_seq_changed(u32 device_id,
 					hfi_buffer_requirements)))
 					return -E2BIG;
 				data_ptr = data_ptr + sizeof(u32);
+#ifdef CONFIG_VIDC_LEGACY_SUPPORT
+				buf_req =
+					(struct hfi_buffer_requirements *)
+						data_ptr;
+				event_notify.fw_min_cnt =
+					buf_req->buffer_count_min;
+#endif
 				data_ptr +=
 					sizeof(struct hfi_buffer_requirements);
 				rem_size -=
@@ -305,6 +316,30 @@ static int hfi_process_sess_evt_seq_changed(u32 device_id,
 					sizeof(struct hfi_dpb_counts);
 				rem_size -= sizeof(struct hfi_dpb_counts);
 				break;
+#ifdef CONFIG_VIDC_LEGACY_SUPPORT
+			case HFI_PROPERTY_PARAM_VDEC_DPB_COUNTS_LEGACY:
+				if (!validate_pkt_size(rem_size, sizeof(struct
+					hfi_dpb_counts_legacy)))
+					return -E2BIG;
+				data_ptr = data_ptr + sizeof(u32);
+				dpb_counts_legacy =
+					(struct hfi_dpb_counts_legacy *) data_ptr;
+				event_notify.max_dpb_count =
+					dpb_counts_legacy->max_dpb_count;
+				event_notify.max_ref_frames =
+					dpb_counts_legacy->max_ref_frames;
+				event_notify.max_dec_buffering =
+					dpb_counts_legacy->max_dec_buffering;
+				s_vpr_h(sid,
+					"DPB Counts: dpb %d ref %d buff %d\n",
+					dpb_counts_legacy->max_dpb_count,
+					dpb_counts_legacy->max_ref_frames,
+					dpb_counts_legacy->max_dec_buffering);
+				data_ptr +=
+					sizeof(struct hfi_dpb_counts_legacy);
+				rem_size -= sizeof(struct hfi_dpb_counts_legacy);
+				break;
+#endif
 			default:
 				s_vpr_e(sid, "%s: cmd: %#x not supported\n",
 					__func__, prop_id);
