@@ -311,6 +311,7 @@ clk_rcg2_recalc_rate(struct clk_hw *hw, unsigned long parent_rate)
 	return rrate;
 }
 
+#if !defined(CONFIG_ARCH_SDM845)
 static int _determine_parent_and_update_div(struct clk_hw *hw,
 		const struct freq_tbl *f, struct clk_hw *parent)
 {
@@ -380,6 +381,7 @@ static int _determine_parent_and_update_div(struct clk_hw *hw,
 
 	return ret;
 }
+#endif
 
 static int _freq_tbl_determine_rate(struct clk_hw *hw, const struct freq_tbl *f,
 				    struct clk_rate_request *req,
@@ -389,6 +391,9 @@ static int _freq_tbl_determine_rate(struct clk_hw *hw, const struct freq_tbl *f,
 	struct clk_hw *p;
 	struct clk_rcg2 *rcg = to_clk_rcg2(hw);
 	int index, ret = 0;
+#if defined(CONFIG_ARCH_SDM845)
+	struct clk_rate_request parent_req = { };
+#endif
 
 	switch (policy) {
 	case FLOOR:
@@ -410,11 +415,15 @@ static int _freq_tbl_determine_rate(struct clk_hw *hw, const struct freq_tbl *f,
 
 	clk_flags = clk_hw_get_flags(hw);
 	p = clk_hw_get_parent_by_index(hw, index);
+#if !defined(CONFIG_ARCH_SDM845)
 	if (!p)
 		return -EINVAL;
+#endif
 
 	if (clk_flags & CLK_SET_RATE_PARENT) {
+#if !defined(CONFIG_ARCH_SDM845)
 		rate = f->freq;
+#endif
 		if (f->pre_div) {
 			if (!rate)
 				rate = req->rate;
@@ -435,6 +444,7 @@ static int _freq_tbl_determine_rate(struct clk_hw *hw, const struct freq_tbl *f,
 	req->best_parent_rate = rate;
 	req->rate = f->freq;
 
+#if !defined(CONFIG_ARCH_SDM845)
 	if ((rcg->flags & RCG_UPDATE_BEFORE_PLL) &&
 			(clk_flags & CLK_SET_RATE_PARENT)) {
 
@@ -445,6 +455,22 @@ static int _freq_tbl_determine_rate(struct clk_hw *hw, const struct freq_tbl *f,
 		if (ret)
 			pr_err("Failed to update the div value\n");
 	}
+#else
+	if (f->src_freq != FIXED_FREQ_SRC) {
+		rate = parent_req.rate = f->src_freq;
+		parent_req.best_parent_hw = p;
+		ret = __clk_determine_rate(p, &parent_req);
+		if (ret)
+			return ret;
+
+		ret = clk_set_rate(p->clk, parent_req.rate);
+		if (ret) {
+			pr_err("Failed set rate(%lu) on parent for non-fixed source\n",
+							parent_req.rate);
+			return ret;
+		}
+	}
+#endif
 
 	return ret;
 }
