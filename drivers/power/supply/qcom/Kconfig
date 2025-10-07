@@ -113,6 +113,15 @@ config SMB1355_SLAVE_CHARGER
 	  The driver reports the charger status via the power supply framework.
 	  A charger status change triggers an IRQ via the device STAT pin.
 
+config QPNP_QNOVO
+	bool "QPNP QNOVO driver"
+	depends on MFD_SPMI_PMIC
+	help
+	  Say Y here to enable the Qnovo pulse charging engine. Qnovo driver
+	  accepts pulse parameters via sysfs entries and programs the hardware
+	  module. It also allows userspace code to read diagnostics of voltage
+	  and current measured during certain phases of the pulses.
+
 config QPNP_QNOVO5
 	bool "QPNP QNOVO5 driver"
 	depends on MFD_SPMI_PMIC
