@@ -266,18 +266,7 @@ static struct platform_driver qpnp_coincell_driver = {
 	.id_table	= qpnp_coincell_id,
 };
 
-static int __init qpnp_coincell_init(void)
-{
-	return platform_driver_register(&qpnp_coincell_driver);
-}
-
-static void __exit qpnp_coincell_exit(void)
-{
-	platform_driver_unregister(&qpnp_coincell_driver);
-}
+module_platform_driver(qpnp_coincell_driver);
 
 MODULE_DESCRIPTION("QPNP PMIC coincell charger driver");
 MODULE_LICENSE("GPL v2");
-
-module_init(qpnp_coincell_init);
-module_exit(qpnp_coincell_exit);
