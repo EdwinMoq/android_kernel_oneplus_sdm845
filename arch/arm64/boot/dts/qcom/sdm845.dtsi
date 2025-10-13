@@ -2389,6 +2389,11 @@
 				qcom,glink-channels = "cdsprmglink-apps-dsp";
 				qcom,intents = <0x20 12>;
 
+				qcom,cdsp-cdsp-l3-gov {
+					compatible = "qcom,cdsp-l3";
+					qcom,target-dev = <&cdsp_l3>;
+				};
+
 				msm_cdsp_rm: qcom,msm_cdsp_rm {
 					compatible = "qcom,msm-cdsp-rm";
 					qcom,qos-latency-us = <100>;
