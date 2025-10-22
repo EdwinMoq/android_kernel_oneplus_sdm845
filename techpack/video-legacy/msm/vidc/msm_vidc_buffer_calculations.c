@@ -961,6 +961,12 @@ u32 msm_vidc_calculate_dec_input_frame_size(struct msm_vidc_inst *inst)
 			base_res_mbs = base_res_mbs * 2;
 	}
 
+	if (inst->core->platform_data->vpu_ver == VPU_VERSION_AR50
+			&& f->fmt.pix_mp.pixelformat == V4L2_PIX_FMT_VP9
+			&& num_mbs > NUM_MBS_720P) {
+		div_factor = 2;
+	}
+
 	frame_size = base_res_mbs * MB_SIZE_IN_PIXEL * 3 / 2 / div_factor;
 
 	 /* multiply by 10/8 (1.25) to get size for 10 bit case */
