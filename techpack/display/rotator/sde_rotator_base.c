@@ -255,7 +255,8 @@ u32 sde_mdp_get_ot_limit(u32 width, u32 height, u32 pixfmt, u32 fps, u32 is_rd)
 			ot_lim = 16;
 		}
 	} else if (IS_SDE_MAJOR_SAME(mdata->mdss_version,
-				SDE_MDP_HW_REV_600) || is_yuv) {
+				SDE_MDP_HW_REV_600) || IS_SDE_MAJOR_SAME(mdata->mdss_version,
+				SDE_MDP_HW_REV_400) || is_yuv) {
 		if (res <= (RES_1080p * 30))
 			ot_lim = 2;
 		else if (res <= (RES_1080p * 60))
