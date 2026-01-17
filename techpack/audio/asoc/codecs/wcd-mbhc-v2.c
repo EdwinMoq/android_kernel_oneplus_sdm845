@@ -1021,15 +1021,12 @@ static void wcd_mbhc_swch_irq_handler(struct wcd_mbhc *mbhc)
 		mbhc->extn_cable_hph_rem = false;
 		wcd_mbhc_report_plug(mbhc, 0, jack_type);
 
-		if (mbhc->mbhc_cfg->enable_usbc_analog) {
-			if (mbhc->mbhc_cfg->usbc_analog_legacy) {
-				WCD_MBHC_REG_UPDATE_BITS(WCD_MBHC_L_DET_EN, 1);
-			} else {
-				WCD_MBHC_REG_UPDATE_BITS(WCD_MBHC_L_DET_EN, 0);
-				if (mbhc->mbhc_cb->clk_setup)
-					mbhc->mbhc_cb->clk_setup(
-						mbhc->component, false);
-			}
+		if (mbhc->mbhc_cfg->enable_usbc_analog &&
+			!mbhc->mbhc_cfg->enable_usbc_analog_legacy) {
+			WCD_MBHC_REG_UPDATE_BITS(WCD_MBHC_L_DET_EN, 0);
+			if (mbhc->mbhc_cb->clk_setup)
+				mbhc->mbhc_cb->clk_setup(
+					mbhc->component, false);
 		}
 
 		if (mbhc->mbhc_cfg->moisture_en ||
@@ -1386,7 +1383,7 @@ static int wcd_mbhc_initialise(struct wcd_mbhc *mbhc)
 	 * by an external source
 	 */
 	if (mbhc->mbhc_cfg->enable_usbc_analog) {
-		if (mbhc->mbhc_cfg->usbc_analog_legacy) {
+		if (mbhc->mbhc_cfg->enable_usbc_analog_legacy) {
 			mbhc->hphl_swh = 1;
 			mbhc->gnd_swh = 1;
 		}
@@ -1413,7 +1410,7 @@ static int wcd_mbhc_initialise(struct wcd_mbhc *mbhc)
 	 * when a non-audio accessory is inserted. L_DET_EN sets to 1 when FSA
 	 * I2C driver notifies that ANALOG_AUDIO_ADAPTER is inserted
 	 */
-	if (mbhc->mbhc_cfg->enable_usbc_analog && !mbhc->mbhc_cfg->usbc_analog_legacy)
+	if (mbhc->mbhc_cfg->enable_usbc_analog && !mbhc->mbhc_cfg->enable_usbc_analog_legacy)
 		WCD_MBHC_REG_UPDATE_BITS(WCD_MBHC_L_DET_EN, 0);
 	else
 		WCD_MBHC_REG_UPDATE_BITS(WCD_MBHC_L_DET_EN, 1);
@@ -1434,7 +1431,7 @@ static int wcd_mbhc_initialise(struct wcd_mbhc *mbhc)
 	/* enable MBHC clock */
 	if (mbhc->mbhc_cb->clk_setup) {
 		if (mbhc->mbhc_cfg->enable_usbc_analog &&
-		    !mbhc->mbhc_cfg->usbc_analog_legacy)
+		    !mbhc->mbhc_cfg->enable_usbc_analog_legacy)
 			mbhc->mbhc_cb->clk_setup(component, false);
 		else
 			mbhc->mbhc_cb->clk_setup(component, true);
@@ -1849,13 +1846,12 @@ int wcd_mbhc_start(struct wcd_mbhc *mbhc, struct wcd_mbhc_config *mbhc_cfg)
 			dev_err(card->dev, "%s: fsa4480 i2c node not found, "
 				"trying legacy Type-C analog audio\n",
 				__func__);
-
-			mbhc_cfg->usbc_analog_legacy = true;
-			/* goto err; */
+			mbhc_cfg->enable_usbc_analog_legacy = true;
 		}
 	}
 
-	if (mbhc_cfg->enable_usbc_analog && mbhc_cfg->usbc_analog_legacy) {
+	/* non-fsa4480 legacy analog audio GPIOs */
+	if (mbhc_cfg->enable_usbc_analog_legacy) {
 		struct usbc_ana_audio_config *config =
 						&mbhc_cfg->usbc_analog_cfg;
 
@@ -1909,7 +1905,7 @@ int wcd_mbhc_start(struct wcd_mbhc *mbhc, struct wcd_mbhc_config *mbhc_cfg)
 				 __func__, mbhc->mbhc_fw, mbhc->mbhc_cal);
 	}
 
-	if (mbhc_cfg->enable_usbc_analog && !mbhc_cfg->usbc_analog_legacy) {
+	if (mbhc_cfg->enable_usbc_analog && !mbhc_cfg->enable_usbc_analog_legacy) {
 		mbhc->fsa_nb.notifier_call = wcd_mbhc_usbc_ana_event_handler;
 		mbhc->fsa_nb.priority = 0;
 		rc = fsa4480_reg_notifier(&mbhc->fsa_nb, mbhc->fsa_np);
@@ -1917,6 +1913,26 @@ int wcd_mbhc_start(struct wcd_mbhc *mbhc, struct wcd_mbhc_config *mbhc_cfg)
 
 	return rc;
 err:
+	if (mbhc_cfg->enable_usbc_analog_legacy) {
+		struct usbc_ana_audio_config *config =
+				&mbhc->mbhc_cfg->usbc_analog_cfg;
+		if (config->usbc_en1_gpio > 0) {
+			dev_dbg(card->dev, "%s free usb en1 gpio %d\n",
+				__func__, config->usbc_en1_gpio);
+			gpio_free(config->usbc_en1_gpio);
+			config->usbc_en1_gpio = 0;
+		}
+		if (config->usbc_force_gpio > 0) {
+			dev_dbg(card->dev, "%s free usb_force gpio %d\n",
+				__func__, config->usbc_force_gpio);
+			gpio_free(config->usbc_force_gpio);
+			config->usbc_force_gpio = 0;
+		}
+		if (config->usbc_en1_gpio_p)
+			of_node_put(config->usbc_en1_gpio_p);
+		if (config->usbc_force_gpio_p)
+			of_node_put(config->usbc_force_gpio_p);
+	}
 	dev_dbg(mbhc->component->dev, "%s: leave %d\n", __func__, rc);
 	return rc;
 }
@@ -1949,7 +1965,7 @@ void wcd_mbhc_stop(struct wcd_mbhc *mbhc)
 	}
 
 	if (mbhc->mbhc_cfg->enable_usbc_analog) {
-		if (mbhc->mbhc_cfg->usbc_analog_legacy) {
+		if (mbhc->mbhc_cfg->enable_usbc_analog_legacy) {
 			struct usbc_ana_audio_config *config =
 					&mbhc->mbhc_cfg->usbc_analog_cfg;
 
@@ -1959,7 +1975,6 @@ void wcd_mbhc_stop(struct wcd_mbhc *mbhc)
 				gpio_free(config->usbc_en1_gpio);
 			if (config->usbc_force_gpio)
 				gpio_free(config->usbc_force_gpio);
-
 			if (config->usbc_en1_gpio_p)
 				of_node_put(config->usbc_en1_gpio_p);
 			if (config->usbc_force_gpio_p)
