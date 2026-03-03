@@ -1338,7 +1338,9 @@ int msm_venc_s_ctrl(struct msm_vidc_inst *inst, struct v4l2_ctrl *ctrl)
 	int rc = 0;
 	struct hal_request_iframe request_iframe;
 	struct hal_bitrate bitrate;
+#ifndef CONFIG_ARCH_SDM845
 	struct hal_operating_rate operating_rate;
+#endif
 	struct hal_profile_level profile_level;
 	enum hal_h264_entropy h264_entropy;
 	struct hal_intra_period intra_period;
@@ -2093,10 +2095,12 @@ int msm_venc_s_ctrl(struct msm_vidc_inst *inst, struct v4l2_ctrl *ctrl)
 				ctrl->val >> 16);
 			inst->clk_data.operating_rate = ctrl->val;
 			inst->clk_data.turbo_mode = false;
+#ifndef CONFIG_ARCH_SDM845
 			property_id = HAL_CONFIG_OPERATING_RATE;
 			operating_rate.operating_rate =
 				inst->clk_data.operating_rate;
 			pdata = &operating_rate;
+#endif
 		}
 		break;
 	case V4L2_CID_MPEG_VIDC_VIDEO_VENC_BITRATE_TYPE:
