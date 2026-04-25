@@ -60,6 +60,7 @@
 			<&wsa881x_0213>, <&wsa881x_0214>;
 	qcom,wsa-aux-dev-prefix = "SpkrLeft", "SpkrRight",
 				  "SpkrLeft", "SpkrRight";
+	qcom,msm_audio_ssr_devs = <&audio_apr>, <&q6core>;
 };
 
 &soc {
