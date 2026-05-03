@@ -25,8 +25,7 @@
 
 static struct component_info component_info_desc[COMPONENT_MAX];
 static struct kobject *project_info_kobj;
-static struct project_info *project_info_desc_v1 = NULL;
-static struct project_info_v2 *project_info_desc_v2 = NULL;
+static struct project_info *project_info_desc;
 static struct dump_info *dp_info;
 
 static struct kobject *component_info;
@@ -53,13 +52,6 @@ static DEVICE_ATTR(platform_id, 0444, project_info_get, NULL);
 static DEVICE_ATTR(serialno, 0444, project_info_get, NULL);
 static DEVICE_ATTR(feature_id, 0444, project_info_get, NULL);
 static DEVICE_ATTR(aboard_id, 0444, project_info_get, NULL);
-
-#define GET_PROJECT_INFO(member) (project_info_desc_v2 ? project_info_desc_v2->member : project_info_desc_v1->member)
-#define SET_PROJECT_INFO(member, value) \
-    if (project_info_desc_v2) \
-        project_info_desc_v2->member = value; \
-    else \
-        project_info_desc_v1->member = value;
 
 void save_dump_reason_to_smem(char *info, char *function_name)
 {
@@ -116,49 +108,49 @@ static ssize_t project_info_get(struct device *dev,
                 struct device_attribute *attr,
                 char *buf)
 {
-    if (project_info_desc_v1 || project_info_desc_v2) {
+    if (project_info_desc) {
         if (attr == &dev_attr_project_name)
             return snprintf(buf, BUF_SIZE, "%s\n",
-            GET_PROJECT_INFO(project_name));
+            project_info_desc->project_name);
         if (attr == &dev_attr_hw_id)
             return snprintf(buf, BUF_SIZE, "%d\n",
-            GET_PROJECT_INFO(hw_version));
+            project_info_desc->hw_version);
         if (attr == &dev_attr_rf_id_v1)
             return snprintf(buf, BUF_SIZE, "%d\n",
-            GET_PROJECT_INFO(rf_v1));
+            project_info_desc->rf_v1);
         if (attr == &dev_attr_rf_id_v2)
             return snprintf(buf, BUF_SIZE, "%d\n",
-            GET_PROJECT_INFO(rf_v2));
+            project_info_desc->rf_v2);
         if (attr == &dev_attr_rf_id_v3)
             return snprintf(buf, BUF_SIZE, "%d\n",
-            GET_PROJECT_INFO(rf_v3));
+            project_info_desc->rf_v3);
         if (attr == &dev_attr_modem)
             return snprintf(buf, BUF_SIZE, "%d\n",
-            GET_PROJECT_INFO(modem));
+            project_info_desc->modem);
         if (attr == &dev_attr_operator_no)
             return snprintf(buf, BUF_SIZE, "%d\n",
-            GET_PROJECT_INFO(operator));
+            project_info_desc->operator);
         if (attr == &dev_attr_ddr_manufacture_info)
             return snprintf(buf, BUF_SIZE, "%d\n",
-            GET_PROJECT_INFO(ddr_manufacture_info));
+            project_info_desc->ddr_manufacture_info);
         if (attr == &dev_attr_ddr_row)
             return snprintf(buf, BUF_SIZE, "%d\n",
-            GET_PROJECT_INFO(ddr_row));
+            project_info_desc->ddr_row);
         if (attr == &dev_attr_ddr_column)
             return snprintf(buf, BUF_SIZE, "%d\n",
-            GET_PROJECT_INFO(ddr_column));
+            project_info_desc->ddr_column);
         if (attr == &dev_attr_ddr_fw_version)
             return snprintf(buf, BUF_SIZE, "%d\n",
-            GET_PROJECT_INFO(ddr_fw_version));
+            project_info_desc->ddr_fw_version);
         if (attr == &dev_attr_ddr_reserve_info)
             return snprintf(buf, BUF_SIZE, "%d\n",
-            GET_PROJECT_INFO(ddr_reserve_info));
+            project_info_desc->ddr_reserve_info);
         if (attr == &dev_attr_secboot_status)
             return snprintf(buf, BUF_SIZE, "%d\n",
             get_secureboot_fuse_status());
         if (attr == &dev_attr_platform_id)
             return snprintf(buf, BUF_SIZE, "%d\n",
-            GET_PROJECT_INFO(platform_id));
+            project_info_desc->platform_id);
 
         if (attr == &dev_attr_serialno)
             return snprintf(buf, BUF_SIZE, "0x%x\n",
@@ -166,11 +158,11 @@ static ssize_t project_info_get(struct device *dev,
 
         if (attr == &dev_attr_feature_id)
             return snprintf(buf, BUF_SIZE, "%d\n",
-            GET_PROJECT_INFO(feature_id));
+            project_info_desc->feature_id);
 
         if (attr == &dev_attr_aboard_id)
             return snprintf(buf, BUF_SIZE, "%d\n",
-            GET_PROJECT_INFO(a_board_version));
+            project_info_desc->a_board_version);
     }
 
     return -EINVAL;
@@ -478,10 +470,10 @@ void get_ddr_manufacture_name(void)
     uint32 i, length;
 
     length = ARRAY_SIZE(ddr_manufacture_list);
-    if (project_info_desc_v1 || project_info_desc_v2) {
+    if (project_info_desc) {
         for (i = 0; i < length; i++) {
             if (ddr_manufacture_list[i].id ==
-                GET_PROJECT_INFO(ddr_manufacture_info)) {
+                project_info_desc->ddr_manufacture_info) {
                 snprintf(ddr_manufacture, sizeof(ddr_manufacture), "%s",
                     ddr_manufacture_list[i].name);
                 break;
@@ -495,10 +487,10 @@ void get_cpu_type(void)
     uint32 i, length;
 
     length = ARRAY_SIZE(cpu_list_msm);
-    if (project_info_desc_v1 || project_info_desc_v2) {
+    if (project_info_desc) {
         for (i = 0; i < length; i++) {
             if (cpu_list_msm[i].id ==
-                GET_PROJECT_INFO(platform_id)) {
+                project_info_desc->platform_id) {
                 snprintf(cpu_type, sizeof(cpu_type),
                     "%s", cpu_list_msm[i].name);
                 break;
@@ -544,21 +536,16 @@ uint32 get_hw_version(void)
 {
     size_t size;
 
-    if (strnstr(saved_command_line, "androidboot.platform_name=", strlen(saved_command_line)))
-        project_info_desc_v2 = qcom_smem_get(QCOM_SMEM_HOST_ANY,
-                    SMEM_PROJECT_INFO,
-                    &size);
-    else
-        project_info_desc_v1 = qcom_smem_get(QCOM_SMEM_HOST_ANY,
-                    SMEM_PROJECT_INFO,
-                    &size);
+    project_info_desc = qcom_smem_get(QCOM_SMEM_HOST_ANY,
+                SMEM_PROJECT_INFO,
+                &size);
 
-    if (IS_ERR_OR_NULL(project_info_desc_v1) && IS_ERR_OR_NULL(project_info_desc_v2))
+    if (IS_ERR_OR_NULL(project_info_desc))
         pr_err("%s: get project_info failure\n", __func__);
     else {
         pr_err("%s: hw version: %d\n", __func__,
-            GET_PROJECT_INFO(hw_version));
-        return GET_PROJECT_INFO(hw_version);
+            project_info_desc->hw_version);
+        return project_info_desc->hw_version;
     }
     return 0;
 }
@@ -572,134 +559,129 @@ int __init init_project_info(void)
     if (project_info_init_done)
         return 0;
 
-    if (strnstr(saved_command_line, "androidboot.platform_name=", strlen(saved_command_line)))
-        project_info_desc_v2 = qcom_smem_get(QCOM_SMEM_HOST_ANY,
-                    SMEM_PROJECT_INFO,
-                    &size);
-    else
-        project_info_desc_v1 = qcom_smem_get(QCOM_SMEM_HOST_ANY,
-                    SMEM_PROJECT_INFO,
-                    &size);
+    project_info_desc = qcom_smem_get(QCOM_SMEM_HOST_ANY,
+                SMEM_PROJECT_INFO,
+                &size);
 
-    if (IS_ERR_OR_NULL(project_info_desc_v1) && IS_ERR_OR_NULL(project_info_desc_v2)) {
+    if (IS_ERR_OR_NULL(project_info_desc)) {
         pr_err("%s: get project_info failure\n", __func__);
         return 0;
     }
     pr_err("%s: project_name: %s hw_version: %d rf_v1: %d rf_v2: %d: rf_v3: %d  paltform_id:%d\n",
-        __func__, GET_PROJECT_INFO(project_name),
-        GET_PROJECT_INFO(hw_version),
-        GET_PROJECT_INFO(rf_v1),
-        GET_PROJECT_INFO(rf_v2),
-        GET_PROJECT_INFO(rf_v3),
-        GET_PROJECT_INFO(platform_id));
+        __func__, project_info_desc->project_name,
+        project_info_desc->hw_version,
+        project_info_desc->rf_v1,
+        project_info_desc->rf_v2,
+        project_info_desc->rf_v3,
+        project_info_desc->platform_id);
 
-    switch (GET_PROJECT_INFO(hw_version)) {
+    switch (project_info_desc->hw_version) {
     case 11:
         snprintf(mainboard_version, sizeof(mainboard_version), "%s %s",
-        GET_PROJECT_INFO(project_name), "EVB");
+        project_info_desc->project_name, "EVB");
         break;
     case 12:
         snprintf(mainboard_version, sizeof(mainboard_version), "%s %s",
-        GET_PROJECT_INFO(project_name), "T0");
+        project_info_desc->project_name, "T0");
         break;
     case 13:
         snprintf(mainboard_version, sizeof(mainboard_version), "%s %s",
-        GET_PROJECT_INFO(project_name), "T1");
+        project_info_desc->project_name, "T1");
         break;
     case 14:
         snprintf(mainboard_version, sizeof(mainboard_version), "%s %s",
-        GET_PROJECT_INFO(project_name), "EVT1");
+        project_info_desc->project_name, "EVT1");
         break;
     case 15:
         snprintf(mainboard_version, sizeof(mainboard_version), "%s %s",
-        GET_PROJECT_INFO(project_name), "EVT2");
+        project_info_desc->project_name, "EVT2");
         break;
     case 21:
         snprintf(mainboard_version, sizeof(mainboard_version), "%s %s",
-        GET_PROJECT_INFO(project_name), "DVT");
+        project_info_desc->project_name, "DVT");
         break;
     case 22:
         snprintf(mainboard_version, sizeof(mainboard_version), "%s %s",
-        GET_PROJECT_INFO(project_name), "PVT");
+        project_info_desc->project_name, "PVT");
         break;
     case 23:
         snprintf(mainboard_version, sizeof(mainboard_version), "%s %s",
-        GET_PROJECT_INFO(project_name), "PVT");
+        project_info_desc->project_name, "PVT");
         break;
     case 24:
         snprintf(mainboard_version, sizeof(mainboard_version), "%s %s",
-        GET_PROJECT_INFO(project_name), "PVT_MCU");
+        project_info_desc->project_name, "PVT_MCU");
         break;
     case 25:
     snprintf(mainboard_version, sizeof(mainboard_version), "%s %s",
-        GET_PROJECT_INFO(project_name), "DVTBACKUP");
+        project_info_desc->project_name, "DVTBACKUP");
         break;
 
     case 31:
         snprintf(mainboard_version, sizeof(mainboard_version), "%s %s",
-        GET_PROJECT_INFO(project_name), "EVB");
+        project_info_desc->project_name, "EVB");
         break;
     case 32:
         snprintf(mainboard_version, sizeof(mainboard_version), "%s %s",
-        GET_PROJECT_INFO(project_name), "T0");
+        project_info_desc->project_name, "T0");
         break;
     case 33:
         snprintf(mainboard_version, sizeof(mainboard_version), "%s %s",
-        GET_PROJECT_INFO(project_name), "EVT1");
+        project_info_desc->project_name, "EVT1");
         break;
     case 34:
         snprintf(mainboard_version, sizeof(mainboard_version), "%s %s",
-        GET_PROJECT_INFO(project_name), "DVT");
+        project_info_desc->project_name, "DVT");
         break;
     case 35:
         snprintf(mainboard_version, sizeof(mainboard_version), "%s %s",
-        GET_PROJECT_INFO(project_name), "2ND");
+        project_info_desc->project_name, "2ND");
         break;
     case 41:
         snprintf(mainboard_version, sizeof(mainboard_version), "%s %s",
-        GET_PROJECT_INFO(project_name), "PVT");
+        project_info_desc->project_name, "PVT");
         break;
     case 42:
         snprintf(mainboard_version, sizeof(mainboard_version), "%s %s",
-        GET_PROJECT_INFO(project_name), "PVT2nd");
+        project_info_desc->project_name, "PVT2nd");
         break;
     case 43:
         snprintf(mainboard_version, sizeof(mainboard_version), "%s %s",
-        GET_PROJECT_INFO(project_name), "PVT-1");
+        project_info_desc->project_name, "PVT-1");
         break;
     case 44:
         snprintf(mainboard_version, sizeof(mainboard_version), "%s %s",
-        GET_PROJECT_INFO(project_name), "PVTSpec");
+        project_info_desc->project_name, "PVTSpec");
         break;
     case 45:
         snprintf(mainboard_version, sizeof(mainboard_version), "%s %s",
-        GET_PROJECT_INFO(project_name), "MPSpec");
+        project_info_desc->project_name, "MPSpec");
         break;
     case 55:
         snprintf(mainboard_version, sizeof(mainboard_version), "%s %s",
-        GET_PROJECT_INFO(project_name), "DVTUSB30");
+        project_info_desc->project_name, "DVTUSB30");
         break;
 
     default:
         snprintf(mainboard_version, sizeof(mainboard_version), "%d",
-        GET_PROJECT_INFO(hw_version));
+        project_info_desc->hw_version);
         break;
     }
     push_component_info(MAINBOARD,
         mainboard_version,
         mainboard_manufacture);
 
-   if( GET_PROJECT_INFO(hw_version) <= 32 ) {
+   if( project_info_desc->hw_version <= 32 ) {
         snprintf(Aboard_version, sizeof(Aboard_version), "%d %s",
-        GET_PROJECT_INFO(a_board_version),GET_PROJECT_INFO(a_board_version) <=5 ?
-        a_borad_version_string_arry[GET_PROJECT_INFO(a_board_version) -1].name:"Unknown");
+        project_info_desc->a_board_version,project_info_desc->a_board_version <=5 ?
+        a_borad_version_string_arry[project_info_desc->a_board_version -1].name:"Unknown");
 
         push_component_info(ABOARD, Aboard_version, mainboard_manufacture);
         pr_err("%s: Aboard_gpio(%s)\n", __func__, Aboard_version);
 
     }
 
-    snprintf(rf_version, sizeof(rf_version),  " %d",GET_PROJECT_INFO(rf_v1));
+    snprintf(rf_version, sizeof(rf_version),  " %d",project_info_desc->rf_v1);
 	push_component_info(RF_VERSION, rf_version, mainboard_manufacture);
 
 	get_ddr_manufacture_name();
@@ -719,15 +701,15 @@ int __init init_project_info(void)
 		ddr_size = 2;
 
     snprintf(ddr_version, sizeof(ddr_version), "size_%dG_r_%d_c_%d",
-        ddr_size, GET_PROJECT_INFO(ddr_row),
-        GET_PROJECT_INFO(ddr_column));
+        ddr_size, project_info_desc->ddr_row,
+        project_info_desc->ddr_column);
     snprintf(ddr_manufacture_and_fw_verion,
         sizeof(ddr_manufacture_and_fw_verion),
         "%s%s %u.%u", ddr_manufacture,
-        GET_PROJECT_INFO(ddr_reserve_info) == 0x05 ? "20nm" :
-        (GET_PROJECT_INFO(ddr_reserve_info) == 0x06 ? "18nm" : " "),
-        GET_PROJECT_INFO(ddr_fw_version) >> 16,
-        GET_PROJECT_INFO(ddr_fw_version) & 0x0000FFFF);
+        project_info_desc->ddr_reserve_info == 0x05 ? "20nm" :
+        (project_info_desc->ddr_reserve_info == 0x06 ? "18nm" : " "),
+        project_info_desc->ddr_fw_version >> 16,
+        project_info_desc->ddr_fw_version & 0x0000FFFF);
     push_component_info(DDR, ddr_version, ddr_manufacture_and_fw_verion);
 
     get_cpu_type();
@@ -785,23 +767,23 @@ static int op_aboard_read_gpio(void)
 
     if( gpio0 == 0 && gpio1 == 0 )
     {
-        SET_PROJECT_INFO(a_board_version, 0);
+        project_info_desc->a_board_version = 0 ;
     }
     else if( gpio0 == 0 && gpio1 == 1 )
     {
-        SET_PROJECT_INFO(a_board_version, 1);
+        project_info_desc->a_board_version = 1 ;
     }
     else if( gpio0 == 1 && gpio1 == 0 )
     {
-        SET_PROJECT_INFO(a_board_version, 2);
+        project_info_desc->a_board_version = 2 ;
     }
     else
     {
-        SET_PROJECT_INFO(a_board_version, -1);
+        project_info_desc->a_board_version = -1 ;
     }
     snprintf(Aboard_version, sizeof(Aboard_version), "%d %s",
-    GET_PROJECT_INFO(a_board_version),GET_PROJECT_INFO(a_board_version) <3 ?
-    a_borad_version_string_arry_gpio[GET_PROJECT_INFO(a_board_version)].name:"Unknown");
+    project_info_desc->a_board_version,project_info_desc->a_board_version <3 ?
+    a_borad_version_string_arry_gpio[project_info_desc->a_board_version].name:"Unknown");
 
     push_component_info(ABOARD, Aboard_version, mainboard_manufacture);
     pr_err("%s: Aboard_gpio(%s)\n", __func__, Aboard_version);
@@ -894,7 +876,7 @@ static int __init init_project(void)
 
     init_project_info();
 
-    if( GET_PROJECT_INFO(hw_version) > 32 ){
+    if( project_info_desc->hw_version > 32 ){
         ret = platform_driver_register(&aboard_driver);
         if (ret)
             pr_err("aboard_driver register failed: %d\n", ret);
