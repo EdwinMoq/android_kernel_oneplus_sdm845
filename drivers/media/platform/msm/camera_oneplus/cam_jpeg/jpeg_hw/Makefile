@@ -1,12 +1,12 @@
-ccflags-y += -Idrivers/media/platform/msm/camera_oneplus/cam_smmu/
-ccflags-y += -Idrivers/media/platform/msm/camera_oneplus/cam_core/
-ccflags-y += -Idrivers/media/platform/msm/camera_oneplus/cam_utils/
-ccflags-y += -Idrivers/media/platform/msm/camera_oneplus/cam_sync/
-ccflags-y += -Idrivers/media/platform/msm/camera_oneplus/cam_req_mgr/
-ccflags-y += -Idrivers/media/platform/msm/camera_oneplus/cam_cdm/
-ccflags-y += -Idrivers/media/platform/msm/camera_oneplus/cam_cpas/include/
-ccflags-y += -Idrivers/media/platform/msm/camera_oneplus/cam_jpeg/jpeg_hw/
-ccflags-y += -Idrivers/media/platform/msm/camera_oneplus/cam_jpeg/jpeg_hw/include/
+ccflags-y += -I$(srctree)/drivers/media/platform/msm/camera_oneplus/cam_smmu/
+ccflags-y += -I$(srctree)/drivers/media/platform/msm/camera_oneplus/cam_core/
+ccflags-y += -I$(srctree)/drivers/media/platform/msm/camera_oneplus/cam_utils/
+ccflags-y += -I$(srctree)/drivers/media/platform/msm/camera_oneplus/cam_sync/
+ccflags-y += -I$(srctree)/drivers/media/platform/msm/camera_oneplus/cam_req_mgr/
+ccflags-y += -I$(srctree)/drivers/media/platform/msm/camera_oneplus/cam_cdm/
+ccflags-y += -I$(srctree)/drivers/media/platform/msm/camera_oneplus/cam_cpas/include/
+ccflags-y += -I$(srctree)/drivers/media/platform/msm/camera_oneplus/cam_jpeg/jpeg_hw/
+ccflags-y += -I$(srctree)/drivers/media/platform/msm/camera_oneplus/cam_jpeg/jpeg_hw/include/
 
 obj-$(CONFIG_SPECTRA_CAMERA) += jpeg_enc_hw/
 obj-$(CONFIG_SPECTRA_CAMERA) += jpeg_dma_hw/
