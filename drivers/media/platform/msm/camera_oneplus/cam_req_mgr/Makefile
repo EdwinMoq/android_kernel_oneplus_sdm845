@@ -1,6 +1,6 @@
-ccflags-y += -Idrivers/media/platform/msm/camera_oneplus/cam_core/
-ccflags-y += -Idrivers/media/platform/msm/camera_oneplus/cam_smmu/
-ccflags-y += -Idrivers/media/platform/msm/camera_oneplus/cam_utils
+ccflags-y += -I$(srctree)/drivers/media/platform/msm/camera_oneplus/cam_core/
+ccflags-y += -I$(srctree)/drivers/media/platform/msm/camera_oneplus/cam_smmu/
+ccflags-y += -I$(srctree)/drivers/media/platform/msm/camera_oneplus/cam_utils
 
 obj-$(CONFIG_SPECTRA_CAMERA) += cam_req_mgr_core.o\
 				cam_req_mgr_dev.o \
