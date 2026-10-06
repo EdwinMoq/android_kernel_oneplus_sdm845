@@ -921,12 +921,17 @@ int msm_vidc_set_internal_config(struct msm_vidc_inst *inst)
 	int rc = 0;
 	u32 rc_mode;
 	bool set_rc = false;
+#ifndef CONFIG_ARCH_SDM845
 	struct hal_vbv_hdr_buf_size hrd_buf_size;
+#endif
 	struct hal_enable latency;
 	struct hfi_device *hdev;
 	struct hal_multi_slice_control multi_slice_control;
 	u32 codec;
-	u32 mbps, mb_per_frame, fps, bitrate;
+#ifndef CONFIG_ARCH_SDM845
+	u32 mbps;
+#endif
+	u32 mb_per_frame, fps, bitrate;
 	u32 slice_val, slice_mode, max_avg_slicesize;
 	u32 output_width, output_height;
 
@@ -965,10 +970,13 @@ int msm_vidc_set_internal_config(struct msm_vidc_inst *inst)
 	output_height = inst->prop.height[CAPTURE_PORT];
 	output_width = inst->prop.width[CAPTURE_PORT];
 	fps = inst->prop.fps;
+#ifndef CONFIG_ARCH_SDM845
 	mbps = NUM_MBS_PER_SEC(output_height, output_width, fps);
+#endif
 	if ((rc_mode == V4L2_MPEG_VIDEO_BITRATE_MODE_CBR ||
 		 rc_mode == V4L2_MPEG_VIDEO_BITRATE_MODE_CBR_VFR) &&
 		(codec != V4L2_PIX_FMT_VP8)) {
+#ifndef CONFIG_ARCH_SDM845
 		if ((rc_mode == V4L2_MPEG_VIDEO_BITRATE_MODE_CBR &&
 		    mbps <= CBR_MB_LIMIT) ||
 		   (rc_mode == V4L2_MPEG_VIDEO_BITRATE_MODE_CBR_VFR &&
@@ -981,6 +989,7 @@ int msm_vidc_set_internal_config(struct msm_vidc_inst *inst)
 		rc = call_hfi_op(hdev, session_set_property,
 			(void *)inst->session, HAL_CONFIG_VENC_VBV_HRD_BUF_SIZE,
 			(void *)&hrd_buf_size);
+#endif
 
 		latency.enable = V4L2_MPEG_MSM_VIDC_ENABLE;
 		rc = call_hfi_op(hdev, session_set_property,
