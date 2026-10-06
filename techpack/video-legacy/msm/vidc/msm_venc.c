@@ -4743,10 +4743,10 @@ int msm_venc_set_properties(struct msm_vidc_inst *inst)
 	rc = msm_venc_set_rate_control(inst);
 	if (rc)
 		goto exit;
-	rc = msm_venc_set_vbv_delay(inst);
-	if (rc)
-		goto exit;
 	if (vpu != VPU_VERSION_AR50) {
+		rc = msm_venc_set_vbv_delay(inst);
+		if (rc)
+			goto exit;
 		rc = msm_venc_set_bitrate_savings_mode(inst);
 		if (rc)
 			goto exit;
