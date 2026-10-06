@@ -2632,7 +2632,7 @@ int msm_venc_set_rate_control(struct msm_vidc_inst *inst)
 }
 
 
-
+#ifndef CONFIG_ARCH_SDM845
 int msm_venc_set_vbv_delay(struct msm_vidc_inst *inst)
 {
 	int rc = 0;
@@ -2706,7 +2706,7 @@ set_vbv_delay:
 	}
 	return rc;
 }
-
+#endif
 
 int msm_venc_set_input_timestamp_rc(struct msm_vidc_inst *inst)
 {
@@ -4769,9 +4769,11 @@ int msm_venc_set_properties(struct msm_vidc_inst *inst)
 	rc = msm_venc_set_rate_control(inst);
 	if (rc)
 		goto exit;
+#ifndef CONFIG_ARCH_SDM845
 	rc = msm_venc_set_vbv_delay(inst);
 	if (rc)
 		goto exit;
+#endif
 #ifdef VIDC_BITRATE_SAVINGS_AVAILABLE
 	rc = msm_venc_set_bitrate_savings_mode(inst);
 	if (rc)
