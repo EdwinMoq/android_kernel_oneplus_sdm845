@@ -430,7 +430,7 @@
 	xo-therm-adc {
 		polling-delay-passive = <0>;
 		polling-delay = <0>;
-		thermal-sensors = <&pm8998_adc_tm 0x4c>;
+		thermal-sensors = <&pm8998_adc_tm ADC_XO_THERM_PU2>;
 		wake-capable-sensor;
 		thermal-governor = "user_space";
 
@@ -452,7 +452,7 @@
 	msm-therm-adc {
 		polling-delay-passive = <0>;
 		polling-delay = <0>;
-		thermal-sensors = <&pm8998_adc_tm 0x4d>;
+		thermal-sensors = <&pm8998_adc_tm ADC_AMUX_THM1_PU2>;
 		wake-capable-sensor;
 		thermal-governor = "user_space";
 
@@ -468,7 +468,7 @@
 	pa-therm1-adc {
 		polling-delay-passive = <0>;
 		polling-delay = <0>;
-		thermal-sensors = <&pm8998_adc_tm 0x4f>;
+		thermal-sensors = <&pm8998_adc_tm ADC_AMUX_THM3_PU2>;
 		wake-capable-sensor;
 		thermal-governor = "user_space";
 
@@ -484,7 +484,7 @@
 	quiet-therm-adc {
 		polling-delay-passive = <0>;
 		polling-delay = <0>;
-		thermal-sensors = <&pm8998_adc_tm 0x51>;
+		thermal-sensors = <&pm8998_adc_tm ADC_AMUX_THM5_PU2>;
 		wake-capable-sensor;
 		thermal-governor = "user_space";
 
