@@ -24,7 +24,11 @@
 #include <media/videobuf2-core.h>
 #include <media/videobuf2-v4l2.h>
 #include "msm_vidc.h"
+#ifdef CONFIG_VIDC_LEGACY_SUPPORT
+#include <media/msm_media_info_legacy.h>
+#else
 #include <media/msm_media_info.h>
+#endif
 #include "vidc_hfi_api.h"
 #include "vidc_hfi_helper.h"
 
