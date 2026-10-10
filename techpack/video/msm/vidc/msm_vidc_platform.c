@@ -896,6 +896,105 @@ static struct msm_vidc_codec_capability kona_capabilities[] = {
 	                            V4L2_MPEG_VIDEO_HEVC_LEVEL_5},
 };
 
+static struct msm_vidc_codec_capability sdm845_capabilities[] = {
+	/* {cap_type, domains, codecs, min, max, step_size, default_value} */
+	{CAP_FRAME_WIDTH, DOMAINS_ALL, CODECS_ALL, 128, 4096, 1, 1920},
+	{CAP_FRAME_HEIGHT, DOMAINS_ALL, CODECS_ALL, 128, 2304, 1, 1080},
+	/* ((4096 * 2304) / 256) */
+	{CAP_MBS_PER_FRAME, DOMAINS_ALL, CODECS_ALL, 64, 36864, 1, 36864},
+	/* ((1920x1080) / 480) * 30 fps */
+	{CAP_MBS_PER_SECOND, DOMAINS_ALL, CODECS_ALL, 64, 979200, 1, 244800},
+	{CAP_FRAMERATE, DOMAINS_ALL, CODECS_ALL, 1, 480, 1, 30},
+	{CAP_OPERATINGRATE, DOMAINS_ALL, CODECS_ALL, 1, INT_MAX, 1, 30},
+	{CAP_BITRATE, DOMAINS_ALL, CODECS_ALL, 1, 120000000, 1, 20000000},
+	{CAP_CABAC_BITRATE, ENC, H264, 1, 100000000, 1, 20000000},
+	{CAP_SCALE_X, ENC, CODECS_ALL, 8192, 65536, 1, 8192},
+	{CAP_SCALE_Y, ENC, CODECS_ALL, 8192, 65536, 1, 8192},
+	{CAP_SCALE_X, DEC, CODECS_ALL, 65536, 65536, 1, 65536},
+	{CAP_SCALE_Y, DEC, CODECS_ALL, 65536, 65536, 1, 65536},
+	{CAP_BFRAME, ENC, H264|HEVC, 0, 1, 1, 0},
+	{CAP_HIER_P_NUM_ENH_LAYERS, ENC, H264|HEVC, 0, 6, 1, 0},
+	{CAP_LTR_COUNT, ENC, H264|HEVC, 0, 2, 1, 0},
+	/* ((1920 * 1088) / 256) * 30 fps */
+	{CAP_MBS_PER_SECOND_POWER_SAVE, ENC, CODECS_ALL,
+		0, 244800, 1, 244800},
+	{CAP_I_FRAME_QP, ENC, H264|HEVC, 0, 51, 1, 10},
+	{CAP_P_FRAME_QP, ENC, H264|HEVC, 0, 51, 1, 20},
+	{CAP_B_FRAME_QP, ENC, H264|HEVC, 0, 51, 1, 20},
+	{CAP_I_FRAME_QP, ENC, VP8|VP9, 0, 127, 1, 20},
+	{CAP_P_FRAME_QP, ENC, VP8|VP9, 0, 127, 1, 40},
+	{CAP_B_FRAME_QP, ENC, VP8|VP9, 0, 127, 1, 40},
+	/* 10 slices */
+	{CAP_SLICE_BYTE, ENC, H264|HEVC, 1, 10, 1, 10},
+	{CAP_SLICE_MB, ENC, H264|HEVC, 1, 10, 1, 10},
+	{CAP_MAX_VIDEOCORES, DOMAINS_ALL, CODECS_ALL, 0, 3, 1, 1},
+
+	/* VP8 specific */
+	{CAP_FRAME_WIDTH, ENC|DEC, VP8, 96, 4096, 1, 4096},
+	{CAP_FRAME_HEIGHT, ENC|DEC, VP8, 96, 2304, 1, 2304},
+	/* (4096 * 2304) / 256 */
+	{CAP_MBS_PER_FRAME, ENC|DEC, VP8, 36, 36864, 1, 36864},
+	/* ((1920 * 1088) / 256) * 120*/
+	{CAP_MBS_PER_SECOND, ENC|DEC, VP8, 36, 979200, 1, 979200},
+	{CAP_FRAMERATE, ENC|DEC, VP8, 1, 240, 1, 30},
+	{CAP_BITRATE, ENC, VP8, 1, 40000000, 1, 20000000},
+	{CAP_BITRATE, DEC, VP8, 1, 100000000, 1, 20000000},
+
+	/* Mpeg2 decoder specific */
+	{CAP_FRAME_WIDTH, DEC, MPEG2, 128, 1920, 1, 1920},
+	{CAP_FRAME_HEIGHT, DEC, MPEG2, 128, 1920, 1, 1088},
+	/* (1920 * 1088) / 256 */
+	{CAP_MBS_PER_FRAME, DEC, MPEG2, 64, 8160, 1, 8160},
+	/* ((1920 * 1088) / 256) * 30*/
+	{CAP_MBS_PER_SECOND, DEC, MPEG2, 64, 244800, 1, 244800},
+	{CAP_FRAMERATE, DEC, MPEG2, 1, 30, 1, 30},
+	{CAP_BITRATE, DEC, MPEG2, 1, 40000000, 1, 20000000},
+
+	/* Secure usecase specific */
+	{CAP_SECURE_FRAME_WIDTH, DOMAINS_ALL, CODECS_ALL, 128, 4096, 1, 1920},
+	{CAP_SECURE_FRAME_HEIGHT, DOMAINS_ALL, CODECS_ALL, 128, 2304, 1, 1080},
+	/* (4096 * 2304) / 256 */
+	{CAP_SECURE_MBS_PER_FRAME, DOMAINS_ALL, CODECS_ALL, 64, 36864, 1, 36864},
+	{CAP_SECURE_BITRATE, DOMAINS_ALL, CODECS_ALL, 1, 40000000, 1, 20000000},
+
+	/* Batch Mode Decode */
+	{CAP_BATCH_MAX_MB_PER_FRAME, DEC, CODECS_ALL, 64, 8160, 1, 8160},
+	/* (1920 * 1088) / 256 */
+	{CAP_BATCH_MAX_FPS, DEC, CODECS_ALL, 1, 30, 1, 30},
+
+	/* All intra encoding usecase specific */
+	{CAP_ALLINTRA_MAX_FPS, ENC, H264|HEVC, 1, 240, 1, 30},
+
+	/* Image specific */
+	{CAP_HEVC_IMAGE_FRAME_WIDTH, ENC, HEVC, 128, 512, 1, 512},
+	{CAP_HEVC_IMAGE_FRAME_HEIGHT, ENC, HEVC, 128, 512, 1, 512},
+
+	/* profile hevc usecase specific */
+	{CAP_PROFILE, ENC, HEVC, V4L2_MPEG_VIDEO_HEVC_PROFILE_MAIN,
+				V4L2_MPEG_VIDEO_HEVC_PROFILE_MAIN_10, 1,
+				V4L2_MPEG_VIDEO_HEVC_PROFILE_MAIN},
+
+	/* Level for AVC and HEVC encoder specific.
+	   Default for levels is UNKNOWN value. But if we use unknown
+	   value here to set as default, max value needs to be set to
+	   unknown as well, which creates a problem of allowing client
+	   to set higher level than supported */
+	{CAP_H264_LEVEL, ENC, H264, V4L2_MPEG_VIDEO_H264_LEVEL_1_0,
+	                            V4L2_MPEG_VIDEO_H264_LEVEL_6_0, 1,
+	                            V4L2_MPEG_VIDEO_H264_LEVEL_6_0},
+	{CAP_HEVC_LEVEL, ENC, HEVC, V4L2_MPEG_VIDEO_HEVC_LEVEL_1,
+	                            V4L2_MPEG_VIDEO_HEVC_LEVEL_6, 1,
+	                            V4L2_MPEG_VIDEO_HEVC_LEVEL_6},
+
+	/* Level for AVC and HEVC decoder specific */
+	{CAP_H264_LEVEL, DEC, H264, V4L2_MPEG_VIDEO_H264_LEVEL_1_0,
+	                            V4L2_MPEG_VIDEO_H264_LEVEL_6_1, 1,
+	                            V4L2_MPEG_VIDEO_H264_LEVEL_5_0},
+	{CAP_HEVC_LEVEL, DEC, HEVC, V4L2_MPEG_VIDEO_HEVC_LEVEL_1,
+	                            V4L2_MPEG_VIDEO_HEVC_LEVEL_5_1, 1,
+	                            V4L2_MPEG_VIDEO_HEVC_LEVEL_5},
+};
+
 /*
  * Custom conversion coefficients for resolution: 176x144 negative
  * coeffs are converted to s4.9 format
@@ -1729,6 +1828,10 @@ static struct msm_vidc_common_data sdm845_common_data[] = {
 		.value = 489600,
 	},
 	{
+		.key = "qcom,max-mbpf",
+		.value = 36864,/* (4096x2304)/256 */
+	},
+	{
 		.key = "qcom,power-collapse-delay",
 		.value = 1500,
 	},
@@ -2043,6 +2146,10 @@ static struct msm_vidc_platform_data sdm845_data = {
 	.vpu_ver = VPU_VERSION_AR50,
 	.num_vpp_pipes = 0x1,
 	.ubwc_config = 0x0,
+	.codecs = default_codecs,
+	.codecs_count = ARRAY_SIZE(default_codecs),
+	.codec_caps = sdm845_capabilities,
+	.codec_caps_count = ARRAY_SIZE(sdm845_capabilities),
 	.max_inst_count = MAX_SUPPORTED_INSTANCES,
 };
 
