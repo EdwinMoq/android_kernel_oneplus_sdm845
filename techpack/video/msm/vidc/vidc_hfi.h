@@ -5,7 +5,11 @@
 #ifndef __H_VIDC_HFI_H__
 #define __H_VIDC_HFI_H__
 
+#ifdef CONFIG_ARCH_SDM845
+#include <media/msm_media_info_legacy.h>
+#else
 #include <media/msm_media_info.h>
+#endif
 #include "vidc_hfi_helper.h"
 #include "vidc_hfi_api.h"
 
