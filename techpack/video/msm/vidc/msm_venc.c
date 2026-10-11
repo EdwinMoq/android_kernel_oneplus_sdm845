@@ -1598,7 +1598,8 @@ int msm_venc_s_ctrl(struct msm_vidc_inst *inst, struct v4l2_ctrl *ctrl)
 		}
 		break;
 	case V4L2_CID_MPEG_VIDEO_FORCE_KEY_FRAME:
-		if (inst->state == MSM_VIDC_START_DONE) {
+		if (inst->state == MSM_VIDC_START_DONE &&
+			inst->core->platform_data->vpu_ver != VPU_VERSION_AR50) {
 			rc = msm_venc_set_request_keyframe(inst);
 			if (rc)
 				s_vpr_e(sid, "%s: set bitrate failed\n",
@@ -1695,7 +1696,8 @@ int msm_venc_s_ctrl(struct msm_vidc_inst *inst, struct v4l2_ctrl *ctrl)
 		}
 		if (inst->state < MSM_VIDC_LOAD_RESOURCES)
 			msm_vidc_calculate_buffer_counts(inst);
-		if (inst->state == MSM_VIDC_START_DONE) {
+		if (inst->state == MSM_VIDC_START_DONE &&
+			inst->core->platform_data->vpu_ver != VPU_VERSION_AR50) {
 			rc = msm_venc_set_operating_rate(inst);
 			if (rc)
 				s_vpr_e(sid, "%s: set operating rate failed\n",
@@ -1900,7 +1902,8 @@ int msm_venc_s_ctrl(struct msm_vidc_inst *inst, struct v4l2_ctrl *ctrl)
 		break;
 	case V4L2_CID_HFLIP:
 	case V4L2_CID_VFLIP:
-		if (inst->state == MSM_VIDC_START_DONE) {
+		if (inst->state == MSM_VIDC_START_DONE &&
+			inst->core->platform_data->vpu_ver != VPU_VERSION_AR50) {
 			rc = msm_venc_set_dynamic_flip(inst);
 			if (rc)
 				s_vpr_e(sid, "%s: set flip failed\n", __func__);
@@ -2101,7 +2104,8 @@ int msm_venc_set_color_format(struct msm_vidc_inst *inst)
 			enc_pix_format_constraints,
 			ARRAY_SIZE(enc_pix_format_constraints),
 			f->fmt.pix_mp.pixelformat, inst->sid);
-	if (fmt_constraints) {
+	if (fmt_constraints &&
+		inst->core->platform_data->vpu_ver != VPU_VERSION_AR50) {
 		rc = msm_comm_set_color_format_constraints(inst,
 				HAL_BUFFER_INPUT,
 				fmt_constraints);
@@ -3144,7 +3148,11 @@ int msm_venc_set_entropy_mode(struct msm_vidc_inst *inst)
 		return 0;
 
 	entropy.entropy_mode = inst->entropy_mode;
-	entropy.cabac_model = HFI_H264_CABAC_MODEL_2;
+	if (inst->core->platform_data->vpu_ver == VPU_VERSION_AR50) {
+		entropy.cabac_model = HFI_H264_CABAC_MODEL_0;
+	} else {
+		entropy.cabac_model = HFI_H264_CABAC_MODEL_2;
+	}
 
 	s_vpr_h(inst->sid, "%s: %d\n", __func__, entropy.entropy_mode);
 	rc = call_hfi_op(hdev, session_set_property, inst->session,
@@ -4452,7 +4460,8 @@ int msm_venc_set_extradata(struct msm_vidc_inst *inst)
 			HFI_PROPERTY_PARAM_VENC_LTR_INFO, 0x0);
 		msm_comm_set_extradata(inst,
 			HFI_PROPERTY_PARAM_VENC_ROI_QP_EXTRADATA, 0x0);
-		if (codec == V4L2_PIX_FMT_HEVC) {
+		if (codec == V4L2_PIX_FMT_HEVC &&
+			inst->core->platform_data->vpu_ver != VPU_VERSION_AR50) {
 			msm_comm_set_extradata(inst,
 			HFI_PROPERTY_PARAM_VENC_HDR10PLUS_METADATA_EXTRADATA,
 			0x0);
@@ -4472,7 +4481,8 @@ int msm_venc_set_extradata(struct msm_vidc_inst *inst)
 		msm_comm_set_extradata(inst,
 			HFI_PROPERTY_PARAM_VENC_ROI_QP_EXTRADATA, 0x1);
 
-	if (inst->prop.extradata_ctrls & EXTRADATA_ENC_INPUT_HDR10PLUS) {
+	if ((inst->prop.extradata_ctrls & EXTRADATA_ENC_INPUT_HDR10PLUS) &&
+			inst->core->platform_data->vpu_ver != VPU_VERSION_AR50) {
 		// Enable HDR10+ Extradata
 		if (codec == V4L2_PIX_FMT_HEVC) {
 			msm_comm_set_extradata(inst,
@@ -4736,9 +4746,11 @@ int msm_venc_set_properties(struct msm_vidc_inst *inst)
 	rc = msm_venc_set_vbv_delay(inst);
 	if (rc)
 		goto exit;
-	rc = msm_venc_set_bitrate_savings_mode(inst);
-	if (rc)
-		goto exit;
+	if (vpu != VPU_VERSION_AR50) {
+		rc = msm_venc_set_bitrate_savings_mode(inst);
+		if (rc)
+			goto exit;
+	}
 	rc = msm_venc_set_input_timestamp_rc(inst);
 	if (rc)
 		goto exit;
@@ -4828,18 +4840,22 @@ int msm_venc_set_properties(struct msm_vidc_inst *inst)
 	rc = msm_venc_set_cvp_skipratio(inst);
 	if (rc)
 		goto exit;
-	rc = msm_venc_set_operating_rate(inst);
-	if (rc)
-		goto exit;
+	if (vpu != VPU_VERSION_AR50) {
+		rc = msm_venc_set_operating_rate(inst);
+		if (rc)
+			goto exit;
+	}
 	rc = msm_venc_set_buffer_counts(inst);
 	if (rc)
 		goto exit;
 	rc = msm_venc_set_rotation(inst);
 	if (rc)
 		goto exit;
-	rc = msm_venc_set_lossless(inst);
-	if (rc)
-		goto exit;
+	if (vpu != VPU_VERSION_AR50) {
+		rc = msm_venc_set_lossless(inst);
+		if (rc)
+			goto exit;
+	}
 
 exit:
 	if (rc)
