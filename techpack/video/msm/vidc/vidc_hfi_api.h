@@ -334,6 +334,10 @@ enum hal_core_id {
 	VIDC_CORE_ID_UNUSED = 0x10000000,
 };
 
+struct hal_videocores_usage_info {
+	u32 video_core_enable_mask;
+};
+
 enum vidc_resource_id {
 	VIDC_RESOURCE_NONE,
 	VIDC_RESOURCE_SYSCACHE,
