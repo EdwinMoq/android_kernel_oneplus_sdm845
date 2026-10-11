@@ -1007,7 +1007,8 @@ int msm_vdec_set_color_format(struct msm_vidc_inst *inst)
 			dec_pix_format_constraints,
 			ARRAY_SIZE(dec_pix_format_constraints),
 			inst->clk_data.opb_fourcc, inst->sid);
-	if (fmt_constraint) {
+	if (fmt_constraint &&
+		inst->core->platform_data->vpu_ver != VPU_VERSION_AR50) {
 		rc = msm_comm_set_color_format_constraints(inst,
 				msm_comm_get_hal_output_buffer(inst),
 				fmt_constraint);
@@ -1411,19 +1412,22 @@ int msm_vdec_set_extradata(struct msm_vidc_inst *inst)
 		HFI_PROPERTY_PARAM_VDEC_INTERLACE_VIDEO_EXTRADATA, 0x1);
 	msm_comm_set_extradata(inst, display_info, 0x1);
 
-	if (codec == V4L2_PIX_FMT_VP9 || codec == V4L2_PIX_FMT_HEVC) {
-		msm_comm_set_extradata(inst,
-			HFI_PROPERTY_PARAM_VDEC_HDR10_HIST_EXTRADATA, 0x1);
+	if ((codec == V4L2_PIX_FMT_VP9 || codec == V4L2_PIX_FMT_HEVC) &&
+		(inst->core->platform_data->vpu_ver != VPU_VERSION_AR50)) {
+			msm_comm_set_extradata(inst,
+				HFI_PROPERTY_PARAM_VDEC_HDR10_HIST_EXTRADATA, 0x1);
 	}
 
 	msm_comm_set_extradata(inst,
 		HFI_PROPERTY_PARAM_VDEC_NUM_CONCEALED_MB, 0x1);
 	if (codec == V4L2_PIX_FMT_HEVC) {
-		msm_comm_set_extradata(inst,
-			HFI_PROPERTY_PARAM_VDEC_MASTER_DISP_COL_SEI_EXTRADATA,
-			0x1);
-		msm_comm_set_extradata(inst,
-			HFI_PROPERTY_PARAM_VDEC_CLL_SEI_EXTRADATA, 0x1);
+		if (inst->core->platform_data->vpu_ver != VPU_VERSION_AR50) {
+			msm_comm_set_extradata(inst,
+				HFI_PROPERTY_PARAM_VDEC_MASTER_DISP_COL_SEI_EXTRADATA,
+				0x1);
+			msm_comm_set_extradata(inst,
+				HFI_PROPERTY_PARAM_VDEC_CLL_SEI_EXTRADATA, 0x1);
+		}
 		msm_comm_set_extradata(inst,
 			HFI_PROPERTY_PARAM_VDEC_STREAM_USERDATA_EXTRADATA,
 			0x1);
@@ -1485,9 +1489,11 @@ int msm_vdec_set_properties(struct msm_vidc_inst *inst)
 		rc = msm_vdec_set_conceal_color(inst);
 		if (rc)
 			goto exit;
-		rc = msm_vdec_set_seqchng_at_syncframe(inst);
-		if (rc)
-			goto exit;
+		if (inst->core->platform_data->vpu_ver != VPU_VERSION_AR50) {
+			rc = msm_vdec_set_seqchng_at_syncframe(inst);
+			if (rc)
+				goto exit;
+		}
 	}
 
 	rc = msm_vdec_set_color_format(inst);
