@@ -273,7 +273,8 @@
 #define HFI_VENUS_HEIGHT_ALIGNMENT 32
 
 #define SYSTEM_LAL_TILE10 192
-#define NUM_MBS_480P (((640 + 15) >> 4) * ((480 + 15) >> 4))
+#define NUM_MBS_360P (((480 + 15) >> 4) * ((360 + 15) >> 4))
+#define NUM_MBS_640x480P (((640 + 15) >> 4) * ((480 + 15) >> 4))
 #define NUM_MBS_720P (((1280 + 15) >> 4) * ((720 + 15) >> 4))
 #define NUM_MBS_4k (((4096 + 15) >> 4) * ((2304 + 15) >> 4))
 #define MB_SIZE_IN_PIXEL (16 * 16)
@@ -553,7 +554,7 @@ int msm_vidc_get_encoder_internal_buffer_sizes(struct msm_vidc_inst *inst)
 	rotation = get_ctrl(inst, V4L2_CID_ROTATE);
 	rotation_val = rotation->val;
 	if (rotation_val == 90 || rotation_val == 270) {
-		/* Internal buffer size calc are based on rotated wxh */
+		/* Internal buffer size calculators are based on rotated w x h */
 		width = f->fmt.pix_mp.height;
 		height = f->fmt.pix_mp.width;
 	} else {
@@ -599,6 +600,7 @@ int msm_vidc_get_encoder_internal_buffer_sizes(struct msm_vidc_inst *inst)
 			HAL_BUFFER_INTERNAL_PERSIST) {
 			curr_req->buffer_size =
 				enc_calculators->calculate_persist_size();
+			valid_buffer_type = true;
 		}
 
 		if (valid_buffer_type) {
@@ -725,7 +727,7 @@ int msm_vidc_calculate_output_buffer_count(struct msm_vidc_inst *inst)
 			output_min_count = 9;
 			break;
 		default:
-			output_min_count = 8; //H264, HEVC
+			output_min_count = 4; //H264, HEVC
 		}
 	} else {
 		output_min_count = MIN_ENC_OUTPUT_BUFFERS;
@@ -948,10 +950,11 @@ u32 msm_vidc_calculate_dec_input_frame_size(struct msm_vidc_inst *inst)
 			div_factor = 2;
 	}
 
-	if (is_secure_session(inst) && num_mbs >= NUM_MBS_720P)
+	if (is_secure_session(inst))
 		div_factor = div_factor << 1;
 
-	/* For targets that doesn't support 4k, consider max mb's for that
+	/*
+	 * For targets that doesn't support 4k, consider max mb's for that
 	 * target and allocate max input buffer size for the same
 	 */
 	if (inst->core->platform_data->vpu_ver == VPU_VERSION_AR50_LITE) {
@@ -959,6 +962,12 @@ u32 msm_vidc_calculate_dec_input_frame_size(struct msm_vidc_inst *inst)
 		div_factor = 1;
 		if (num_mbs < NUM_MBS_720P)
 			base_res_mbs = base_res_mbs * 2;
+	}
+
+	if (inst->core->platform_data->vpu_ver == VPU_VERSION_AR50
+			&& f->fmt.pix_mp.pixelformat == V4L2_PIX_FMT_VP9
+			&& num_mbs > NUM_MBS_720P) {
+		div_factor = 2;
 	}
 
 	frame_size = base_res_mbs * MB_SIZE_IN_PIXEL * 3 / 2 / div_factor;
@@ -1019,13 +1028,16 @@ u32 msm_vidc_calculate_enc_output_frame_size(struct msm_vidc_inst *inst)
 	u32 mbs_per_frame;
 	u32 width, height;
 	struct v4l2_format *f;
+	uint32_t vpu;
+
+	vpu = inst->core->platform_data->vpu_ver;
 
 	f = &inst->fmts[OUTPUT_PORT].v4l2_fmt;
 	/*
 	 * Encoder output size calculation: 32 Align width/height
 	 * For CQ or heic session : YUVsize * 2
-	 * For resolution <= 480p : YUVsize * 2
-	 * For resolution > 480p & <= 4K : YUVsize / 2
+	 * For resolution <= 480x360p : YUVsize * 2
+	 * For resolution > 360p & <= 4K : YUVsize / 2
 	 * For resolution > 4k : YUVsize / 4
 	 * Initially frame_size = YUVsize * 2;
 	 */
@@ -1042,20 +1054,27 @@ u32 msm_vidc_calculate_enc_output_frame_size(struct msm_vidc_inst *inst)
 		is_grid_session(inst) || is_image_session(inst))
 		goto calc_done;
 
-	if (mbs_per_frame <= NUM_MBS_480P)
+	/*
+	 * Check added to avoid reduction of frame_size for resolutions
+	 * less than 640x480P
+	*/
+	if (mbs_per_frame < NUM_MBS_640x480P)
 		(void)frame_size; /* Default frame_size = YUVsize * 2 */
 	else if (mbs_per_frame <= NUM_MBS_4k)
 		frame_size = frame_size >> 2;
 	else
 		frame_size = frame_size >> 3;
-
 	/*
 	 * Check added to avoid Encode failure of resolutions
 	 * above 720P on SA6155P. Need to be removed if fix is
 	 * added in firmware.
 	*/
-	if (mbs_per_frame > NUM_MBS_720P)
-		frame_size = width * height;
+	if (vpu == VPU_VERSION_AR50) {
+		if (mbs_per_frame > NUM_MBS_720P)
+			frame_size = width * height;
+		else
+			frame_size =  frame_size << 1;
+	}
 
 	if (inst->rc_type == RATE_CONTROL_OFF)
 		frame_size = frame_size << 1;

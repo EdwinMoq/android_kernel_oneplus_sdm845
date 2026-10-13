@@ -105,26 +105,26 @@ extern int msm_vidc_err_recovery_disable;
 	} while (0)
 
 #define s_vpr_e(sid, __fmt, ...) dprintk(VIDC_ERR, sid, __fmt, ##__VA_ARGS__)
-#define s_vpr_h(sid, __fmt, ...) dprintk(VIDC_HIGH, sid, __fmt, ##__VA_ARGS__)
-#define s_vpr_l(sid, __fmt, ...) dprintk(VIDC_LOW, sid, __fmt, ##__VA_ARGS__)
-#define s_vpr_p(sid, __fmt, ...) dprintk(VIDC_PERF, sid, __fmt, ##__VA_ARGS__)
-#define s_vpr_t(sid, __fmt, ...) dprintk(VIDC_PKT, sid, __fmt, ##__VA_ARGS__)
-#define s_vpr_b(sid, __fmt, ...) dprintk(VIDC_BUS, sid, __fmt, ##__VA_ARGS__)
+#define s_vpr_h(sid, __fmt, ...) dprintk(VIDC_ERR, sid, __fmt, ##__VA_ARGS__)
+#define s_vpr_l(sid, __fmt, ...) dprintk(VIDC_ERR, sid, __fmt, ##__VA_ARGS__)
+#define s_vpr_p(sid, __fmt, ...) dprintk(VIDC_ERR, sid, __fmt, ##__VA_ARGS__)
+#define s_vpr_t(sid, __fmt, ...) dprintk(VIDC_ERR, sid, __fmt, ##__VA_ARGS__)
+#define s_vpr_b(sid, __fmt, ...) dprintk(VIDC_ERR, sid, __fmt, ##__VA_ARGS__)
 #define s_vpr_hp(sid, __fmt, ...) \
-			dprintk(VIDC_HIGH|VIDC_PERF, sid, __fmt, ##__VA_ARGS__)
+			dprintk(VIDC_ERR, sid, __fmt, ##__VA_ARGS__)
 
 #define d_vpr_e(__fmt, ...)	\
 			dprintk(VIDC_ERR, DEFAULT_SID, __fmt, ##__VA_ARGS__)
 #define d_vpr_h(__fmt, ...) \
-			dprintk(VIDC_HIGH, DEFAULT_SID, __fmt, ##__VA_ARGS__)
+			dprintk(VIDC_ERR, DEFAULT_SID, __fmt, ##__VA_ARGS__)
 #define d_vpr_l(__fmt, ...) \
-			dprintk(VIDC_LOW, DEFAULT_SID, __fmt, ##__VA_ARGS__)
+			dprintk(VIDC_ERR, DEFAULT_SID, __fmt, ##__VA_ARGS__)
 #define d_vpr_p(__fmt, ...) \
-			dprintk(VIDC_PERF, DEFAULT_SID, __fmt, ##__VA_ARGS__)
+			dprintk(VIDC_ERR, DEFAULT_SID, __fmt, ##__VA_ARGS__)
 #define d_vpr_t(__fmt, ...) \
-			dprintk(VIDC_PKT, DEFAULT_SID, __fmt, ##__VA_ARGS__)
+			dprintk(VIDC_ERR, DEFAULT_SID, __fmt, ##__VA_ARGS__)
 #define d_vpr_b(__fmt, ...) \
-			dprintk(VIDC_BUS, DEFAULT_SID, __fmt, ##__VA_ARGS__)
+			dprintk(VIDC_ERR, DEFAULT_SID, __fmt, ##__VA_ARGS__)
 
 #define dprintk_firmware(__level, __fmt, ...)	\
 	do { \
