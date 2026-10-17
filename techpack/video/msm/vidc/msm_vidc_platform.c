@@ -1844,6 +1844,14 @@ static struct msm_vidc_common_data sdm845_common_data[] = {
 		.value = 0,
 	},
 	{
+		.key = "qcom,decode-batching",
+		.value = 1,
+	},
+	{
+		.key = "qcom,batch-timeout",
+		.value = 200,
+	},
+	{
 		.key = "qcom,dcvs",
 		.value = 1,
 	},
