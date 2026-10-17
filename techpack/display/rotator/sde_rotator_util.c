@@ -21,7 +21,11 @@
 #include <linux/msm-bus.h>
 #include <linux/msm-bus-board.h>
 #include <linux/regulator/consumer.h>
+#ifdef CONFIG_ARCH_SDM845
+#include <media/msm_media_info_legacy.h>
+#else
 #include <media/msm_media_info.h>
+#endif
 #include <linux/videodev2.h>
 #include <linux/ion.h>
 
