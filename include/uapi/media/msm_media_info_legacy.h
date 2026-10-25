@@ -1270,6 +1270,7 @@ static inline unsigned int VENUS_BUFFER_SIZE(unsigned int color_fmt,
 		y_plane = y_stride * y_sclines;
 		uv_plane = uv_stride * uv_sclines + uv_alignment;
 		size = y_plane + uv_plane;
+		size += UBWC_EXTRA_SIZE;
 		break;
 	case COLOR_FMT_NV12_UBWC:
 		y_meta_stride = VENUS_Y_META_STRIDE(color_fmt, width);
@@ -1329,6 +1330,7 @@ static inline unsigned int VENUS_BUFFER_SIZE(unsigned int color_fmt,
 
 		size = y_ubwc_plane + uv_ubwc_plane + y_meta_plane +
 			uv_meta_plane;
+		size += UBWC_EXTRA_SIZE;
 		break;
 	case COLOR_FMT_P010_UBWC:
 		y_ubwc_plane = MSM_MEDIA_ALIGN(y_stride * y_sclines, 4096);
