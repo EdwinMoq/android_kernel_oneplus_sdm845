@@ -610,6 +610,7 @@ enum msm_vidc_flags {
 	MSM_VIDC_FLAG_DEFERRED            = BIT(0),
 	MSM_VIDC_FLAG_RBR_PENDING         = BIT(1),
 	MSM_VIDC_FLAG_QUEUED              = BIT(2),
+	MSM_VIDC_FLAG_HIDDEN              = BIT(3),
 };
 
 struct msm_vidc_buffer {

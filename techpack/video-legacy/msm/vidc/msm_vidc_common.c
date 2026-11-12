@@ -1780,6 +1780,9 @@ static void handle_event_change(enum hal_command_response cmd, void *data)
 			s_vpr_e(inst->sid,
 				"%s: data_addr %x, extradata_addr %x not found\n",
 				__func__, planes[0], planes[1]);
+		} else if (mbuf->flags & MSM_VIDC_FLAG_HIDDEN) {
+			handle_hidden_buffer_release(inst, mbuf);
+			kref_put_mbuf(mbuf);
 		} else {
 			handle_release_buffer_reference(inst, mbuf);
 			kref_put_mbuf(mbuf);
@@ -2700,6 +2703,25 @@ static void handle_fbd(enum hal_command_response cmd, void *data)
 	}
 	mbuf->flags &= ~MSM_VIDC_FLAG_QUEUED;
 	vb = &mbuf->vvb.vb2_buf;
+
+	/*
+	 * Venus 4xx decodes the hidden frame of a VP9 superframe into an
+	 * output buffer and returns it read-only with DROP_FRAME set,
+	 * tagged with the superframe's input. The codec2 HAL (written for
+	 * split-mode cores that never expose hidden frames) completes the
+	 * input on it, then loses both the shown frame and the buffer,
+	 * until decoding stalls. Keep such buffers in the driver and
+	 * requeue them once the firmware releases the reference.
+	 */
+	if (inst->session_type == MSM_VIDC_DECODER &&
+	    get_v4l2_codec(inst) == V4L2_PIX_FMT_VP9 &&
+	    fill_buf_done->buffer_type == HAL_BUFFER_OUTPUT &&
+	    (fill_buf_done->flags1 & HAL_BUFFERFLAG_DROP_FRAME) &&
+	    (fill_buf_done->flags1 & HAL_BUFFERFLAG_READONLY)) {
+		mbuf->flags |= MSM_VIDC_FLAG_HIDDEN;
+		kref_put_mbuf(mbuf);
+		goto exit;
+	}
 
 	if (fill_buf_done->buffer_type == HAL_BUFFER_OUTPUT2 &&
 		fill_buf_done->flags1 & HAL_BUFFERFLAG_READONLY) {
@@ -7228,6 +7250,31 @@ void msm_comm_put_vidc_buffer(struct msm_vidc_inst *inst,
 	}
 unlock:
 	mutex_unlock(&inst->registeredbufs.lock);
+}
+
+void handle_hidden_buffer_release(struct msm_vidc_inst *inst,
+		struct msm_vidc_buffer *mbuf)
+{
+	int rc;
+
+	mutex_lock(&inst->bufq[OUTPUT_PORT].lock);
+	mbuf->flags &= ~MSM_VIDC_FLAG_HIDDEN;
+	if (!inst->in_reconfig && !inst->out_flush &&
+	    inst->state < MSM_VIDC_RELEASE_RESOURCES) {
+		rc = msm_comm_qbuf_in_rbr(inst, mbuf);
+		if (rc)
+			print_vidc_buffer(VIDC_ERR, "hidden requeue failed",
+				inst, mbuf);
+		mutex_unlock(&inst->bufq[OUTPUT_PORT].lock);
+		return;
+	}
+	mutex_unlock(&inst->bufq[OUTPUT_PORT].lock);
+
+	/* hand it back to the client like a dropped frame */
+	mbuf->vvb.vb2_buf.planes[0].bytesused = 0;
+	mbuf->vvb.flags = 0;
+	msm_comm_put_vidc_buffer(inst, mbuf);
+	msm_comm_vb2_buffer_done(inst, mbuf);
 }
 
 void handle_release_buffer_reference(struct msm_vidc_inst *inst,

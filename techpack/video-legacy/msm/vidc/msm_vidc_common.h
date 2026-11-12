@@ -336,6 +336,8 @@ struct msm_vidc_buffer *msm_comm_get_vidc_buffer(struct msm_vidc_inst *inst,
 		struct vb2_buffer *vb2);
 void msm_comm_put_vidc_buffer(struct msm_vidc_inst *inst,
 		struct msm_vidc_buffer *mbuf);
+void handle_hidden_buffer_release(struct msm_vidc_inst *inst,
+		struct msm_vidc_buffer *mbuf);
 void handle_release_buffer_reference(struct msm_vidc_inst *inst,
 		struct msm_vidc_buffer *mbuf);
 int msm_comm_vb2_buffer_done(struct msm_vidc_inst *inst,
