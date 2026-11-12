@@ -4556,7 +4556,10 @@ int msm_comm_num_queued_bufs(struct msm_vidc_inst *inst, u32 type)
 	list_for_each_entry(mbuf, &inst->registeredbufs.list, list) {
 		if (mbuf->vvb.vb2_buf.type != type)
 			continue;
-		if (!(mbuf->flags & MSM_VIDC_FLAG_QUEUED))
+		if (!(mbuf->flags & (MSM_VIDC_FLAG_QUEUED |
+				     MSM_VIDC_FLAG_DEFERRED |
+				     MSM_VIDC_FLAG_RBR_PENDING |
+				     MSM_VIDC_FLAG_HIDDEN)))
 			continue;
 		count++;
 	}
