@@ -18,8 +18,8 @@
 
 #define MSM_VIDC_SESSION_INACTIVE_THRESHOLD_MS 1000
 
-#define MAX_8K_WIDTH_VALUE 7680
-#define MAX_8K_HEIGHT_VALUE 3840
+#define MAX_WIDTH_VALUE 5760
+#define MAX_HEIGHT_VALUE 2880
 
 static int msm_vidc_decide_work_mode_ar50(struct msm_vidc_inst *inst);
 static unsigned long msm_vidc_calc_freq_ar50(struct msm_vidc_inst *inst,
@@ -1821,7 +1821,7 @@ int msm_vidc_decide_core_and_power_mode_ar50(struct msm_vidc_inst *inst)
 		}
 	}
 	if (inst->session_type == MSM_VIDC_ENCODER &&
-		((out_width *out_height) >=(MAX_8K_WIDTH_VALUE * MAX_8K_HEIGHT_VALUE)) &&
+		((out_width *out_height) >=(MAX_WIDTH_VALUE * MAX_HEIGHT_VALUE)) &&
 		(inst->capability.cap[CAP_MAX_VIDEOCORES].max >= 2)) {
 			if (inst->clk_data.work_mode == HFI_WORKMODE_2) {
 				inst->clk_data.core_id = VIDC_CORE_ID_3;
