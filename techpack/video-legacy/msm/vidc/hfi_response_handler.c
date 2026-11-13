@@ -267,6 +267,16 @@ static int hfi_process_sess_evt_seq_changed(u32 device_id,
 				rem_size -=
 					sizeof(struct hfi_buffer_requirements);
 				break;
+			case HFI_PROPERTY_PARAM_UNCOMPRESSED_FORMAT_SELECT:
+				if (!validate_pkt_size(rem_size, sizeof(struct
+					hfi_uncompressed_format_select)))
+					return -E2BIG;
+				data_ptr = data_ptr + sizeof(u32);
+				data_ptr +=
+					sizeof(struct hfi_uncompressed_format_select);
+				rem_size -=
+					sizeof(struct hfi_uncompressed_format_select);
+				break;
 			case HFI_INDEX_EXTRADATA_INPUT_CROP:
 				if (!validate_pkt_size(rem_size, sizeof(struct
 				     hfi_index_extradata_input_crop_payload)))
