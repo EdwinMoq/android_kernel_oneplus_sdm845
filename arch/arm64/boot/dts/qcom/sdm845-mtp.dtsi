@@ -189,6 +189,7 @@
 
 &pmi8998_haptics {
 	qcom,vmax-mv = <2400>;
+	qcom,lra-auto-mode;
 	status = "okay";
 };
 
