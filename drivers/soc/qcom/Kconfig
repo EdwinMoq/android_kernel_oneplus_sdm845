@@ -935,6 +935,15 @@ config QTI_CRYPTO_TZ
 	 programmed and managed through SCM calls to TZ where ICE driver
 	 will configure keys.
 
+config QTI_CRYPTO_LEGACY_TZ
+	bool "Use legacy Trustzone ICE key interface"
+	depends on QTI_CRYPTO_TZ
+	help
+	 Say 'Y' on targets whose Trustzone lacks the CE_TYPE ICE key
+	 calls (e.g. SDM845). Keys are programmed with the older
+	 TZ_ES_CONFIG_SET_ICE_KEY call, key slots 0 and 1 are left
+	 reserved for FDE and hardware wrapped keys are not supported.
+
 config MSM_BAM_DMUX
 	bool "BAM Data Mux Driver"
 	depends on SPS

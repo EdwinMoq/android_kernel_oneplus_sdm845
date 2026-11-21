@@ -39,6 +39,10 @@ int crypto_qti_program_key(struct crypto_vops_qti_entry *ice_entry,
 		u32 words[BLK_CRYPTO_MAX_WRAPPED_KEY_SIZE / sizeof(u32)];
 	} key_new;
 
+	if (IS_ENABLED(CONFIG_QTI_CRYPTO_LEGACY_TZ) &&
+	    (key->is_hw_wrapped || key->size != 64))
+		return -EOPNOTSUPP;
+
 	err = qtee_shmbridge_allocate_shm(key->size, &shm);
 	if (err)
 		return -ENOMEM;
@@ -46,7 +50,7 @@ int crypto_qti_program_key(struct crypto_vops_qti_entry *ice_entry,
 	tzbuf = shm.vaddr;
 
 	memcpy(key_new.bytes, key->raw, key->size);
-	if (!key->is_hw_wrapped) {
+	if (!IS_ENABLED(CONFIG_QTI_CRYPTO_LEGACY_TZ) && !key->is_hw_wrapped) {
 		for (i = 0; i < ARRAY_SIZE(key_new.words); i++)
 			__cpu_to_be32s(&key_new.words[i]);
 	}
@@ -62,6 +66,12 @@ int crypto_qti_program_key(struct crypto_vops_qti_entry *ice_entry,
 	desc.args[3] = ICE_CIPHER_MODE_XTS_256;
 	desc.args[4] = data_unit_mask;
 	desc.args[5] = storage_type;
+
+	if (IS_ENABLED(CONFIG_QTI_CRYPTO_LEGACY_TZ)) {
+		smc_id = TZ_ES_CONFIG_SET_ICE_KEY_ID;
+		desc.arginfo = TZ_ES_CONFIG_SET_ICE_KEY_PARAM_ID;
+		desc.args[5] = 0;
+	}
 
 
 	err = scm_call2_noretry(smc_id, &desc);
@@ -86,6 +96,12 @@ int crypto_qti_invalidate_key(
 	desc.arginfo = TZ_ES_INVALIDATE_ICE_KEY_CE_TYPE_PARAM_ID;
 	desc.args[0] = slot;
 	desc.args[1] = storage_type;
+
+	if (IS_ENABLED(CONFIG_QTI_CRYPTO_LEGACY_TZ)) {
+		smc_id = TZ_ES_INVALIDATE_ICE_KEY_ID;
+		desc.arginfo = TZ_ES_INVALIDATE_ICE_KEY_PARAM_ID;
+		desc.args[1] = 0;
+	}
 
 	err = scm_call2_noretry(smc_id, &desc);
 	if (err)

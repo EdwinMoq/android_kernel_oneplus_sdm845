@@ -36,6 +36,10 @@ static struct ufs_hba_crypto_variant_ops ufshcd_crypto_qti_variant_ops = {
 	.prepare_lrbp_crypto = ufshcd_crypto_qti_prep_lrbp_crypto,
 };
 
+/* Legacy TZ keeps ICE key slots 0 and 1 reserved for FDE */
+#define QTI_ICE_SLOT_OFFSET \
+	(IS_ENABLED(CONFIG_QTI_CRYPTO_LEGACY_TZ) ? 2 : 0)
+
 static uint8_t get_data_unit_size_mask(unsigned int data_unit_size)
 {
 	if (data_unit_size < MINIMUM_DUN_SIZE ||
@@ -107,7 +111,8 @@ static int ufshcd_crypto_qti_keyslot_program(struct keyslot_manager *ksm,
 		goto out;
 	}
 
-	err = crypto_qti_keyslot_program(hba->crypto_vops->priv, key, slot,
+	err = crypto_qti_keyslot_program(hba->crypto_vops->priv, key,
+					slot + QTI_ICE_SLOT_OFFSET,
 					data_unit_mask, crypto_alg_id);
 	if (err)
 		pr_err("%s: failed with error %d\n", __func__, err);
@@ -138,7 +143,8 @@ static int ufshcd_crypto_qti_keyslot_evict(struct keyslot_manager *ksm,
 		return err;
 	}
 
-	err = crypto_qti_keyslot_evict(hba->crypto_vops->priv, slot);
+	err = crypto_qti_keyslot_evict(hba->crypto_vops->priv,
+				       slot + QTI_ICE_SLOT_OFFSET);
 	if (err) {
 		pr_err("%s: failed with error %d\n",
 			__func__, err);
@@ -238,10 +244,13 @@ static int ufshcd_hba_init_crypto_qti_spec(struct ufs_hba *hba,
 			hba->crypto_cap_array[cap_idx].sdus_mask * 512;
 	}
 
-	hba->ksm = keyslot_manager_create(hba->dev, ufshcd_num_keyslots(hba),
+	hba->ksm = keyslot_manager_create(hba->dev,
+					  ufshcd_num_keyslots(hba) -
+					  QTI_ICE_SLOT_OFFSET,
 					  ksm_ops,
 					  BLK_CRYPTO_FEATURE_STANDARD_KEYS |
-					  BLK_CRYPTO_FEATURE_WRAPPED_KEYS,
+					  (IS_ENABLED(CONFIG_QTI_CRYPTO_LEGACY_TZ) ?
+					   0 : BLK_CRYPTO_FEATURE_WRAPPED_KEYS),
 					  crypto_modes_supported, hba);
 
 	if (!hba->ksm) {
@@ -341,7 +350,7 @@ int ufshcd_crypto_qti_prep_lrbp_crypto(struct ufs_hba *hba,
 		return -EINVAL;
 
 	lrbp->crypto_enable = true;
-	lrbp->crypto_key_slot = bc->bc_keyslot;
+	lrbp->crypto_key_slot = bc->bc_keyslot + QTI_ICE_SLOT_OFFSET;
 	if (bc->is_ext4) {
 		lrbp->data_unit_num = (u64)cmd->request->bio->bi_iter.bi_sector;
 		lrbp->data_unit_num >>= 3;
